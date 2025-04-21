@@ -1,5 +1,6 @@
 import ollama
 
+from business_logic.llm_evaluation import evaluate_response
 from business_logic.multilabel_classifier import AntisemitismClassifier
 
 
@@ -9,6 +10,7 @@ def ollama_chat(model, prompt):
     response = client.generate(model=model, prompt=prompt)
     print(f"{model} response:")
     print(response.response)
+    return response
 
 
 if __name__ == "__main__":
@@ -34,4 +36,14 @@ if __name__ == "__main__":
     model = 'llama3.2'
 
     print(f"starting a conversation with {model}\n")
-    ollama_chat(model, prompt)
+    response = ollama_chat(model, prompt)
+
+    metrics = evaluate_response(
+        original_comment=comment,
+        label=label,
+        generated_response=response.response,
+    )
+
+    print("Evaluation Metrics:")
+    for k, v in metrics.items():
+        print(f"{k}: {v}")
