@@ -27,7 +27,8 @@ if __name__ == "__main__":
               f"\nthe antisemitism type of {label}? Please summarize each reference. "
               f"\nFurther to this, please help me to phrase a polite comment "
               f"that explains the connection between the comment and {label} antisemitism, "
-              f"\nuse the references you suggested about {label} antisemitism and include their website links.")
+              f"\nin the response, include the same references you suggested about {label} antisemitism "
+              f"along with their website links if there are.")
 
     model = 'llama3.2'
 
