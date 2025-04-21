@@ -8,9 +8,9 @@ import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
+nltk.download('punkt', quiet=True)
+nltk.download('punkt_tab', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")

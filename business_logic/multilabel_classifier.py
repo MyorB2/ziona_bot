@@ -2,7 +2,6 @@ import os
 import torch
 import numpy as np
 import warnings
-import nltk
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
@@ -12,10 +11,6 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 from business_logic.preprocessing import preprocess_dataframe
 from models.hate_speech_dataset_class import HateSpeechDataset
 from src.utils import compute_metrics, compute_final_metrics, test_model
-
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
 
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")

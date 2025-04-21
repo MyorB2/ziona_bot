@@ -1,4 +1,3 @@
-import nltk
 import os
 import torch
 import numpy as np
@@ -8,10 +7,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from types import SimpleNamespace
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
 
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")
