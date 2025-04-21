@@ -18,7 +18,8 @@ if __name__ == "__main__":
     # label2 = classifier.predict(comment)
     label = "Foreigner/Alien"
 
-    prompt = (f"I have come across an antithemic comment on social media that says: \n{comment}. "
+    prompt = (f"I have come across an antithemic comment on social media that says: "
+              f"\n{comment}. "
               f"\nThis response is antisemistic of the type {label}. As a Jewish person, I found  it very offensive, "
               f"\nI would like to combat antisemitism by respond to that person in a way that explains "
               f"what is wrong with the comment and educates about {label} antisemitism. "
