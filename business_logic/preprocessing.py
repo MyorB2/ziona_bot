@@ -1,14 +1,16 @@
-from google.colab import drive
+import os
+import re
+import warnings
+import emoji
 import nltk
+import pandas as pd
+# from google.colab import drive
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
 nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('stopwords')
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-import emoji
-import re, os
-import pandas as pd
-import warnings
 
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")
@@ -37,10 +39,10 @@ def extract_text(text):
     if match_level:
         text = match_level.group(1).strip()
 
-    text = re.sub(r"\d{4}-\d{2}-\d{2}, \d{2}:\d{2}, by [A-Za-z0-9_\.\s]+ \(.? up votes, .? down votes\):", "", text)
+    text = re.sub(r"\d{4}-\d{2}-\d{2}, \d{2}:\d{2}, by [A-Za-z0-9_.\s]+ \(.? up votes, .? down votes\):", "", text)
     text = re.sub(
-        r'(\d{4}-\d{2}-\d{2}, \d{2}:\d{2}, by [A-Za-z0-9_\.\s]+ \(.? up votes, .? down votes\):|'
-        r'\d{1,2} [A-Za-z]+, by [A-Za-z0-9_\.\s]+ \(.*? up votes\):)',
+        r'(\d{4}-\d{2}-\d{2}, \d{2}:\d{2}, by [A-Za-z0-9_.\s]+ \(.? up votes, .? down votes\):|'
+        r'\d{1,2} [A-Za-z]+, by [A-Za-z0-9_.\s]+ \(.*? up votes\):)',
         '', text)
 
     # "February", "24 February", "4 days ago", "2021-02-16, 14:56"
@@ -280,7 +282,7 @@ def clean_text(text):
 
 def clean_url(text):
     # Regex to extract site name and page path
-    match = re.search(r'^(?:https?:\/\/)?(?:www\.)?([^\/]+?)(?:\.[a-z]+)?(\/.*)?$', text)
+    match = re.search(r'^(?:https?://)?(?:www\.)?([^/]+?)(?:\.[a-z]+)?(/.*)?$', text)
 
     if match:
         site_name = match.group(1).split('.')[0]  # Extract only the main domain (ignore subdomains)
@@ -307,20 +309,25 @@ def clean_extracted_text(combined_df, categories, as_categories):
 
 
 def preprocess_dataframe():
-    drive.mount('/content/drive')
+    # # if using google colab
+    # drive.mount('/content/drive')
+    # dataset_uk_path = '/content/drive/MyDrive/Project/Datasets/UK'
+    # guidebook_path = "/content/drive/MyDrive/Project/Datasets/Guidebook.csv"
+    # guidebook_weights_path = "/content/drive/MyDrive/Project/Datasets/Guidebook_weights.xlsx"
 
-    # Specify the directory containing your CSV files
-    directory_path = '/content/drive/MyDrive/Project/Datasets/UK'
+    dataset_uk_path = '../assets/Guidebook_weights.xlsx'
+    guidebook_path = '../assets/Guidebook_weights.xlsx'
+    guidebook_weights_path = '../assets/Guidebook_weights.xlsx'
 
     # Create an empty list to store dataframes
     all_dataframes = []
-    df_guidebook = pd.read_csv("/content/drive/MyDrive/Project/Datasets/Guidebook.csv")
-    weighted_categories = pd.read_excel("/content/drive/MyDrive/Project/Datasets/Guidebook_weights.xlsx")
+    df_guidebook = pd.read_csv(guidebook_path)
+    weighted_categories = pd.read_excel(guidebook_weights_path)
 
     # Iterate over files in the directory
-    for filename in os.listdir(directory_path):
+    for filename in os.listdir(dataset_uk_path):
         if filename.endswith('.csv'):
-            filepath = os.path.join(directory_path, filename)
+            filepath = os.path.join(dataset_uk_path, filename)
             try:
                 df = pd.read_csv(filepath)
                 all_dataframes.append(df)
@@ -336,9 +343,10 @@ def preprocess_dataframe():
         combined_df = combined_df[['Segment', 'Code']]
         print("All CSV files read and concatenated successfully!")
         # To see the output, run the code.
-        #print(combined_df.head()) # You can uncomment this to display the first few rows
+        # print(combined_df.head()) # You can uncomment this to display the first few rows
     else:
         print("No CSV files found in the specified directory or errors occurred during reading.")
+        return None, None
 
     categories = df_guidebook["Abbreviation/Label"].unique()
     categories = categories[2:]

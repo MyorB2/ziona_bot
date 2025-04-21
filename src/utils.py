@@ -1,21 +1,20 @@
 import nltk
-nltk.download('punkt')
-nltk.download('punkt_tab')
-nltk.download('stopwords')
 import os
 import torch
 import numpy as np
 import json
 import warnings
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 from types import SimpleNamespace
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")
-
-ed_df_cleaned.to_excel("combined_df_cleaned_as.xlsx")
 
 
 def compute_metrics(pred, fold_number=None):
