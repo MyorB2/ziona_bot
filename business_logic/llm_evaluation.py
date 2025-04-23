@@ -1,117 +1,142 @@
-import nltk
-from nltk.corpus import stopwords
-
-from src.global_parameters import TYPE_KEYWORDS, EDUCATIONAL_KEYWORDS, REFERENCE_KEYWORDS, IMPOLITE_KEYWORDS, \
-    POLITE_KEYWORDS
-
-nltk.download('punkt', quiet=True)
-nltk.download('punkt_tab', quiet=True)
-nltk.download('stopwords', quiet=True)
+import ollama
+import json
 
 
-def evaluate_response(original_comment, label, generated_response):
+class LLMEvaluator:
     """
-    Evaluates the quality of a generated response combating antisemitism.
-
-    Parameters:
-    - original_comment (str): The original antisemitic comment
-    - label (str): The type of antisemitism identified
-    - generated_response (str): The LLM-generated response
-
-    Returns:
-    - dict: Dictionary containing evaluation scores and feedback
+    Class to evaluate responses to antisemitic comments using another LLM as a judge.
     """
-    scores = {}
-    feedback = {}
 
-    # Check if type-specific keywords are mentioned
-    if label in TYPE_KEYWORDS:
-        keywords = TYPE_KEYWORDS[label]
-        keywords_found = [kw for kw in keywords if kw.lower() in generated_response.lower()]
-        type_score = len(keywords_found) / len(keywords) if keywords else 0
-        scores["type_relevance"] = min(type_score * 2, 1.0)
+    def __init__(self, evaluator_model="llama3.2"):
+        """
+        Initialize the evaluator with a specific model.
 
-        if scores["type_relevance"] < 0.5:
-            feedback[
-                "type_relevance"] = f"Low coverage of {label} antisemitism concepts."
-        else:
-            feedback["type_relevance"] = f"Good coverage of {label} antisemitism concepts."
-    else:
-        scores["type_relevance"] = 0.0
-        feedback["type_relevance"] = f"Unknown antisemitism class: {label}"
+        Parameters:
+        - evaluator_model (str): The model to use for evaluation (default: llama3.2)
+        """
+        self.evaluator_model = evaluator_model
+        self.client = ollama.Client()
 
-    # Check if the response contains educational elements
-    edu_count = sum(1 for marker in EDUCATIONAL_KEYWORDS if marker.lower() in generated_response.lower())
-    scores["educational_value"] = min(edu_count / 5, 1.0)  # At least 5 markers for full score
+    def evaluate_response(self, original_comment, antisemitism_type, generated_response):
+        """
+        Uses an LLM to evaluate the quality of a generated response combating antisemitism.
 
-    if scores["educational_value"] < 0.4:
-        feedback["educational_value"] = "Missing educational content"
-    else:
-        feedback["educational_value"] = "Good educational content"
+        Parameters:
+        - original_comment (str): The original antisemitic comment
+        - antisemitism_type (str): The type of antisemitism identified
+        - generated_response (str): The LLM-generated response
 
-    # Check for reference inclusion
-    has_references = any(marker.lower() in generated_response.lower() for marker in REFERENCE_KEYWORDS)
-    scores["references"] = 1.0 if has_references else 0.0
+        Returns:
+        - dict: Dictionary containing evaluation scores and feedback
+        """
 
-    if not has_references:
-        feedback["references"] = "No inclusion of references."
-    else:
-        feedback["references"] = "Good inclusion of references."
+        # Create an evaluation prompt that asks the LLM to analyze the response
+        evaluation_prompt = f"""
+        You are an expert evaluator specialized in assessing responses to antisemitic content. You will be given:
+        1. An original antisemitic comment
+        2. The identified type of antisemitism
+        3. A generated response meant to educate and combat this antisemitism
+        
+        Your task is to evaluate the response on the following criteria, rating each from 0.0 to 1.0:
+        
+        1. TYPE_RELEVANCE: How well does the response address the specific type of antisemitism ({antisemitism_type})?
+        2. EDUCATIONAL_VALUE: How informative and educational is the response about antisemitism?
+        3. REFERENCES: Does the response include quality references and resources?
+        4. TONE: Is the response polite, respectful, and likely to create a constructive dialogue?
+        5. EFFECTIVENESS: How likely is this response to change the person's perspective or educate others reading it?
+        6. CONNECTION: How well does the response directly address the specific content/wording of the original comment?
+        
+        For each criterion, provide:
+        - A score between 0.0 and 1.0
+        - A brief explanation for your rating
+        - Specific suggestions for improvement
+        
+        ORIGINAL COMMENT:
+        {original_comment}
+        
+        ANTISEMITISM TYPE:
+        {antisemitism_type}
+        
+        GENERATED RESPONSE:
+        {generated_response}
+        
+        Return your evaluation in valid JSON format with this structure:
+        {{
+          "scores": {{
+            "type_relevance": [score],
+            "educational_value": [score],
+            "references": [score],
+            "tone": [score],
+            "effectiveness": [score],
+            "connection": [score],
+            "overall": [average_score]
+          }}
+        }}
+        
+        Be objective and thorough in your assessment. Base your evaluation on evidence from the text.
+        """
 
-    # Politeness and tone assessment
-    impolite_count = sum(1 for phrase in IMPOLITE_KEYWORDS if phrase.lower() in generated_response.lower())
-    polite_count = sum(1 for phrase in POLITE_KEYWORDS if phrase.lower() in generated_response.lower())
+        # Get the evaluation from the LLM
+        print(f"Evaluating response using {self.evaluator_model}...")
+        response = self.client.generate(model=self.evaluator_model, prompt=evaluation_prompt)
+        evaluation_text = response.response
 
-    politeness_score = min((polite_count - impolite_count + 1) / 2, 1.0)
-    scores["politeness"] = max(politeness_score, 0.0)
+        # Extract the JSON part from the response
+        try:
+            # Try to find JSON within the response
+            json_start = evaluation_text.find('{')
+            json_end = evaluation_text.rfind('}') + 1
+            if json_start >= 0 and json_end > 0:
+                json_str = evaluation_text[json_start:json_end]
+                evaluation_results = json.loads(json_str)
+            else:
+                # If no JSON formatting found, use the whole text
+                evaluation_results = json.loads(evaluation_text)
 
-    if scores["politeness"] < 0.6:
-        feedback["politeness"] = "Bad tone and politeness level."
-    else:
-        feedback["politeness"] = "Good tone and politeness level."
+            return evaluation_results
 
-    # 5. Length appropriateness
-    word_count = len(generated_response.split())
-    if word_count < 100:
-        scores["length"] = 0.5
-        feedback["length"] = "Response is too short."
-    elif word_count > 500:
-        scores["length"] = 0.7
-        feedback["length"] = "Response is too long."
-    else:
-        scores["length"] = 1.0
-        feedback["length"] = "Response has appropriate length."
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return an error message and the raw response
+            print("Failed to parse LLM response as JSON. Raw response:")
+            print(evaluation_text)
+            return {
+                "scores": {"overall": 0.0},
+                "raw_response": evaluation_text
+            }
 
-    # 6. Direct addressing of the original comment
-    original_words = set(original_comment.lower().split())
-    response_words = set(generated_response.lower().split())
-    common_words = original_words.intersection(response_words)
+    def batch_evaluate(self, test_cases):
+        """
+        Evaluate multiple test cases and return aggregate results.
 
-    meaningful_common_words = [w for w in common_words if w not in stopwords and len(w) > 3]
+        Parameters:
+        - test_cases: List of dictionaries containing:
+            - original_comment: The original antisemitic comment
+            - antisemitism_type: The type of antisemitism identified
+            - generated_response: The LLM-generated response
 
-    connection_score = min(len(meaningful_common_words) / 3, 1.0)  # At least 3 meaningful words
-    scores["connection_to_original"] = connection_score
+        Returns:
+        - dict: Aggregate evaluation results and individual case results
+        """
+        results = []
 
-    if scores["connection_to_original"] < 0.5:
-        feedback["connection_to_original"] = "Bad connection to the original comment."
-    else:
-        feedback["connection_to_original"] = "Good connection to the original comment."
+        for i, case in enumerate(test_cases):
+            print(f"Evaluating case {i + 1}/{len(test_cases)}...")
+            result = self.evaluate_response(
+                case["original_comment"],
+                case["antisemitism_type"],
+                case["generated_response"]
+            )
+            results.append(result)
 
-    # Calculate overall score (weighted average)
-    weights = {
-        "type_relevance": 0.25,
-        "educational_value": 0.25,
-        "references": 0.15,
-        "politeness": 0.15,
-        "length": 0.10,
-        "connection_to_original": 0.10
-    }
+        # Calculate average scores across all test cases
+        avg_scores = {}
+        if results and "scores" in results[0]:
+            metrics = results[0]["scores"].keys()
+            for metric in metrics:
+                scores = [r["scores"].get(metric, 0) for r in results if "scores" in r]
+                avg_scores[metric] = sum(scores) / len(scores) if scores else 0
 
-    overall_score = sum(scores[metric] * weights[metric] for metric in weights)
-    scores["overall"] = overall_score
-    feedback["overall"] = f"Response score is {overall_score}."
-
-    return {
-        "scores": scores,
-        "feedback": feedback
-    }
+        return {
+            "individual_results": results,
+            "average_scores": avg_scores
+        }

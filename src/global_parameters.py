@@ -19,3 +19,5 @@ IMPOLITE_KEYWORDS = ["you are wrong", "you should know", "obviously", "clearly",
 
 POLITE_KEYWORDS = ["i understand", "consider", "perhaps", "may I suggest", "another perspective",
                      "respectfully", "thank you for", "appreciate", "dialogue"]
+
+ANTISEMITIC_PREFIXES = ["I", "H2", "OA", "L13b", "L13c", "L13d", "L13h", "L13i1", "LC1a", "PS", "D", "MMD", "Image", "Video/GIF", "SE", "S"]

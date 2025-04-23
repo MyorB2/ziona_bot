@@ -1,6 +1,6 @@
 import ollama
 
-from business_logic.llm_evaluation import evaluate_response
+from business_logic.llm_evaluation import evaluate_response, LLMEvaluator
 from business_logic.multilabel_classifier import AntisemitismClassifier
 
 
@@ -38,12 +38,13 @@ if __name__ == "__main__":
     print(f"starting a conversation with {model}\n")
     response = ollama_chat(model, prompt)
 
-    metrics = evaluate_response(
-        original_comment=comment,
-        label=label,
-        generated_response=response.response,
-    )
+    # Evaluate a single response
+    evaluator = LLMEvaluator(evaluator_model="llama3.2")
+    evaluation_results = evaluator.evaluate_response(comment, label, response.response)
 
-    print("Evaluation Metrics:")
-    for k, v in metrics.items():
-        print(f"{k}: {v}")
+    print("\n---- LLM Evaluation Results ----")
+    if "scores" in evaluation_results:
+        print("\nScores:")
+        for metric, score in evaluation_results["scores"].items():
+            print(f"  - {metric}: {score:.2f}")
+
