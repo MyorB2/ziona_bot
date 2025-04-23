@@ -1,4 +1,5 @@
 # Final_Project
+automate evaluation with llm and check outputs with friends.
 
 This project run in Google Colab, hence there is a command to mount drive, and all of the files have drive's addresses.
 
