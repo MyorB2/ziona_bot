@@ -30,68 +30,75 @@ class BinaryClassificationDataset(Dataset):
         return item
 
 
-class AntisemitismClassifier:
-    def __init__(self):
+def extract_bin_categories(category_list, as_categories):
+    count_as = 0
+    for cat in category_list:
+        for as_c in as_categories:
+            if cat.startswith(as_c):
+                count_as += 1
+    return 1 if count_as > len(category_list) / 2 else 0
+
+
+def binary_preprocess(new_df):
+    # הכנת דאטה
+    def safe_literal_eval(val):
+        if isinstance(val, str):
+            return ast.literal_eval(val)
+        return val
+
+    new_df["extracted_subcategories"] = new_df["extracted_subcategories"].apply(safe_literal_eval)
+
+    new_df["binary_label_strict"] = new_df["extracted_subcategories"].apply(
+        lambda cats: extract_bin_categories(cats, ANTISEMITIC_PREFIXES)
+    )
+
+    texts = new_df["clean_extracted_text"].tolist()
+    labels = new_df["binary_label_strict"].tolist()
+
+    train_texts, val_texts, train_labels, val_labels = train_test_split(
+        texts, labels, test_size=0.2, random_state=42, stratify=labels
+    )
+
+    tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
+
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    preds = logits.argmax(axis=-1)
+
+    acc = accuracy_score(labels, preds)
+    precision_micro = precision_score(labels, preds, average='micro', zero_division=0)
+    recall_micro = recall_score(labels, preds, average='micro', zero_division=0)
+    f1_micro = f1_score(labels, preds, average='micro', zero_division=0)
+
+    precision_macro = precision_score(labels, preds, average='macro', zero_division=0)
+    recall_macro = recall_score(labels, preds, average='macro', zero_division=0)
+    f1_macro = f1_score(labels, preds, average='macro', zero_division=0)
+
+    return {
+        'accuracy': acc,
+        'precision_micro': precision_micro,
+        'recall_micro': recall_micro,
+        'f1_micro': f1_micro,
+        'precision_macro': precision_macro,
+        'recall_macro': recall_macro,
+        'f1_macro': f1_macro
+    }
+
+
+class BinaryAntisemitismClassifier:
+    def __init__(self, train_texts, train_labels, val_texts, val_labels, tokenizer):
         self.model = None
+        self.train_texts = train_texts
+        self.train_labels = train_labels
+        self.val_texts = val_texts
+        self.val_labels = val_labels
+        self.tokenizer = tokenizer
         self.train_classifier()
 
-    def extract_bin_categories(self, category_list, as_categories):
-        count_as = 0
-        for cat in category_list:
-            for as_c in as_categories:
-                if cat.startswith(as_c):
-                    count_as += 1
-        return 1 if count_as > len(category_list) / 2 else 0
-
-    def binary_preprocess(self, new_df):
-        # הכנת דאטה
-        def safe_literal_eval(val):
-            if isinstance(val, str):
-                return ast.literal_eval(val)
-            return val
-
-        new_df["extracted_subcategories"] = new_df["extracted_subcategories"].apply(safe_literal_eval)
-
-        new_df["binary_label_strict"] = new_df["extracted_subcategories"].apply(
-            lambda cats: self.extract_bin_categories(cats, ANTISEMITIC_PREFIXES)
-        )
-
-        texts = new_df["clean_extracted_text"].tolist()
-        labels = new_df["binary_label_strict"].tolist()
-
-        train_texts, val_texts, train_labels, val_labels = train_test_split(
-            texts, labels, test_size=0.2, random_state=42, stratify=labels
-        )
-
-        tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
-
-
-    def compute_metrics(self, eval_pred):
-        logits, labels = eval_pred
-        preds = logits.argmax(axis=-1)
-
-        acc = accuracy_score(labels, preds)
-        precision_micro = precision_score(labels, preds, average='micro', zero_division=0)
-        recall_micro = recall_score(labels, preds, average='micro', zero_division=0)
-        f1_micro = f1_score(labels, preds, average='micro', zero_division=0)
-
-        precision_macro = precision_score(labels, preds, average='macro', zero_division=0)
-        recall_macro = recall_score(labels, preds, average='macro', zero_division=0)
-        f1_macro = f1_score(labels, preds, average='macro', zero_division=0)
-
-        return {
-            'accuracy': acc,
-            'precision_micro': precision_micro,
-            'recall_micro': recall_micro,
-            'f1_micro': f1_micro,
-            'precision_macro': precision_macro,
-            'recall_macro': recall_macro,
-            'f1_macro': f1_macro
-        }
-
     def train_classifier(self):
-        train_dataset = BinaryClassificationDataset(train_texts, train_labels, tokenizer)
-        val_dataset = BinaryClassificationDataset(val_texts, val_labels, tokenizer)
+        train_dataset = BinaryClassificationDataset(self.train_texts, self.train_labels, self.tokenizer)
+        val_dataset = BinaryClassificationDataset(self.val_texts, self.val_labels, self.tokenizer)
 
         model = BertForSequenceClassification.from_pretrained("bert-base-multilingual-cased", num_labels=2)
 
@@ -115,7 +122,7 @@ class AntisemitismClassifier:
             args=training_args,
             train_dataset=train_dataset,
             eval_dataset=val_dataset,
-            compute_metrics=self.compute_metrics
+            compute_metrics=compute_metrics
         )
 
         trainer.train()

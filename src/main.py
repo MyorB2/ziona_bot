@@ -13,6 +13,18 @@ def ollama_chat(model, prompt):
     return response
 
 
+def evaluation(response):
+    # Evaluate a single response
+    evaluator = LLMEvaluator(evaluator_model="llama3.2")
+    evaluation_results = evaluator.evaluate_response(comment, label, response.response)
+
+    print("\n---- LLM Evaluation Results ----")
+    if "scores" in evaluation_results:
+        print("\nScores:")
+        for metric, score in evaluation_results["scores"].items():
+            print(f"  - {metric}: {score:.2f}")
+
+
 if __name__ == "__main__":
     comment = "why do those penguins always have to not fit to the society, they interfere the marathon runners, they should respect them even if it is on their neighborhood and on sabat"
 
@@ -37,14 +49,4 @@ if __name__ == "__main__":
 
     print(f"starting a conversation with {model}\n")
     response = ollama_chat(model, prompt)
-
-    # Evaluate a single response
-    evaluator = LLMEvaluator(evaluator_model="llama3.2")
-    evaluation_results = evaluator.evaluate_response(comment, label, response.response)
-
-    print("\n---- LLM Evaluation Results ----")
-    if "scores" in evaluation_results:
-        print("\nScores:")
-        for metric, score in evaluation_results["scores"].items():
-            print(f"  - {metric}: {score:.2f}")
-
+    evaluation(response)
