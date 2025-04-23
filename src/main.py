@@ -1,6 +1,6 @@
 import ollama
 
-from business_logic.llm_evaluation import evaluate_response, LLMEvaluator
+from business_logic.llm_evaluation import LLMEvaluator
 from business_logic.multilabel_classifier import AntisemitismClassifier
 
 
@@ -18,11 +18,21 @@ def evaluation(response):
     evaluator = LLMEvaluator(evaluator_model="llama3.2")
     evaluation_results = evaluator.evaluate_response(comment, label, response.response)
 
-    print("\n---- LLM Evaluation Results ----")
+    print("\n\n\n---- LLM Evaluation Results ----")
     if "scores" in evaluation_results:
         print("\nScores:")
         for metric, score in evaluation_results["scores"].items():
             print(f"  - {metric}: {score:.2f}")
+
+    if "feedback" in evaluation_results:
+        print("\nFeedback:")
+        for metric, feedback in evaluation_results["feedback"].items():
+            print(f"  - {metric}: {feedback}")
+
+    if "improvement_suggestions" in evaluation_results:
+        print("\nImprovement Suggestions:")
+        for suggestion in evaluation_results["improvement_suggestions"]:
+            print(f"  - {suggestion}")
 
 
 if __name__ == "__main__":
@@ -32,9 +42,9 @@ if __name__ == "__main__":
     # label2 = classifier.predict(comment)
     label = "Foreigner/Alien"
 
-    prompt = (f"I have come across an antithemic comment on social media that says: "
+    prompt = (f"I have come across an antisemitic comment on social media that says: "
               f"\n{comment}. "
-              f"\nThis response is antisemistic of the type {label}. As a Jewish person, I found  it very offensive, "
+              f"\nThis response is antisemitic of the type {label}. As a Jewish person, I found  it very offensive, "
               f"\nI would like to combat antisemitism by respond to that person in a way that explains "
               f"what is wrong with the comment and educates about {label} antisemitism. "
               f"\ncan you please suggest at least two references "

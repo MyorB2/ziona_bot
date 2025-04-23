@@ -70,7 +70,17 @@ class LLMEvaluator:
             "effectiveness": [score],
             "connection": [score],
             "overall": [average_score]
-          }}
+          }},
+          "feedback": {{
+            "type_relevance": [feedback],
+            "educational_value": [feedback],
+            "references": [feedback],
+            "tone": [feedback],
+            "effectiveness": [feedback],
+            "connection": [feedback],
+            "overall": [overall_feedback]
+          }},
+          "improvement_suggestions": [list of specific improvements the response needs]
         }}
         
         Be objective and thorough in your assessment. Base your evaluation on evidence from the text.
@@ -101,6 +111,9 @@ class LLMEvaluator:
             print(evaluation_text)
             return {
                 "scores": {"overall": 0.0},
+                "feedback": {
+                    "overall": "Error parsing evaluation. Please check the LLM's response format."
+                },
                 "raw_response": evaluation_text
             }
 

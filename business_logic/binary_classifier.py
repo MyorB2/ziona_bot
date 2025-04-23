@@ -206,4 +206,5 @@ class BinaryAntisemitismClassifier:
 
         # סינון רשומות אנטישמיות לפי המודל
         df_predicted_antisemitic = self.combined_df_cleaned[self.combined_df_cleaned["binary_prediction"] == 1].copy()
+        df_predicted_antisemitic.to_csv('df_predicted_antisemitic.csv', encoding='utf-8-sig', index=False)
         return df_predicted_antisemitic

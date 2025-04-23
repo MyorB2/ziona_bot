@@ -1,4 +1,6 @@
 import os
+
+import pandas as pd
 import torch
 import numpy as np
 import warnings
@@ -24,6 +26,7 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 class AntisemitismClassifier:
     def __init__(self):
         self.model = None
+        self.df = pd.read_csv('/content/df_predicted_antisemitic.csv')
         self.train_classifier()
 
     def train_classifier(self):
