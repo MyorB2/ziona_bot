@@ -1,19 +1,11 @@
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from sklearn.metrics import classification_report
+from transformers import Trainer, TrainingArguments
 import numpy as np
-import pandas as pd
-import torch
-from torch.utils.data import Dataset
 from transformers import BertTokenizer, BertForSequenceClassification
 
 from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Dataset
 import ast
-import os
-import wandb
-import time
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -22,21 +14,8 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 from business_logic.preprocessing import preprocess_dataframe
+from models.binary_dataset import BinaryClassificationDataset
 from src.global_parameters import ANTISEMITIC_PREFIXES
-
-
-class BinaryClassificationDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer, max_length=128):
-        self.encodings = tokenizer(texts, truncation=True, padding=True, max_length=max_length)
-        self.labels = labels
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-        item["labels"] = torch.tensor(self.labels[idx], dtype=torch.long)
-        return item
 
 
 def extract_bin_categories(category_list, as_categories):
@@ -68,8 +47,6 @@ def binary_preprocess(combined_df_cleaned):
         texts, labels, test_size=0.2, random_state=42, stratify=labels
     )
 
-    tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
-
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -96,13 +73,13 @@ def compute_metrics(eval_pred):
 
 
 class BinaryAntisemitismClassifier:
-    def __init__(self, train_texts, train_labels, val_texts, val_labels, tokenizer):
+    def __init__(self, train_texts, train_labels, val_texts, val_labels):
         self.model = None
         self.train_texts = train_texts
         self.train_labels = train_labels
         self.val_texts = val_texts
         self.val_labels = val_labels
-        self.tokenizer = tokenizer
+        self.tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
 
         self.combined_df_cleaned, self.categories = preprocess_dataframe()
 

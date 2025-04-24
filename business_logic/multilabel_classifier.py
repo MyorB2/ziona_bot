@@ -1,17 +1,25 @@
 import os
-
 import pandas as pd
 import torch
 import numpy as np
 import warnings
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments
+from transformers import BertTokenizer, BertForSequenceClassification
+from sklearn.metrics import classification_report, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
-
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.utils import resample
+from collections import Counter
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+import ast
+import joblib, os
 from business_logic.preprocessing import preprocess_dataframe
+from models.combind_los_trainer import CombinedLossTrainer
 from models.hate_speech_dataset_class import HateSpeechDataset
+from models.multi_dataset import MultiLabelDataset
 from src.utils import compute_metrics, compute_final_metrics, test_model
 
 os.environ["WANDB_DISABLED"] = "true"
@@ -19,125 +27,227 @@ warnings.filterwarnings("ignore")
 # Ensure device is set to GPU if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-MODEL_NAME = "GroNLP/hateBERT"
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
+def compute_metrics_multilabel(eval_pred):
+    logits, labels = eval_pred
+    probs = torch.sigmoid(torch.tensor(logits)).numpy()
+    preds = (probs > 0.3).astype(int)
+    return {
+        "accuracy": accuracy_score(labels, preds),
+        "precision_micro": precision_score(labels, preds, average="micro", zero_division=0),
+        "recall_micro": recall_score(labels, preds, average="micro", zero_division=0),
+        "f1_micro": f1_score(labels, preds, average="micro", zero_division=0),
+        "precision_macro": precision_score(labels, preds, average="macro", zero_division=0),
+        "recall_macro": recall_score(labels, preds, average="macro", zero_division=0),
+        "f1_macro": f1_score(labels, preds, average="macro", zero_division=0)
+    }
 
 
 class AntisemitismClassifier:
     def __init__(self):
+        self.mlb = None
+        self.val_labels = None
+        self.train_labels = None
+        self.val_texts = None
+        self.train_texts = None
+        self.val_dataset_aug = None
+        self.train_dataset_aug = None
+        self.val_dataset = None
+        self.train_dataset = None
         self.model = None
         self.df = pd.read_csv('/content/df_predicted_antisemitic.csv')
+        self.tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-base")
+        self.category_classes = None
         self.train_classifier()
+
+    def multi_preprocess(self):
+        # --- שלב 1: הכנת דאטה ---
+        # df = df_predicted_antisemitic.copy()
+        self.df["extracted_categories"] = self.df["extracted_categories"].apply(
+            lambda x: ast.literal_eval(x) if isinstance(x, str) else x)
+        texts = self.df["clean_extracted_text"].tolist()
+        labels = self.df["extracted_categories"].tolist()
+
+        cleaned_data = [(t, l) for t, l in zip(texts, labels) if
+                        isinstance(l, list) and all(isinstance(x, str) for x in l)]
+        texts, labels = zip(*cleaned_data)
+
+        texts = list(texts)
+        labels = list(labels)
+
+        self.mlb = MultiLabelBinarizer()
+        labels_bin = self.mlb.fit_transform(labels)
+        self.category_classes = self.mlb.classes_
+
+        save_path = "/content/drive/MyDrive/Models_2204"
+        os.makedirs(save_path, exist_ok=True)
+        joblib.dump(self.mlb, f"{save_path}/saved_self.mlb.pkl")
+        print("self.mlb saved to:", f"{save_path}/saved_self.mlb.pkl")
+
+        # --- Oversampling ---
+        flat_labels = [label for sublist in labels for label in sublist]
+        label_counts = Counter(flat_labels)
+        rare_labels = [label for label, count in label_counts.items() if count < 500]
+
+        df_ml = pd.DataFrame({"text": texts, "labels": labels})
+        df_rare = df_ml[df_ml["labels"].apply(lambda x: any(label in rare_labels for label in x))]
+
+        df_oversampled = pd.concat([
+            df_ml,
+            resample(df_rare, replace=True, n_samples=len(df_rare) * 3, random_state=42)
+        ])
+
+        # --- ניקוי נוסף אחרי האיחוד ---
+        df_oversampled = df_oversampled[
+            df_oversampled["labels"].apply(lambda l: isinstance(l, list) and all(isinstance(x, str) for x in l))]
+
+        texts = df_oversampled["text"].tolist()
+        labels = df_oversampled["labels"].tolist()
+        labels_bin = self.mlb.transform(labels)
+
+        # --- שלב 2: טקסטים עם Hate Score + לוגיטים מ-HateBERT ---
+        hate_tokenizer = AutoTokenizer.from_pretrained("Hate-speech-CNERG/dehatebert-mono-english")
+        hate_model = AutoModelForSequenceClassification.from_pretrained("Hate-speech-CNERG/dehatebert-mono-english").to(
+            "cuda")
+        hate_model.eval()
+
+        hate_scores = []
+        texts_augmented = []
+        hate_logits_all = []
+
+        for text in tqdm(texts):
+            inputs = hate_tokenizer(text, return_tensors="pt", truncation=True, padding=True).to("cuda")
+            with torch.no_grad():
+                outputs = hate_model(**inputs)
+                probs = torch.softmax(outputs.logits, dim=1)
+                hate_logits_all.append(outputs.logits.detach().cpu().numpy())
+                score = probs[0][1].item()
+                texts_augmented.append(f"[HATE_SCORE={round(score, 2)}] {text}")
+
+        hate_logits_all = np.vstack(hate_logits_all)
+
+        stratify_labels = labels_bin.argmax(axis=1)
+
+        self.train_texts, self.val_texts, self.train_labels, self.val_labels = train_test_split(
+            texts, labels_bin, test_size=0.2, stratify=stratify_labels, random_state=42
+        )
+
+        train_texts_aug, val_texts_aug = train_test_split(texts_augmented, test_size=0.2, random_state=42)
+        hate_logits_train, hate_logits_val = train_test_split(hate_logits_all, test_size=0.2, random_state=42)
+
+        self.train_dataset = MultiLabelDataset(self.train_texts, self.train_labels, self.tokenizer)
+        self.val_dataset = MultiLabelDataset(self.val_texts, self.val_labels, self.tokenizer)
+        self.train_dataset_aug = MultiLabelDataset(train_texts_aug, self.train_labels, self.tokenizer)
+        self.val_dataset_aug = MultiLabelDataset(val_texts_aug, self.val_labels, self.tokenizer)
 
     def train_classifier(self):
         try:
             print("Start training AntisemitismClassifier model")
-            combined_df_cleaned, categories = preprocess_dataframe()
-            if not combined_df_cleaned or not categories:
-                raise Exception("Error: either combined_df_cleaned or categories are empty")
-            combined_df_cleaned = combined_df_cleaned.dropna(subset=["clean_extracted_text"]).reset_index(drop=True)
-            combined_df_cleaned.to_excel("combined_df_cleaned_as.xlsx")
+            model1 = AutoModelForSequenceClassification.from_pretrained("microsoft/deberta-v3-base",
+                                                                        num_labels=len(self.category_classes),
+                                                                        problem_type="multi_label_classification").to(
+                "cuda")
+            model2 = AutoModelForSequenceClassification.from_pretrained("microsoft/deberta-v3-base",
+                                                                        num_labels=len(self.category_classes),
+                                                                        problem_type="multi_label_classification").to(
+                "cuda")
 
-            labels = np.array(combined_df_cleaned["one_hot_sub_cat"].tolist())
-            print(f"\nchecking labels shape: {labels.shape}\n")
-            num_labels = len(categories)
-
-            texts = combined_df_cleaned["clean_extracted_text"].tolist()
-            labels = np.array(combined_df_cleaned["one_hot_bin_cat"].tolist())
-
-            # Train, Validation and Test split
-            train_val_texts, test_texts, train_val_labels, test_labels = train_test_split(
-                texts, labels, test_size=0.2, random_state=42, stratify=labels
+            training_args = TrainingArguments(
+                output_dir="./ensemble_models",
+                eval_strategy="epoch",
+                save_strategy="epoch",
+                num_train_epochs=1,
+                per_device_train_batch_size=16,
+                per_device_eval_batch_size=16,
+                learning_rate=2e-5,
+                weight_decay=0.01,
+                logging_dir="./logs_ensemble",
+                logging_steps=10,
+                load_best_model_at_end=True,
+                metric_for_best_model="eval_loss",
+                greater_is_better=False,
+                report_to="none"
             )
 
-            train_texts, val_texts, train_labels, val_labels = train_test_split(
-                train_val_texts, train_val_labels, test_size=0.2, random_state=42, stratify=train_val_labels
-            )
+            trainer1 = CombinedLossTrainer(model=model1, args=training_args, train_dataset=self.train_dataset,
+                                           eval_dataset=self.val_dataset, compute_metrics=compute_metrics_multilabel)
+            trainer2 = CombinedLossTrainer(model=model2, args=training_args, train_dataset=self.train_dataset_aug,
+                                           eval_dataset=self.val_dataset_aug, compute_metrics=compute_metrics_multilabel)
+            # trainer3 = CombinedLossTrainer(model=model3, args=training_args, train_dataset=train_dataset, eval_dataset=val_dataset, compute_metrics=compute_metrics_multilabel)
 
-            # Datasets
-            train_dataset = HateSpeechDataset(train_texts, train_labels, tokenizer)
-            val_dataset = HateSpeechDataset(val_texts, val_labels, tokenizer)
-            test_dataset = HateSpeechDataset(test_texts, test_labels, tokenizer)
+            trainer1.train()
+            trainer2.train()
+            # trainer3.train()
 
-            # Split data using MultilabelStratifiedKFold
-            mskf = MultilabelStratifiedKFold(n_splits=5, shuffle=True, random_state=123)
-            model = None
+            # --- שלב 5: שילוב התחזיות ---
+            pred1 = trainer1.predict(self.val_dataset).predictions
+            pred2 = trainer2.predict(self.val_dataset_aug).predictions
+            # pred3 = trainer3.predict(val_dataset).predictions
 
-            for i, texts in enumerate(mskf.split(combined_df_cleaned["clean_extracted_text"], labels)):
-                print(f"Training model {i+1}")
-                train_idx, val_idx = texts
-                train_texts, val_texts = combined_df_cleaned["clean_extracted_text"].iloc[train_idx].tolist(), combined_df_cleaned["clean_extracted_text"].iloc[val_idx].tolist()
-                train_labels, val_labels = labels[train_idx], labels[val_idx]
+            avg_logits = (torch.tensor(pred1) + torch.tensor(pred2)) / 2
+            preds = (torch.sigmoid(avg_logits) > 0.3).int().numpy()
+            true_labels = self.val_labels
 
-                train_dataset = HateSpeechDataset(train_texts, train_labels, tokenizer)
-                val_dataset = HateSpeechDataset(val_texts, val_labels, tokenizer)
+            print(classification_report(true_labels, preds, target_names=self.mlb.classes_))
 
-                model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, num_labels=num_labels).to(device)
-                if model is None:
-                    continue
+            trainer1.model.save_pretrained("saved_model_multilabel_1")
+            trainer2.model.save_pretrained("saved_model_multilabel_2")
+            # trainer3.model.save_pretrained("saved_model_multilabel_3")
 
-                training_args = TrainingArguments(
-                    output_dir="./results",
-                    eval_strategy="epoch",
-                    per_device_train_batch_size=8,
-                    per_device_eval_batch_size=8,
-                    num_train_epochs=3,
-                    weight_decay=0.01,
-                    logging_dir="./logs",
-                    logging_steps=10,
-                    save_strategy="epoch",
-                    load_best_model_at_end=True
-                )
+            # שמירת הטוקנייזר התואם (משותף לשלושתם)
+            self.tokenizer.save_pretrained("saved_model_multilabel_1")
 
-                trainer = Trainer(
-                    model=model,
-                    args=training_args,
-                    train_dataset=train_dataset,
-                    eval_dataset=val_dataset,
-                    compute_metrics=compute_metrics
-                )
+            # --- Save in Drive ---
+            trainer1.model.save_pretrained("/content/drive/MyDrive/Models_2204/saved_model_multilabel_1")
+            trainer2.model.save_pretrained("/content/drive/MyDrive/Models_2204/saved_model_multilabel_2")
+            # trainer3.model.save_pretrained("/content/drive/MyDrive/saved_model_multilabel_3")
 
-                trainer.train()
-
-                # Save the trained model
-                model.save_pretrained("saved_hateBERT_model")
-                tokenizer.save_pretrained("saved_hateBERT_model")
-
-            if model is None:
-                raise Exception("Error: training failed")
-
-            self.model = model
-            # Get total metrics after training
-            final_metrics = compute_final_metrics()
-            print("Final Averaged Metrics:", final_metrics)
-            #  Evaluate Model on Test Set
-            test_metrics = test_model(model, device, test_dataset)
-            print("\nFinal Test Set Metrics:", test_metrics)
-            print("Success: training completed.")
-
+            self.tokenizer.save_pretrained("/content/drive/MyDrive/Models_2204/saved_model_multilabel_1")
         except Exception as e:
             raise Exception(f"Error while training model: {e}")
 
     def predict(self, text):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model.to(device)
-        self.model.eval()
-        text_list = [text]
-        test_dataset = HateSpeechDataset(text_list, tokenizer)
-        test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, pin_memory=torch.cuda.is_available())
+        # --- טען מודלים שמורים ---
+        binary_tokenizer = BertTokenizer.from_pretrained("/content/drive/MyDrive/Models_2204/best_model_binary2204")
+        binary_model = BertForSequenceClassification.from_pretrained(
+            "/content/drive/MyDrive/Models_2204/best_model_binary2204")
+        binary_model.eval().to("cuda")
 
-        all_preds = []
+        multi_tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-base")
+        multi_model1 = AutoModelForSequenceClassification.from_pretrained(
+            "/content/drive/MyDrive/Models_2204/saved_model_multilabel_1").to("cuda")
+        multi_model2 = AutoModelForSequenceClassification.from_pretrained(
+            "/content/drive/MyDrive/Models_2204/saved_model_multilabel_2").to("cuda")
+        # multi_model3 = AutoModelForSequenceClassification.from_pretrained("saved_model_multilabel_3").to("cuda")
 
+        #  שלב 1: ניבוי בינארי
+        binary_inputs = binary_tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=128).to(
+            "cuda")
         with torch.no_grad():
-            for batch in tqdm(test_dataloader, desc="Predicting"):
-                batch = {key: val.to(device) for key, val in batch.items()}
-                outputs = self.model(**batch)
-                logits = outputs.logits
-                preds = (torch.sigmoid(logits) > 0.5).int().cpu().numpy()
-                all_preds.extend(preds)
+            logits = binary_model(**binary_inputs).logits
+            probs = torch.softmax(logits, dim=1)
+            pred_bin = torch.argmax(probs).item()
 
-        # Interpret the prediction. The label '1' from this model represents hate speech.
-        if all_preds[0][0] == 1:
-            return "Hate Speech"
-        else:
-            return "Not Hate Speech"
+        if pred_bin == 0:
+            return {"binary_prediction": "Not Antisemitic", "categories": []}
+
+        #  שלב 2: ניבוי קטגוריות אם אנטישמי
+        multi_inputs = multi_tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=128).to(
+            "cuda")
+        with torch.no_grad():
+            logits1 = multi_model1(**multi_inputs).logits
+            logits2 = multi_model2(**multi_inputs).logits
+            # logits3 = multi_model3(**multi_inputs).logits
+
+        avg_logits = (logits1 + logits2) / 2
+        probs = torch.sigmoid(avg_logits).cpu().numpy()[0]
+
+        #  מיפוי לקטגוריות
+        threshold = 0.3
+        pred_indices = np.where(probs > threshold)[0]
+        pred_categories = self.mlb.classes_[pred_indices]
+
+        return {
+            "binary_prediction": "Antisemitic",
+            "categories": pred_categories.tolist()[0]
+        }
