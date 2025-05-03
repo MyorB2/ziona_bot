@@ -315,9 +315,9 @@ def preprocess_dataframe():
     # guidebook_path = "/content/drive/MyDrive/Project/Datasets/Guidebook.csv"
     # guidebook_weights_path = "/content/drive/MyDrive/Project/Datasets/Guidebook_weights.xlsx"
 
-    dataset_uk_path = '../assets/Guidebook_weights.xlsx'
-    guidebook_path = '../assets/Guidebook_weights.xlsx'
-    guidebook_weights_path = '../assets/Guidebook_weights.xlsx'
+    dataset_uk_path = '../resources/Guidebook_weights.xlsx'
+    guidebook_path = '../resources/Guidebook_weights.xlsx'
+    guidebook_weights_path = '../resources/Guidebook_weights.xlsx'
 
     # Create an empty list to store dataframes
     all_dataframes = []

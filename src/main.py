@@ -38,8 +38,8 @@ def evaluation(response):
 if __name__ == "__main__":
     comment = "why do those penguins always have to not fit to the society, they interfere the marathon runners, they should respect them even if it is on their neighborhood and on sabat"
 
-    # classifier = AntisemitismClassifier()
-    # label2 = classifier.predict(comment)
+    classifier = AntisemitismClassifier()
+    label2 = classifier.predict(comment)
     label = "Foreigner/Alien"
 
     prompt = (f"I have come across an antisemitic comment on social media that says: "
