@@ -1,21 +1,22 @@
-from transformers import Trainer, TrainingArguments
-import numpy as np
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Dataset
 import ast
-from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
-
+import os
+import wandb
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from transformers import EarlyStoppingCallback
+from transformers import TrainingArguments
 
-from business_logic.preprocessing import preprocess_dataframe
+from transformers import AutoModel
+import torch.nn as nn
+from transformers.modeling_outputs import SequenceClassifierOutput
+
 from models.binary_dataset import BinaryClassificationDataset
-from src.global_parameters import ANTISEMITIC_PREFIXES
 
 
 def extract_bin_categories(category_list, as_categories):
@@ -28,13 +29,13 @@ def extract_bin_categories(category_list, as_categories):
 
 
 def binary_preprocess(combined_df_cleaned):
-    # הכנת דאטה
     def safe_literal_eval(val):
         if isinstance(val, str):
             return ast.literal_eval(val)
         return val
 
-    combined_df_cleaned["extracted_subcategories"] = combined_df_cleaned["extracted_subcategories"].apply(safe_literal_eval)
+    combined_df_cleaned["extracted_subcategories"] = combined_df_cleaned["extracted_subcategories"].apply(
+        safe_literal_eval)
 
     combined_df_cleaned["binary_label_strict"] = combined_df_cleaned["extracted_subcategories"].apply(
         lambda cats: extract_bin_categories(cats, ANTISEMITIC_PREFIXES)
@@ -72,25 +73,79 @@ def compute_metrics(eval_pred):
     }
 
 
+def compute_metrics_binary(eval_pred):
+    import torch
+    logits, labels = eval_pred
+    probs = torch.sigmoid(torch.tensor(logits)).numpy()
+    preds = (probs >= 0.5).astype(int)
+
+    return {
+        "accuracy": accuracy_score(labels, preds),
+        "precision_micro": precision_score(labels, preds, average="micro", zero_division=0),
+        "recall_micro": recall_score(labels, preds, average="micro", zero_division=0),
+        "f1_micro": f1_score(labels, preds, average="micro", zero_division=0),
+        "precision_macro": precision_score(labels, preds, average="macro", zero_division=0),
+        "recall_macro": recall_score(labels, preds, average="macro", zero_division=0),
+        "f1_macro": f1_score(labels, preds, average="macro", zero_division=0),
+    }
+
+
+class WeightedBinaryClassifier(nn.Module):
+    def __init__(self, base_model_name, pos_weight):
+        super().__init__()
+        self.bert = AutoModel.from_pretrained(base_model_name)
+        self.classifier = nn.Linear(self.bert.config.hidden_size, 1)
+        self.loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+
+    def forward(self, input_ids=None, attention_mask=None, labels=None):
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        logits = self.classifier(outputs.last_hidden_state[:, 0, :]).squeeze(-1)
+
+        loss = None
+        if labels is not None:
+            loss = self.loss_fn(logits, labels.float())
+
+        return SequenceClassifierOutput(
+            loss=loss,
+            logits=logits.unsqueeze(-1),
+        )
+
+
 class BinaryAntisemitismClassifier:
-    def __init__(self, train_texts, train_labels, val_texts, val_labels):
-        self.model = None
+    def __init__(self, texts, labels, tokenizer, max_length=128, train_texts=None,
+                 train_labels=None, val_texts=None, val_labels=None):
+
         self.train_texts = train_texts
         self.train_labels = train_labels
         self.val_texts = val_texts
         self.val_labels = val_labels
-        self.tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-cased")
+        self.encodings = tokenizer(texts, truncation=True, padding=True, max_length=max_length)
+        self.labels = torch.tensor(labels, dtype=torch.long)
 
-        self.combined_df_cleaned, self.categories = preprocess_dataframe()
+        self.train_dataset = BinaryClassificationDataset(train_texts, train_labels, tokenizer)
+        self.val_dataset = BinaryClassificationDataset(val_texts, val_labels, tokenizer)
+        self.tokenizer = AutoTokenizer.from_pretrained("cardiffnlp/twitter-roberta-base-sentiment")
+        assert set(train_labels).issubset({0, 1})
+        assert set(val_labels).issubset({0, 1})
 
+        # Calculating pos_weight according to class distribution
+        neg = (torch.tensor(train_labels) == 0).sum()
+        pos = (torch.tensor(train_labels) == 1).sum()
+        self.pos_weight = torch.tensor([neg / pos]).to("cuda")
+        self.model = WeightedBinaryClassifier("cardiffnlp/twitter-roberta-base-sentiment", self.pos_weight)
+
+        self.trainer = None
         self.train_classifier()
 
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item["labels"] = self.labels[idx]
+        return item
+
     def train_classifier(self):
-        train_dataset = BinaryClassificationDataset(self.train_texts, self.train_labels, self.tokenizer)
-        val_dataset = BinaryClassificationDataset(self.val_texts, self.val_labels, self.tokenizer)
-
-        model = BertForSequenceClassification.from_pretrained("bert-base-multilingual-cased", num_labels=2)
-
         training_args = TrainingArguments(
             output_dir="./bert_binary_classifier",
             eval_strategy="epoch",
@@ -100,88 +155,39 @@ class BinaryAntisemitismClassifier:
             per_device_eval_batch_size=16,
             num_train_epochs=5,
             weight_decay=0.01,
+            load_best_model_at_end=True,
+            metric_for_best_model="f1_macro",
             logging_dir="./logs",
             logging_steps=10,
-            load_best_model_at_end=True,
-            metric_for_best_model="eval_loss"
+            report_to="none"
         )
 
-        trainer = Trainer(
-            model=model,
+        self.trainer = Trainer(
+            model=self.model,
             args=training_args,
-            train_dataset=train_dataset,
-            eval_dataset=val_dataset,
-            compute_metrics=compute_metrics
+            train_dataset=self.train_dataset,
+            eval_dataset=self.val_dataset,
+            compute_metrics=compute_metrics_binary,
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=2)]
         )
 
-        trainer.train()
+        self.trainer.train()
 
-        # ניבוי על סט האימות
-        predictions = trainer.predict(val_dataset)
-        preds = np.argmax(predictions.predictions, axis=1)
+    def predict(self):
+        # prediction in validation set
+        predictions = self.trainer.predict(self.val_dataset)
+
+        logits = predictions.predictions
+        probs = torch.sigmoid(torch.tensor(logits)).numpy()
+        preds = (probs >= 0.5).astype(int).flatten()
+
         labels = predictions.label_ids
 
-        # טבלת ביצועים
-        report = classification_report(labels, preds, digits=4)
+        # Classification report
+        report = classification_report(labels, preds, target_names=["Negative", "Positive"])
         print(report)
 
-        model.save_pretrained("saved_model_bert_binary")
-        self.tokenizer.save_pretrained("saved_model_bert_binary")
-
-        trainer.model.save_pretrained("best_model_binary")
-        self.tokenizer.save_pretrained("best_model_binary")
-
-        model.save_pretrained("/content/drive/MyDrive/best_model_binary2204")
-        self.tokenizer.save_pretrained("/content/drive/MyDrive/best_model_binary2204")
-
-        # חישוב המטריצה
-        cm = confusion_matrix(labels, preds)
-
-        # ציור
-        plt.figure(figsize=(5, 4))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Not Antisemitic', 'Antisemitic'],
-                    yticklabels=['Not Antisemitic', 'Antisemitic'])
-        plt.xlabel('Predicted')
-        plt.ylabel('True')
-        plt.title('Confusion Matrix')
-        plt.show()
-
-    def create_df_peds(self):
-        # טוקניזציה מהירה לכל הדאטה
-        tokenizer = BertTokenizer.from_pretrained("saved_model_bert_binary")  # או התיקייה שבה שמרת את המודל
-        model = BertForSequenceClassification.from_pretrained("saved_model_bert_binary")
-        model.eval()
-
-        # texts: רשימת טקסטים מדויקים מתוך df (clean_extracted_text)
-        texts = self.combined_df_cleaned["clean_extracted_text"].tolist()
-
-        # יצירת predictions על כל הדאטה
-        all_preds = []
-        batch_size = 32
-
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model.to(device)
-
-        with torch.no_grad():
-            for i in range(0, len(texts), batch_size):
-                batch_texts = texts[i:i + batch_size]
-
-                # שלבי טוקניזציה
-                inputs = tokenizer(batch_texts, return_tensors="pt", padding=True, truncation=True, max_length=128)
-
-                inputs = {key: val.to(device) for key, val in inputs.items()}
-
-                # הרצה
-                outputs = model(**inputs)
-                probs = torch.nn.functional.softmax(outputs.logits, dim=1)
-                preds = torch.argmax(probs, dim=1)
-
-                all_preds.extend(preds.cpu().tolist())  # חשוב להחזיר ל-CPU כדי לא לקרוס ב-pandas
-
-        # הוספת עמודת תחזית לדאטה המקורי
-        self.combined_df_cleaned["binary_prediction"] = all_preds
-
-        # סינון רשומות אנטישמיות לפי המודל
-        df_predicted_antisemitic = self.combined_df_cleaned[self.combined_df_cleaned["binary_prediction"] == 1].copy()
-        df_predicted_antisemitic.to_csv('df_predicted_antisemitic.csv', encoding='utf-8-sig', index=False)
-        return df_predicted_antisemitic
+        # Save model
+        model_path = "./final_model_weighted"
+        trainer.save_model(model_path)
+        tokenizer.save_pretrained(model_path)
