@@ -1,26 +1,53 @@
 import ollama
-import torch
-from typing import List, Dict, Any
-from pathlib import Path
 
 # LangChain imports
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain.llms import HuggingFacePipeline
-from langchain.vectorstores import FAISS
+
+# Transformers imports
+from transformers import AutoModelForCausalLM, pipeline
+
+# Business logic imports
+from business_logic.llm_evaluation import LLMEvaluator
+
+import torch
+from typing import List, Dict, Any
+from pathlib import Path
+
+# LangChain imports
 from langchain.schema import Document
+from langchain.vectorstores import FAISS
 from langchain.embeddings.base import Embeddings
 
 # Transformers imports
 from transformers import (
-    AutoTokenizer, AutoModelForCausalLM, pipeline,
+    AutoTokenizer,
     DPRQuestionEncoder, DPRQuestionEncoderTokenizer,
     DPRContextEncoder, DPRContextEncoderTokenizer
 )
 
-# Business logic imports
-from business_logic.llm_evaluation import LLMEvaluator
-from business_logic.multilabel_classifier import AntisemitismClassifier
+# Sentence transformers for fallback
+try:
+    from sentence_transformers import SentenceTransformer
+    SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    SENTENCE_TRANSFORMERS_AVAILABLE = False
+    print("sentence-transformers not available. Install with: pip install sentence-transformers")
+
+# For preprocessing
+import nltk
+
+# Download required NLTK data (run once)
+try:
+    from nltk.corpus import stopwords
+    stopwords.words('english')
+except:
+    try:
+        nltk.download('stopwords')
+        nltk.download('punkt')
+    except:
+        print("Warning: Could not download NLTK data. BM25 preprocessing may be limited.")
 
 
 class DPREmbeddings(Embeddings):
@@ -129,7 +156,8 @@ class AntisemitismResponseSystem:
         print(f"Using device: {self.device}")
 
         # Initialize classifier
-        self.classifier = AntisemitismClassifier()
+        # self.classifier = AntisemitismClassifier()
+        self.classifier = None
 
         # Initialize evaluator
         self.evaluator = LLMEvaluator(evaluator_model="llama3.2")
@@ -152,7 +180,7 @@ class AntisemitismResponseSystem:
             if excel_config:
                 documents = DocumentLoader.load_from_excel(
                     documents_source,
-                    excel_config.get('text_column', 'text'),
+                    excel_config.get('text_column', ''),
                     excel_config.get('metadata_columns', [])
                 )
             else:
@@ -281,7 +309,8 @@ class AntisemitismResponseSystem:
         print(f"Processing comment: {comment[:100]}...")
 
         # Step 1: Classify the comment
-        label = self.classify_comment(comment)
+        # label = self.classify_comment(comment)
+        label = "Foreigner/Alien"
         print(f"Classification: {label}")
 
         # Step 2: Create document retrieval prompt
@@ -332,13 +361,20 @@ def main():
     """Main function to demonstrate the system"""
 
     # Initialize system (you can specify Excel file path and config here)
-    system = AntisemitismResponseSystem()
+    response_system = AntisemitismResponseSystem(
+        documents_source=r"C:\Users\myor1\PycharmProjects\ziona_bot\resources\knowledge_base.csv",
+        excel_config={
+            'text_column': 'paragraph',  # Column containing the text
+            'metadata_columns': ['source', 'url']  # Optional metadata columns
+        }
+    )
 
     # Example comment
     comment = "why do those penguins always have to not fit to the society, they interfere the marathon runners, they should respect them even if it is on their neighborhood and on sabat"
 
     # Process the comment
-    results = system.process_comment(comment)
+    results = response_system.process_comment(comment)
+    # results = {"comment": {comment}, "classification": "Foreigner/Alien", "generated_response": {"success": True, "response": ""}}
 
     # Display results
     print("=" * 80)

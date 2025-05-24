@@ -1,62 +1,99 @@
-import ollama
+import ast
+import logging
+import os
+import pandas as pd
 
-from business_logic.llm_evaluation import LLMEvaluator
-from business_logic.multilabel_classifier import AntisemitismClassifier
+from business_logic.react_agent import ReActAgent
+from models.react_evaluator import ResponseEvaluator
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logging.getLogger("faiss").setLevel(logging.WARNING)
+logging.getLogger("faiss.loader").setLevel(logging.WARNING)
+
+HF_TOKEN = "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"
+
+# Suppress Windows symlink warning for Hugging Face cache
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 
-def ollama_chat(model, prompt):
-    print(f"User prompt:\n{prompt}\n\n")
-    client = ollama.Client()
-    response = client.generate(model=model, prompt=prompt)
-    print(f"{model} response:")
-    print(response.response)
-    return response
+def main():
+    """Main function to demonstrate usage"""
 
+    # Configuration
+    KNOWLEDGE_BASE_PATH = r"C:\Users\myor1\PycharmProjects\ziona_bot\resources\knowledge_base.csv"
 
-def evaluation(response):
-    # Evaluate a single response
-    evaluator = LLMEvaluator(evaluator_model="llama3.2")
-    evaluation_results = evaluator.evaluate_response(comment, label, response.response)
+    try:
+        # Categories explanation
+        # 1: Calling for annihilation, theory conspiracies, identify Jewish people as evil.
+        # 2: Economic stereotypes, biological racism, humiliating external imaging.
+        # 3: Demonize Israel, compare Israel and Zionism to Nazis, anti-Zionism, denial of the right to exist.
+        # 4: Be cynical about the Holocaust, Holocaust denial.
+        # 5: Mention of Jewish or Israeli public figures along with antisemitic connotation, Implying of Jewish people.
+        label_map = {1: "antisemitic ideology", 2: "stereotypes and dehumanisation",
+                     3: "antisemitism against Israel or Zionism", 4: "Holocaust or Zionism denial",
+                     5: "indirect antisemitism or secondary objective"}
 
-    print("\n\n\n---- LLM Evaluation Results ----")
-    if "scores" in evaluation_results:
-        print("\nScores:")
-        for metric, score in evaluation_results["scores"].items():
-            print(f"  - {metric}: {score:.2f}")
+        # Load knowledge base
+        knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)
+        # category_id is list of integers
+        knowledge_base["category_id"] = knowledge_base["category_id"].apply(lambda x: ast.literal_eval(x))
+        logger.info(f"Loaded knowledge base with {len(knowledge_base)} entries")
 
-    if "feedback" in evaluation_results:
-        print("\nFeedback:")
-        for metric, feedback in evaluation_results["feedback"].items():
-            print(f"  - {metric}: {feedback}")
+        # Initialize agent
+        agent = ReActAgent(knowledge_base)
 
-    if "improvement_suggestions" in evaluation_results:
-        print("\nImprovement Suggestions:")
-        for suggestion in evaluation_results["improvement_suggestions"]:
-            print(f"  - {suggestion}")
+        # Example usage
+        test_cases = [
+            {
+                "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+                "category_id": 5,
+                "category_name": label_map[5]
+            },
+            {
+                "comment": "Jews control all the banks and media",
+                "category_id": 2,
+                "category_name": label_map[2]
+            }
+        ]
+
+        for i, test_case in enumerate(test_cases, 1):
+            print(f"\n{'=' * 50}")
+            print(f"Test Case {i}")
+            print(f"{'=' * 50}")
+
+            result = agent.generate_response(
+                test_case["comment"],
+                test_case["category_id"],
+                test_case["category_name"]
+            )
+
+            print(f"Comment: {test_case['comment']}")
+            print(f"Category: {test_case['category_name']}")
+            print(f"Thought 1: {result['thought_1']}")
+            print(f"Action 1: {result['action_1']}")
+            print(f"Observation 1: {result['observation_1']}")
+            print(f"Thought 2: {result['thought_2']}")
+            print(f"Action 2: {result['action_2']}")
+            print(f"Observation 2: {result['observation_2']}")
+            print(f"Thought 3: {result['thought_3']}")
+            print(f"Action 3: {result['action_3']}")
+            print(f"Observation 3: {result['observation_3']}")
+            print(f"Final Response: {result['final_response']}")
+            print(f"Source: {result['source']}")
+            print(f"URL: {result['url']}")
+
+            evaluator = ResponseEvaluator()
+            results = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result['final_response'])
+            print("\nEvaluation Results:")
+            for key, value in results.items():
+                print(f"{key}: {value}")
+            print()
+
+    except Exception as e:
+        logger.error(f"Error in main execution: {e}")
 
 
 if __name__ == "__main__":
-    comment = "why do those penguins always have to not fit to the society, they interfere the marathon runners, they should respect them even if it is on their neighborhood and on sabat"
-
-    classifier = AntisemitismClassifier()
-    label2 = classifier.predict(comment)
-    label = "Foreigner/Alien"
-
-    prompt = (f"I have come across an antisemitic comment on social media that says: "
-              f"\n{comment}. "
-              f"\nThis response is antisemitic of the type {label}. As a Jewish person, I found  it very offensive, "
-              f"\nI would like to combat antisemitism by respond to that person in a way that explains "
-              f"what is wrong with the comment and educates about {label} antisemitism. "
-              f"\ncan you please suggest at least two references "
-              f"such as articles or papers or essay, or Hasbara videos that confronts "
-              f"\nthe antisemitism type of {label}? Please summarize each reference. "
-              f"\nFurther to this, please help me to phrase a polite comment "
-              f"that explains the connection between the comment and {label} antisemitism, "
-              f"\nin the response, include the same references you suggested about {label} antisemitism "
-              f"along with their website links if there are.")
-
-    model = 'llama3.2'
-
-    print(f"starting a conversation with {model}\n")
-    response = ollama_chat(model, prompt)
-    evaluation(response)
+    main()
