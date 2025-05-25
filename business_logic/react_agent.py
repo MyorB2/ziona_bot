@@ -6,7 +6,6 @@ from ollama import Client
 
 # RAG imports
 from langchain.schema import Document
-
 from business_logic.rag import RAGRetriever
 
 # Setup logging
