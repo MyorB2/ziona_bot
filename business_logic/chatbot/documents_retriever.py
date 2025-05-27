@@ -39,7 +39,7 @@ class DocumentsRetriever:
         self.faiss_weight: float = 0.4
 
         self._set_documents()
-        logger.info("RAG Retriever initialized successfully")
+        logger.info("Retriever initialized successfully")
 
     def _set_documents(self):
         self.documents = [Document(

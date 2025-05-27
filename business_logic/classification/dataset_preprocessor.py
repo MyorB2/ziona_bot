@@ -14,6 +14,22 @@ os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")
 
 
+def safe_split_int_list(lst):
+    result = []
+    try:
+        if isinstance(lst, str):
+            lst = ast.literal_eval(lst)
+
+        if isinstance(lst, list):
+            for item in lst:
+                if isinstance(item, str) and ',' in item:
+                    result.extend([int(i.strip()) for i in item.split(',') if i.strip().isdigit()])
+                elif isinstance(item, (int, float)) or str(item).strip().isdigit():
+                    result.append(int(str(item).strip()))
+        return result
+    except Exception:
+        return []
+
 class DatasetPreprocessor:
     def __init__(self, dataset_uk_path, guidebook_path, guidebook_weights_path):
         self.dataset_uk_path = dataset_uk_path
@@ -130,22 +146,7 @@ class DatasetPreprocessor:
             pass
         return 1
 
-    @staticmethod
-    def safe_split_int_list(lst):
-        result = []
-        try:
-            if isinstance(lst, str):
-                lst = ast.literal_eval(lst)
 
-            if isinstance(lst, list):
-                for item in lst:
-                    if isinstance(item, str) and ',' in item:
-                        result.extend([int(i.strip()) for i in item.split(',') if i.strip().isdigit()])
-                    elif isinstance(item, (int, float)) or str(item).strip().isdigit():
-                        result.append(int(str(item).strip()))
-            return result
-        except Exception:
-            return []
 
     @staticmethod
     def clean_and_filter_categories(lst):
@@ -247,7 +248,7 @@ class DatasetPreprocessor:
         df['binary_category'] = df['updated_mapped_categories'].apply(self.is_binary_as)
 
         # Process and clean mapped categories
-        df["updated_mapped_categories"] = df["updated_mapped_categories"].apply(self.safe_split_int_list)
+        df["updated_mapped_categories"] = df["updated_mapped_categories"].apply(safe_split_int_list)
         df['updated_mapped_categories'] = df['updated_mapped_categories'].apply(
             lambda x: ast.literal_eval(x) if isinstance(x, str) else x
         )

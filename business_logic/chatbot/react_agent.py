@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Dict, Any
 from ollama import Client
 
-# RAG imports
+# retriever imports
 from langchain.schema import Document
 from business_logic.chatbot.documents_retriever import DocumentsRetriever
 
@@ -178,9 +178,8 @@ class ReActAgent:
                 "action_3": action_3,
                 "observation_3": observation_3,
                 "final_response": response_text,
-                "source": best_result.source,
-                "url": best_result.url,
-                "retrieval_score": best_result.score
+                "source": best_result.metadata["source"],
+                "url": best_result.metadata["url"]
             }
 
         except Exception as e:

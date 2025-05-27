@@ -78,29 +78,32 @@ def main():
             print(f"Test Case {i}")
             print(f"{'=' * 50}")
 
-            result = agent.generate_response(
-                test_case["comment"],
-                test_case["category_id"],
-                test_case["category_name"]
-            )
+            # result = agent.generate_response(
+            #     test_case["comment"],
+            #     test_case["category_id"],
+            #     test_case["category_name"]
+            # )
+            #
+            # print(f"Comment: {test_case['comment']}")
+            # print(f"Category: {test_case['category_name']}")
+            # print(f"Thought 1: {result['thought_1']}")
+            # print(f"Action 1: {result['action_1']}")
+            # print(f"Observation 1: {result['observation_1']}")
+            # print(f"Thought 2: {result['thought_2']}")
+            # print(f"Action 2: {result['action_2']}")
+            # print(f"Observation 2: {result['observation_2']}")
+            # print(f"Thought 3: {result['thought_3']}")
+            # print(f"Action 3: {result['action_3']}")
+            # print(f"Observation 3: {result['observation_3']}")
+            # print(f"Final Response: {result['final_response']}")
+            # print(f"Source: {result['source']}")
+            # print(f"URL: {result['url']}")
 
-            print(f"Comment: {test_case['comment']}")
-            print(f"Category: {test_case['category_name']}")
-            print(f"Thought 1: {result['thought_1']}")
-            print(f"Action 1: {result['action_1']}")
-            print(f"Observation 1: {result['observation_1']}")
-            print(f"Thought 2: {result['thought_2']}")
-            print(f"Action 2: {result['action_2']}")
-            print(f"Observation 2: {result['observation_2']}")
-            print(f"Thought 3: {result['thought_3']}")
-            print(f"Action 3: {result['action_3']}")
-            print(f"Observation 3: {result['observation_3']}")
-            print(f"Final Response: {result['final_response']}")
-            print(f"Source: {result['source']}")
-            print(f"URL: {result['url']}")
-
+            logger.info("Start evaluating...")
             evaluator = ResponseEvaluator()
-            evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result['final_response'])
+            result = "I understand your concern about being criticized for criticizing Israel, but it's important to recognize that criticism of a country or its policies is different from targeting an entire people group. According to the definition of antisemitism provided by the Wikipedia article (https://en.wikipedia.org/wiki/Antisemitism), it's essential to distinguish between legitimate political disagreements and discriminatory beliefs. While criticizing Israel does not necessarily equate to being antisemitic, it's crucial to be mindful of language and actions that may unintentionally perpetuate harmful stereotypes or biases."
+            # evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result['final_response'])
+            evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result)
             print("\nEvaluation Results:")
             for key, value in evals.items():
                 print(f"{key}: {value}")
@@ -112,7 +115,7 @@ def main():
                     eval_scores[key] = [value]
             print()
 
-        print(f"Final Evaluation Results:")
+        logger.info(f"Final evaluation results:")
         for key, val in eval_scores.items():
             if isinstance(eval_scores[key], str):
                 eval_scores[key] = Counter(val).most_common(1)[0][0]
