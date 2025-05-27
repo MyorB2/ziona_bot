@@ -3,8 +3,8 @@ from torch.utils.data import Dataset
 
 
 class MultiLabelDataset(Dataset):
-    def __init__(self, texts, labels, tokenizer):
-        self.encodings = tokenizer(texts, truncation=True, padding=True, max_length=128)
+    def __init__(self, texts, labels, tokenizer, max_length=128):
+        self.encodings = tokenizer(texts, truncation=True, padding=True, max_length=max_length)
         self.labels = labels
 
     def __len__(self):
