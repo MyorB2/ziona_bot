@@ -79,7 +79,7 @@ class ResponseEvaluator:
         educational_score = min(educational_score / len(self.educational_keywords), 1.0)
 
         # Check for specific educational patterns
-        has_citations = bool(re.search(r'\[[^\]]+\]|\([^)]+\)|according to|research shows', combined_text))
+        has_citations = bool(re.search(r'\[[^]]+]|\([^)]+\)|according to|research shows', combined_text))
         has_statistics = bool(re.search(r'\d+%|\d+\s*(percent|million|billion|thousand)', combined_text))
         provides_context = len(combined_text.split()) > 50  # Reasonable length for context
 
@@ -148,7 +148,8 @@ class ResponseEvaluator:
             "overall_addressing_score": np.mean([addresses_antisemitism, word_overlap, label_relevance])
         }
 
-    def _evaluate_label_specific_response(self, label: str, response: str) -> float:
+    @staticmethod
+    def _evaluate_label_specific_response(label: str, response: str) -> float:
         """Evaluate response relevance to specific antisemitism category."""
         label_keywords = {
             "conspiracy": ["conspiracy", "theory", "plot", "control", "manipulation"],
@@ -311,7 +312,7 @@ class ResponseEvaluator:
         return metrics
 
     @staticmethod
-    def evaluate_agent_response(self, comment, label, agent_output, expected_keywords=None):
+    def evaluate_agent_response(comment, label, agent_output, expected_keywords=None):
         """Convenience function for backward compatibility."""
         evaluator = ResponseEvaluator()
         return evaluator.evaluate_comprehensive(comment, label, agent_output, expected_keywords)

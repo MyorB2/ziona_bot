@@ -1,7 +1,9 @@
 import ast
 import logging
+import numpy as np
 import os
 import pandas as pd
+from collections import Counter
 
 from business_logic.chatbot.react_agent import ReActAgent
 from business_logic.chatbot.react_evaluator import ResponseEvaluator
@@ -36,9 +38,10 @@ def main():
                      5: "indirect antisemitism or secondary objective"}
 
         # Load knowledge base
+        logger.info("Reading knowledge base...")
         knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)
-        knowledge_base = knowledge_base[['source', 'url', 'content', 'categories']]
-        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
+        knowledge_base = knowledge_base[['source', 'url', 'paragraph', 'categories']]
+        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'paragraph'])
         knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith("http"))]
         knowledge_base.reset_index(drop=True, inplace=True)
         # category_id is list of integers
@@ -56,11 +59,19 @@ def main():
                 "category_name": label_map[5]
             },
             {
-                "comment": "Jews control all the banks and media",
+                "comment": "do all israelis kills babies for fun???",
+                "category_id": 3,
+                "category_name": label_map[3]
+            },
+            {
+                "comment": "Why those penguins have to interrupt the marathon runners, so what it is on Sabath",
                 "category_id": 2,
                 "category_name": label_map[2]
             }
         ]
+
+        # Save all scores for calculating total evaluation score
+        eval_scores = {}
 
         for i, test_case in enumerate(test_cases, 1):
             print(f"\n{'=' * 50}")
@@ -89,11 +100,25 @@ def main():
             print(f"URL: {result['url']}")
 
             evaluator = ResponseEvaluator()
-            results = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result['final_response'])
+            evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result['final_response'])
             print("\nEvaluation Results:")
-            for key, value in results.items():
+            for key, value in evals.items():
                 print(f"{key}: {value}")
+                if key in eval_scores:
+                    if isinstance(value, bool):
+                        value = int(value)
+                    eval_scores[key].append(value)
+                else:
+                    eval_scores[key] = [value]
             print()
+
+        print(f"Final Evaluation Results:")
+        for key, val in eval_scores.items():
+            if isinstance(eval_scores[key], str):
+                eval_scores[key] = Counter(val).most_common(1)[0][0]
+            else:
+                eval_scores[key] = np.mean(val)
+            print(f"{key}: {eval_scores[key]}")
 
     except Exception as e:
         logger.error(f"Error in main execution: {e}")

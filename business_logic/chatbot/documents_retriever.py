@@ -1,13 +1,9 @@
-import ast
 import logging
 import os
 import numpy as np
 import pandas as pd
-from dataclasses import dataclass
 from typing import Dict, List, Optional
-from ollama import Client
 
-# RAG imports
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
@@ -36,8 +32,6 @@ class DocumentsRetriever:
         self.documents: Optional[List[Document]] = None  # All original documents with metadata
         self.vectorstore = None
         self.llm = None
-        self.comment: Optional[str] = None
-        self.category_name: Optional[str] = None
         self.category_id: Optional[int] = None
         self.query: Optional[str] = None
         self.embedding_function = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
@@ -81,8 +75,8 @@ class DocumentsRetriever:
     def _bm25_scores(self, filtered_docs) -> Dict[int, float]:
         if not filtered_docs or len(filtered_docs) == 0:
             return {}
-        tokenized = [doc.page_content.split() for doc in filtered_docs]
-        bm25 = BM25Okapi(tokenized)
+        tokenized_corpus = [doc.page_content.split() for doc in filtered_docs]
+        bm25 = BM25Okapi(tokenized_corpus)
         scores = bm25.get_scores(self.query.split())
         return {i: float(score) for i, score in enumerate(scores)}
 
@@ -107,11 +101,9 @@ class DocumentsRetriever:
         top_indices = sorted(combined_scores, key=lambda i: combined_scores[i], reverse=True)[:self.top_k]
         return [self.documents[i] for i in top_indices]
 
-    def retrieve(self, comment: str, category_name: str, category_id: int) -> List[Document]:
-        self.comment = comment
+    def retrieve(self, comment: str, category_id: int) -> List[Document]:
         self.category_id = category_id
-        self.category_name = category_name
-        self.query = comment  # This is not a mistake, do not change it
+        self.query = comment  # In our implementation, the query contains only the comment
 
         self._set_vectorstore()
         filtered_docs = self._filter_documents_by_category()

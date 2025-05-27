@@ -6,7 +6,7 @@ from ollama import Client
 
 # RAG imports
 from langchain.schema import Document
-from business_logic.chatbot.documents_retriever import RAGRetriever
+from business_logic.chatbot.documents_retriever import DocumentsRetriever
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,7 @@ class ReActAgent:
 
     def __init__(self, knowledge_base: pd.DataFrame):
         self.knowledge_base = knowledge_base
-        self.retriever = RAGRetriever(knowledge_base)
+        self.retriever = DocumentsRetriever(knowledge_base)
         self.pipe = None
         self._initialize_llm()
 
@@ -109,7 +109,7 @@ class ReActAgent:
 
         # Action 1: Retrieve relevant information using the original comment as query
         action_1 = f"Retrieving documents related to antisemitic comment about category {category_name}"
-        retrieval_results = self.retriever.retrieve(comment, category_name, category_id)
+        retrieval_results = self.retriever.retrieve(comment, category_id)
 
         # Observation 1: Evaluate retrieval results
         if not retrieval_results:
