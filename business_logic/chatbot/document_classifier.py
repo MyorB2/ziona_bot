@@ -311,8 +311,8 @@ Explanation: [Brief justification for your decision]
 # Example usage and testing
 if __name__ == "__main__":
 
-    BASE_PATH = r"C:\Users\myor1\PycharmProjects\ziona_bot\resources"
-    KNOWLEDGE_BASE_PATH = r"C:\Users\myor1\PycharmProjects\ziona_bot\resources\all_collected_articles.csv"
+    BASE_PATH = r"/resources"
+    KNOWLEDGE_BASE_PATH = r"/resources/all_collected_articles.csv"
     knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)
     knowledge_base = knowledge_base[['source', 'url', 'content', 'categories']]
     knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])

@@ -25,17 +25,7 @@ HF_TOKEN = "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"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 
-@dataclass
-class RetrievalResult:
-    """Data class for retrieval results"""
-    paragraph: str
-    source: str
-    url: str
-    score: float
-    category_id: int
-
-
-class RAGRetriever:
+class DocumentsRetriever:
     def __init__(
             self,
             knowledge_base: pd.DataFrame,
@@ -63,7 +53,7 @@ class RAGRetriever:
             metadata={
                 "source": row["source"],
                 "url": row["url"],
-                "category_id": row["category_id"]
+                "categories": row["categories"]
             }
         )
             for _, row in self.knowledge_base.iterrows()
@@ -80,22 +70,12 @@ class RAGRetriever:
             logger.error(f"Error while set_vectorstore: {e}")
             raise Exception(f"Error while set_vectorstore: {e}")
 
-    def _initialize_llm(self):
-        """Initialize the Ollama LLaMA 3.2 model"""
-        try:
-            self.client = Client(host='http://localhost:11434')
-            self.model_name = "llama3"
-            logger.info("Successfully initialized Ollama LLM client")
-        except Exception as e:
-            logger.error(f"Error initializing Ollama LLM: {e}")
-            raise
-
     def _filter_documents_by_category(self) -> List[Document]:
         if self.category_id is None:
             return self.documents
         return [
             doc for doc in self.documents
-            if "category_id" in doc.metadata and self.category_id in doc.metadata["category_id"]
+            if "categories" in doc.metadata and self.category_id in doc.metadata["categories"]
         ]
 
     def _bm25_scores(self, filtered_docs) -> Dict[int, float]:

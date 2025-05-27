@@ -3,8 +3,8 @@ import logging
 import os
 import pandas as pd
 
-from business_logic.react_agent import ReActAgent
-from models.react_evaluator import ResponseEvaluator
+from business_logic.chatbot.react_agent import ReActAgent
+from business_logic.chatbot.react_evaluator import ResponseEvaluator
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -37,8 +37,12 @@ def main():
 
         # Load knowledge base
         knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)
+        knowledge_base = knowledge_base[['source', 'url', 'content', 'categories']]
+        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
+        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith("http"))]
+        knowledge_base.reset_index(drop=True, inplace=True)
         # category_id is list of integers
-        knowledge_base["category_id"] = knowledge_base["category_id"].apply(lambda x: ast.literal_eval(x))
+        knowledge_base["categories"] = knowledge_base["categories"].apply(lambda x: ast.literal_eval(x))
         logger.info(f"Loaded knowledge base with {len(knowledge_base)} entries")
 
         # Initialize agent

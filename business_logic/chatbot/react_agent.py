@@ -6,7 +6,7 @@ from ollama import Client
 
 # RAG imports
 from langchain.schema import Document
-from business_logic.rag import RAGRetriever
+from business_logic.chatbot.documents_retriever import RAGRetriever
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
