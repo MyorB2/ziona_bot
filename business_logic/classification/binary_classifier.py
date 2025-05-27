@@ -1,12 +1,7 @@
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
+from transformers import Trainer, AutoTokenizer
 from sklearn.model_selection import train_test_split
 import torch
-from torch.utils.data import Dataset
 import ast
-import os
-import wandb
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from transformers import EarlyStoppingCallback
@@ -17,6 +12,7 @@ import torch.nn as nn
 from transformers.modeling_outputs import SequenceClassifierOutput
 
 from models.binary_dataset import BinaryClassificationDataset
+from src.global_parameters import ANTISEMITIC_PREFIXES
 
 
 def extract_bin_categories(category_list, as_categories):
@@ -189,5 +185,5 @@ class BinaryAntisemitismClassifier:
 
         # Save model
         model_path = "./final_model_weighted"
-        trainer.save_model(model_path)
-        tokenizer.save_pretrained(model_path)
+        self.trainer.save_model(model_path)
+        self.tokenizer.save_pretrained(model_path)
