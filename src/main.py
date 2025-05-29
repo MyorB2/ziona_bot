@@ -64,7 +64,8 @@ def main():
                 "category_name": label_map[3]
             },
             {
-                "comment": "Why those penguins have to interrupt the marathon runners, so what it is on Sabath",
+                "comment": "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
+                           "they should respect them even if it is on their neighborhood and on Sabbath",
                 "category_id": 2,
                 "category_name": label_map[2]
             }
