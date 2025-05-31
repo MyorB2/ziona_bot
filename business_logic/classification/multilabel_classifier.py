@@ -379,23 +379,28 @@ class MultilabelClassifier(Dataset):
     def predict(
             self,
             texts,
-            model_paths,
             save_dir,
-            load_custom_model,
+            model_paths,
             thresholds_type="default",
             thresholds_path=None
     ):
         # Load components
-        meta_model = joblib.load(os.path.join(save_dir, "meta_model_best.pkl"))
-        scaler = joblib.load(os.path.join(save_dir, "meta_scaler.pkl"))
-        mlb = joblib.load(os.path.join(save_dir, "saved_mlb.pkl"))
+        try:
+            meta_model = joblib.load(os.path.join(save_dir, "meta_model_best.pkl"))
+            scaler = joblib.load(os.path.join(save_dir, "meta_scaler.pkl"))
+            mlb = joblib.load(os.path.join(save_dir, "saved_mlb.pkl"))
+        except FileNotFoundError as e:
+            print(f"Error loading model or mlb: {e}")
+            print("Please ensure the files exist at the specified paths.")
+            # You might want to exit or handle this error appropriately
+            exit()
 
         # Load base models
         models = {}
         tokenizers = {}
         for name, path in model_paths.items():
             if name == "deberta":
-                model, tokenizer_loaded, _ = load_custom_model(path)
+                model, tokenizer_loaded, _ = self.load_custom_model(path)
             else:
                 tokenizer_loaded = AutoTokenizer.from_pretrained(path)
                 model = AutoModelForSequenceClassification.from_pretrained(path)

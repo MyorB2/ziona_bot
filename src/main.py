@@ -55,7 +55,13 @@ def main():
         agent = ReActAgent(knowledge_base)
 
         # Initialize classification model
-        classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
+        model_paths = {
+            "deberta": "/content/drive/MyDrive/Project/Models/Multi_model/1805_1/final_multilabel_model/saving",
+            "hatebert": "Hate-speech-CNERG/dehatebert-mono-english",
+            "twitter": "cardiffnlp/twitter-roberta-base",
+        }
+        save_dir = r"./resources"
+        classification_model = LoadedClassificationModel(save_dir, model_paths)
 
         # Example usage
         # test_cases = [

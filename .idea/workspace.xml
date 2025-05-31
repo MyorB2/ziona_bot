@@ -4,15 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="update streamlit ui">
-      <change afterPath="$PROJECT_DIR$/resources/meta_model_best.pkl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/meta_model_val_preds_opt.npy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/meta_scaler.pkl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/resources/saved_mlb.pkl" afterDir="false" />
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="add workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/classification/multilabel_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/multilabel_classifier.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ziona.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,30 +64,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.document_classifier.executor": "Debug",
-    "Python.main (1).executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.main_claude_rag.executor": "Run",
-    "Python.proj_for_claude.executor": "Debug",
-    "Python.proj_for_gpt.executor": "Run",
-    "Python.proj_w_llama.executor": "Run",
-    "Python.react_agent.executor": "Run",
-    "Python.web_search.executor": "Run",
-    "Python.ziona.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "add__streamlit__ui",
-    "last_opened_file_path": "C:/Users/myor1/PycharmProjects/ziona_bot/resources",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.document_classifier.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_claude_rag.executor&quot;: &quot;Run&quot;,
+    &quot;Python.proj_for_claude.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.proj_for_gpt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.proj_w_llama.executor&quot;: &quot;Run&quot;,
+    &quot;Python.react_agent.executor&quot;: &quot;Run&quot;,
+    &quot;Python.web_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ziona.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/myor1/PycharmProjects/ziona_bot/resources&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\resources" />
@@ -266,6 +262,7 @@
       <workItem from="1748414110224" duration="914000" />
       <workItem from="1748691885428" duration="1731000" />
       <workItem from="1748697086648" duration="3177000" />
+      <workItem from="1748705829775" duration="961000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
