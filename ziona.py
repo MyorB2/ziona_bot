@@ -32,7 +32,8 @@ LABEL_MAP = {1: "antisemitic ideology", 2: "stereotypes and dehumanisation",
 
 st.set_page_config(page_title="Educational Response Generator", layout="wide")
 st.title("Welcome to Ziona's consulting App")
-st.subheader("Tell me what is the problematic comment you accounted on social media, and i will analys it and suggest an educational response")
+st.subheader("Tell me what is the problematic comment you accounted on social media, "
+             "I will analys it and suggest an educational response.")
 
 # UI Elements
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -40,7 +41,7 @@ KNOWLEDGE_BASE_PATH = os.path.join(BASE_DIR, 'resources', 'knowledge_base.csv')
 knowledge_base = load_knowledge_base(KNOWLEDGE_BASE_PATH)
 agent = ReActAgent(knowledge_base)
 
-comment = st.text_area("Enter a potentially antisemitic comment:", height=150)
+comment = st.text_area("Enter a potentially anti-Semitic/ anti-Israeli comment:", height=150)
 
 if st.button("Analyze & Generate Response"):
     with st.spinner("Retrieving knowledge and generating response..."):
