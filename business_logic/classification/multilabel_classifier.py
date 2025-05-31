@@ -245,7 +245,7 @@ class MultilabelClassifier(Dataset):
         with torch.no_grad():
             return torch.sigmoid(model(**inputs).logits).cpu().numpy()
 
-    def build_X_meta(self, models, tokenizers):
+    def build_x_meta(self, models, tokenizers):
         logits_deberta_all, logits_twitter_all, hate_scores, text_lengths, sentiments = [], [], [], [], []
 
         for text in tqdm(self.texts):
@@ -299,7 +299,7 @@ class MultilabelClassifier(Dataset):
         os.makedirs(save_dir, exist_ok=True)
 
         print("Building meta features...")
-        X_meta = self.build_X_meta(models, tokenizers)
+        X_meta = self.build_x_meta(models, tokenizers)
 
         print("Scaling...")
         scaler = StandardScaler()
@@ -376,7 +376,7 @@ class MultilabelClassifier(Dataset):
         print("Meta-model, scaler, thresholds, and reports saved to:", save_dir)
         return grid_search.best_estimator_
 
-    def predict_with_meta_model(
+    def predict(
             self,
             texts,
             model_paths,
@@ -405,7 +405,7 @@ class MultilabelClassifier(Dataset):
 
         # Build features
         print("Building X_meta for inference...")
-        X_meta = self.build_X_meta(models, tokenizers)
+        X_meta = self.build_x_meta(models, tokenizers)
         X_meta_scaled = scaler.transform(X_meta)
 
         # Predict probabilities
@@ -556,7 +556,7 @@ class MultilabelClassifier(Dataset):
 
             self.models[name] = model.eval()
             self.tokenizers[name] = tokenizer_loaded
-        X_meta = self.build_X_meta(self.models, self.tokenizers)
+        X_meta = self.build_x_meta(self.models, self.tokenizers)
         scaler = StandardScaler()
         self.X_meta_scaled = scaler.fit_transform(X_meta)
         X_train, X_val, y_train, y_val = train_test_split(self.X_meta_scaled, self.labels_bin, test_size=0.2,
