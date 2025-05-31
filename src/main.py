@@ -5,8 +5,11 @@ import os
 import pandas as pd
 from collections import Counter
 
+from django.db.models.expressions import result
+
 from business_logic.chatbot.react_agent import ReActAgent
 from business_logic.chatbot.react_evaluator import ResponseEvaluator
+from business_logic.classification.classification_wrapper import LoadedClassificationModel
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -51,24 +54,40 @@ def main():
         # Initialize agent
         agent = ReActAgent(knowledge_base)
 
+        # Initialize classification model
+        classification_model = LoadedClassificationModel(r"./models/Multi_model/1805_1/meta_model_best.pkl")
+
         # Example usage
-        test_cases = [
-            {
-                "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
-                "category_id": 5,
-                "category_name": label_map[5]
-            },
-            {
-                "comment": "do all israelis kills babies for fun???",
-                "category_id": 3,
-                "category_name": label_map[3]
-            },
-            {
-                "comment": "Why those penguins have to interrupt the marathon runners, so what it is on Sabath",
-                "category_id": 2,
-                "category_name": label_map[2]
-            }
+        # test_cases = [
+        #     {
+        #         "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+        #         "category_id": 5,
+        #         "category_name": label_map[5]
+        #     },
+        #     {
+        #         "comment": "do all israelis kills babies for fun???",
+        #         "category_id": 3,
+        #         "category_name": label_map[3]
+        #     },
+        #     {
+        #         "comment": "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
+        #                    "they should respect them even if it is on their neighborhood and on Sabbath",
+        #         "category_id": 2,
+        #         "category_name": label_map[2]
+        #     }
+        # ]
+
+        test_comments = [
+            "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+            "do all israelis kills babies for fun???",
+            "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
+            "they should respect them even if it is on their neighborhood and on Sabbath"
         ]
+        test_cases = []
+        for comment in test_comments:
+            pred = classification_model.predict(comment)
+            category_id = pred["predicted_labels"][0]
+            test_cases.append({"comment": comment, "category_id": category_id, "category_name": label_map[category_id]})
 
         # Save all scores for calculating total evaluation score
         eval_scores = {}
@@ -78,26 +97,26 @@ def main():
             print(f"Test Case {i}")
             print(f"{'=' * 50}")
 
-            # result = agent.generate_response(
-            #     test_case["comment"],
-            #     test_case["category_id"],
-            #     test_case["category_name"]
-            # )
-            #
-            # print(f"Comment: {test_case['comment']}")
-            # print(f"Category: {test_case['category_name']}")
-            # print(f"Thought 1: {result['thought_1']}")
-            # print(f"Action 1: {result['action_1']}")
-            # print(f"Observation 1: {result['observation_1']}")
-            # print(f"Thought 2: {result['thought_2']}")
-            # print(f"Action 2: {result['action_2']}")
-            # print(f"Observation 2: {result['observation_2']}")
-            # print(f"Thought 3: {result['thought_3']}")
-            # print(f"Action 3: {result['action_3']}")
-            # print(f"Observation 3: {result['observation_3']}")
-            # print(f"Final Response: {result['final_response']}")
-            # print(f"Source: {result['source']}")
-            # print(f"URL: {result['url']}")
+            result = agent.generate_response(
+                test_case["comment"],
+                test_case["category_id"],
+                test_case["category_name"]
+            )
+
+            print(f"Comment: {test_case['comment']}")
+            print(f"Category: {test_case['category_name']}")
+            print(f"Thought 1: {result['thought_1']}")
+            print(f"Action 1: {result['action_1']}")
+            print(f"Observation 1: {result['observation_1']}")
+            print(f"Thought 2: {result['thought_2']}")
+            print(f"Action 2: {result['action_2']}")
+            print(f"Observation 2: {result['observation_2']}")
+            print(f"Thought 3: {result['thought_3']}")
+            print(f"Action 3: {result['action_3']}")
+            print(f"Observation 3: {result['observation_3']}")
+            print(f"Final Response: {result['final_response']}")
+            print(f"Source: {result['source']}")
+            print(f"URL: {result['url']}")
 
             logger.info("Start evaluating...")
             evaluator = ResponseEvaluator()

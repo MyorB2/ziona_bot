@@ -31,7 +31,7 @@ from models.save_model_callback import SaveBestModelCallback
 
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")
-# Ensure device is set to GPU if available
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -191,9 +191,9 @@ class MultilabelClassifier(Dataset):
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(metrics_report)
 
-        print("✅ ספים ודוח ביצועים נשמרו בהצלחה!")
-        print(f"📁 ספים: {thresholds_path}")
-        print(f"📄 דוח: {report_path}")
+        print("Successfully saved thresholds and reports")
+        print(f"Thresholds: {thresholds_path}")
+        print(f"ReportsL {report_path}")
 
         return optimal_thresholds, metrics_report
 
@@ -201,65 +201,41 @@ class MultilabelClassifier(Dataset):
         mlb = joblib.load(self.mlb_path)
         os.makedirs(save_dir, exist_ok=True)
 
-        # 1. שמור את משקלי המודל
         torch.save(model.state_dict(), os.path.join(save_dir, "custom_model_weights.pt"))
 
-        # 2. שמור את tokenizer
         tokenizer.save_pretrained(save_dir)
 
-        # # 3. שמור את config
-        # config = AutoConfig.from_pretrained("microsoft/deberta-v3-large")
-
-        # config.num_labels = len(mlb.classes_)
-        # config.problem_type = "multi_label_classification"
-        # config.save_pretrained(save_dir)
-
-        # 3. שמור את config מתוך המודל עצמו
         config = model.base_model.config if hasattr(model, "base_model") else model.config
         config.save_pretrained(save_dir)
 
-        # 4. שמור את pos_weight, mlb וקטגוריות
         joblib.dump({
             "pos_weight": pos_weight,
-            "mlb": self.mlb,
-            "category_classes": list(self.mlb.classes_)  # ✅ הוספה חשובה
+            "mlb": mlb,
+            "category_classes": list(mlb.classes_)
         }, os.path.join(save_dir, "extras.pkl"))
 
-        print("✅ Model, tokenizer, config saved successfully.")
+        print("Model, tokenizer, config saved successfully.")
 
     @staticmethod
     def load_custom_model(save_dir):
-        print(f"📦 Loading model from: {save_dir}")
-
-        # 1. טען tokenizer
-        # tokenizer = AutoTokenizer.from_pretrained(save_dir)
+        print(f"Loading model from: {save_dir}")
         tokenizer = AutoTokenizer.from_pretrained(save_dir, local_files_only=True)
-
-        # 2. טען config
-        # config = AutoConfig.from_pretrained(save_dir)
         config = AutoConfig.from_pretrained(save_dir, local_files_only=True)
 
-        # 3. טען את extras (pos_weight, mlb וכו’)
         extras_path = os.path.join(save_dir, "extras.pkl")
         extras = joblib.load(extras_path)
-        mlb = extras["mlb"]  # ❗️ אל תטען אותו שוב ידנית עם path קבוע
+        mlb = extras["mlb"]
         pos_weight = torch.tensor(extras["pos_weight"], dtype=torch.float32)
 
-        # 4. עדכן config
         config.num_labels = len(mlb.classes_)
         config.problem_type = "multi_label_classification"
 
-        # 5. טען את המודל הבסיסי מה־config בלבד (לא מהמשקלים שלו)
         base_model = AutoModelForSequenceClassification.from_config(config)
-
-        # 6. עטוף במודל עם פונקציית איבוד מותאמת
         model = CustomLossModel(base_model, pos_weight)
-
-        # 7. טען את משקלי המודל המאומן
         model_weights_path = os.path.join(save_dir, "custom_model_weights.pt")
         model.load_state_dict(torch.load(model_weights_path, map_location="cuda"))
 
-        print("✅ Model, tokenizer, and extras loaded successfully.")
+        print("Model, tokenizer, and extras loaded successfully.")
         return model.to("cuda"), tokenizer, mlb
 
     @staticmethod
@@ -269,7 +245,7 @@ class MultilabelClassifier(Dataset):
         with torch.no_grad():
             return torch.sigmoid(model(**inputs).logits).cpu().numpy()
 
-    def build_X_meta(self, models, tokenizers):
+    def build_x_meta(self, models, tokenizers):
         logits_deberta_all, logits_twitter_all, hate_scores, text_lengths, sentiments = [], [], [], [], []
 
         for text in tqdm(self.texts):
@@ -314,28 +290,26 @@ class MultilabelClassifier(Dataset):
 
     def train_and_save_meta_model_with_thresholds(
             self,
-            texts,
             models,
             tokenizers,
             save_dir,
             mlb,
-            device="cuda",
             thresholds_path=None
     ):
         os.makedirs(save_dir, exist_ok=True)
 
-        print("🔄 Building meta features...")
-        X_meta = self.build_X_meta(models, tokenizers)
+        print("Building meta features...")
+        X_meta = self.build_x_meta(models, tokenizers)
 
-        print("🔄 Scaling...")
+        print("Scaling...")
         scaler = StandardScaler()
         X_meta_scaled = scaler.fit_transform(X_meta)
 
-        print("🔁 Splitting data...")
+        print("Splitting data...")
         X_train, X_val, y_train, y_val = train_test_split(X_meta_scaled, self.labels_bin, test_size=0.2,
                                                           random_state=42)
 
-        print("🔍 Starting GridSearchCV...")
+        print("Starting GridSearchCV...")
         param_grid = {
             "estimator__hidden_layer_sizes": [(32,), (64,), (128,)],
             "estimator__alpha": [0.0001, 0.001, 0.01],
@@ -356,47 +330,42 @@ class MultilabelClassifier(Dataset):
 
         grid_search.fit(X_train, y_train)
 
-        print("✅ Best Params:", grid_search.best_params_)
-        print("📊 Best F1-macro:", grid_search.best_score_)
+        print("Best Params:", grid_search.best_params_)
+        print("Best F1-macro:", grid_search.best_score_)
 
-        # חיזוי רגיל
         y_pred_default = grid_search.predict(X_val)
-        print("\n📄 Report with default threshold (0.5):")
+        print("\nReport with default threshold (0.5):")
         print(classification_report(y_val, y_pred_default, target_names=[str(c) for c in mlb.classes_], digits=3,
                                     zero_division=0))
 
-        # חיזוי לפי פרובי
         y_probs = grid_search.predict_proba(X_val)
         y_probs_matrix = np.stack([
             cls_probs[:, 1] if cls_probs.ndim > 1 else cls_probs
             for cls_probs in y_probs
         ], axis=1)
 
-        # שמירה
         joblib.dump(grid_search.best_estimator_, os.path.join(save_dir, "meta_model_best.pkl"))
         joblib.dump(scaler, os.path.join(save_dir, "meta_scaler.pkl"))
         np.save(os.path.join(save_dir, "meta_model_val_probs.npy"), y_probs_matrix)
 
-        # ספים פר תווית אם קיימים
         if thresholds_path and os.path.exists(thresholds_path):
             print(f"\n📥 Using optimal thresholds from: {thresholds_path}")
             optimal_thresholds = joblib.load(thresholds_path) if thresholds_path.endswith(".pkl") else np.load(
                 thresholds_path)
-            print("🔢 First few thresholds:", np.round(optimal_thresholds[:5], 3))
+            print("First few thresholds:", np.round(optimal_thresholds[:5], 3))
 
             y_pred_optimal = (y_probs_matrix >= optimal_thresholds).astype(int)
-            print("\n📄 Report with optimal thresholds:")
+            print("\nReport with optimal thresholds:")
             print(classification_report(y_val, y_pred_optimal, target_names=[str(c) for c in mlb.classes_], digits=3,
                                         zero_division=0))
             np.save(os.path.join(save_dir, "meta_model_val_preds_opt.npy"), y_pred_optimal)
 
-        # ✅ סף גלובלי לפי F1_macro
-        print("\n🔍 Finding best global threshold by F1_macro...")
+        print("\nFinding best global threshold by F1_macro...")
         best_global_thresh, best_macro_f1 = self.find_best_global_threshold_by_macro_f1(y_val, y_probs_matrix)
         y_pred_global = (y_probs_matrix >= best_global_thresh).astype(int)
 
-        print(f"📏 Best global threshold: {best_global_thresh:.3f} | F1_macro: {best_macro_f1:.3f}")
-        print("\n📄 Report with global threshold:")
+        print(f"Best global threshold: {best_global_thresh:.3f} | F1_macro: {best_macro_f1:.3f}")
+        print("\nReport with global threshold:")
         print(classification_report(y_val, y_pred_global, target_names=[str(c) for c in mlb.classes_], digits=3,
                                     zero_division=0))
 
@@ -404,17 +373,16 @@ class MultilabelClassifier(Dataset):
             f.write(classification_report(y_val, y_pred_global, target_names=[str(c) for c in mlb.classes_], digits=3,
                                           zero_division=0))
 
-        print("✅ Meta-model, scaler, thresholds, and reports saved to:", save_dir)
+        print("Meta-model, scaler, thresholds, and reports saved to:", save_dir)
         return grid_search.best_estimator_
 
-    def predict_with_meta_model(
+    def predict(
             self,
             texts,
             model_paths,
             save_dir,
             load_custom_model,
-            device="cuda",
-            thresholds_type="default",  # options: "default", "per_class", "global"
+            thresholds_type="default",
             thresholds_path=None
     ):
         # Load components
@@ -436,8 +404,8 @@ class MultilabelClassifier(Dataset):
             tokenizers[name] = tokenizer_loaded
 
         # Build features
-        print("🔄 Building X_meta for inference...")
-        X_meta = self.build_X_meta(models, tokenizers)
+        print("Building X_meta for inference...")
+        X_meta = self.build_x_meta(models, tokenizers)
         X_meta_scaled = scaler.transform(X_meta)
 
         # Predict probabilities
@@ -516,14 +484,14 @@ class MultilabelClassifier(Dataset):
 
             # evaluation
             eval_strategy="steps",
-            eval_steps=1200,  # כל 500 צעדים נעשה evaluate
+            eval_steps=1200,
             metric_for_best_model="f1_macro",
             load_best_model_at_end=True,
             greater_is_better=True,
 
             # saving
-            save_strategy="steps",  # לשמור כל כמה צעדים
-            save_steps=1200,  # כל 500 steps
+            save_strategy="steps",
+            save_steps=1200,
             save_total_limit=3,
 
             fp16=True,
@@ -534,7 +502,7 @@ class MultilabelClassifier(Dataset):
             logging_steps=50,
             report_to="none")
 
-        # Trainer
+        # New trainer
         self.trainer = Trainer(
             model=custom_model,
             args=training_args,
@@ -552,7 +520,7 @@ class MultilabelClassifier(Dataset):
         # Start Training
         self.trainer.train()
 
-        ## Save threshold
+        # Save threshold
         optimal_thresholds, metrics_report = self.compute_and_save_thresholds_and_report(
             trainer=self.trainer,
             val_dataset=val_dataset,
@@ -560,12 +528,11 @@ class MultilabelClassifier(Dataset):
             file_prefix=""
         )
 
-        ## Save full model
+        # Save full model
         custom_model = custom_model
         tokenizer = tokenizer
         pos_weight_tensor = pos_weight_tensor
         save_dir = f"{self.save_model_dir}/saving"
-
         self.save_custom_model(custom_model, tokenizer, pos_weight_tensor, save_dir)
 
         self.metamodel()
@@ -589,114 +556,78 @@ class MultilabelClassifier(Dataset):
 
             self.models[name] = model.eval()
             self.tokenizers[name] = tokenizer_loaded
-        X_meta = self.build_X_meta(self.models, self.tokenizers)
-
-        # נרמול
+        X_meta = self.build_x_meta(self.models, self.tokenizers)
         scaler = StandardScaler()
         self.X_meta_scaled = scaler.fit_transform(X_meta)
-
-        # פיצול ואימון
         X_train, X_val, y_train, y_val = train_test_split(self.X_meta_scaled, self.labels_bin, test_size=0.2,
                                                           random_state=42)
-
         meta_model = MultiOutputClassifier(
             MLPClassifier(hidden_layer_sizes=(64,), max_iter=500, random_state=42)
         )
         meta_model.fit(X_train, y_train)
 
-        # הערכה
         y_pred = meta_model.predict(X_val)
         print(classification_report(y_val, y_pred, target_names=[str(c) for c in mlb.classes_], digits=3))
 
         meta_model = self.train_and_save_meta_model_with_thresholds(
-            texts=self.texts,
             models=self.models,
             tokenizers=self.tokenizers,
             save_dir="/content/drive/MyDrive/Project/Models/Multi_model/1805_1",
             mlb=mlb,
             thresholds_path=f"{self.save_model_dir}/optimal_thresholds.pkl"
-            # או .npy
         )
 
         self.post_metamodel()
 
     def post_metamodel(self):
-
-        ### load model ###
         thresholds_path = os.path.join(self.save_model_dir, "optimal_thresholds.pkl")
         optimal_thresholds = joblib.load(thresholds_path)
-        print("✅ ספים אופטימליים:")
+        print("Optimal thresholds")
         print(np.round(optimal_thresholds, 4))
 
-        # 3. טען את דו"ח הביצועים
         report_path = os.path.join(self.save_model_dir, "classification_report.txt")
         with open(report_path, "r", encoding="utf-8") as f:
             metrics_report = f.read()
 
-        print("\n✅ דו\"ח ביצועים:")
         print(metrics_report)
-
-        # 1. טען את המודל, הטוקנייזר וה-MLB
         save_dir = f"{self.save_model_dir}/saving"
         # save_dir = "/content/drive/MyDrive/Project/Models/Multi_model/1705_1/final_multilabel_model"
 
         model, tokenizer, mlb = self.load_custom_model(save_dir)
-
-        # 2. טען את הדאטה (בהנחה שיש לך את texts_val ו־labels_val)
         val_dataset = MultiLabelDataset(self.texts_val, self.labels_val, tokenizer)
 
-        # 3. הגדרת ארגומנטים מינימליים
         inference_args = TrainingArguments(
             output_dir="./tmp_eval",
             per_device_eval_batch_size=8,
             report_to="none"
         )
 
-        # 4. הגדרת ה־Trainer
         trainer = Trainer(
             model=model,
             args=inference_args,
             tokenizer=tokenizer
         )
 
-        # 5. תחזית
         outputs = trainer.predict(val_dataset)
         logits = outputs.predictions
         labels_val = outputs.label_ids
 
-        # שלב 1: קבלת תחזיות מהמאמן (logits)
         outputs = trainer.predict(val_dataset)
         logits = outputs.predictions
         labels_val = outputs.label_ids
 
-        # המרת logits ל־probabilities
         probs = sigmoid(torch.tensor(logits)).numpy()
-
-        # Get the number of classes from probs
         num_classes = probs.shape[1]
 
-        # Make sure thresholds_tensor has the same number of elements
-        # Use torch.float32 instead of probs.dtype
         thresholds_tensor = torch.tensor(optimal_thresholds[:num_classes], dtype=torch.float32, device=probs.device)
-
-        # Convert probs to a PyTorch tensor before comparison
         probs_tensor = torch.tensor(probs, dtype=torch.float32, device=probs.device)  # Convert probs to tensor
-
-        # Now you can perform the comparison
         preds_bin = (probs_tensor >= thresholds_tensor).int()  # Use probs_tensor for comparison
 
         labels_val = outputs.label_ids
         preds_bin = (probs >= optimal_thresholds).astype(int)
-
-        # Assuming your labels are in the second column onwards (index 1 and beyond)
         relevant_indices = np.arange(0, labels_val.shape[1])  # Get indices from 1 to the end
 
-        # Select the relevant columns for both labels and predictions
         labels_val_multi = labels_val[:, relevant_indices]
         preds_bin_multi = preds_bin[:, relevant_indices]
-
-        # Get the target names for the multi-label classification
         target_names_multi = [str(name) for name in mlb.classes_[relevant_indices]]
-
-        # Now generate the classification report
         print(classification_report(labels_val_multi, preds_bin_multi, target_names=target_names_multi, digits=4))

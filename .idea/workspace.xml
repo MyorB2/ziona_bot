@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="add streamlit ui" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="add_streamlit_ui" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;MyorB2&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/MyorB2/ziona_bot.git&quot;,
+    &quot;accountId&quot;: &quot;679f191c-c512-4647-ae5e-20d79b119ea3&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2vJw1WP90ZDHpN3cTCoz7X7fw3M" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.document_classifier.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_claude_rag.executor&quot;: &quot;Run&quot;,
+    &quot;Python.proj_for_claude.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.proj_for_gpt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.proj_w_llama.executor&quot;: &quot;Run&quot;,
+    &quot;Python.react_agent.executor&quot;: &quot;Run&quot;,
+    &quot;Python.web_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ziona.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\myor1\PycharmProjects\ziona_bot" />
+      <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\business_logic\classification" />
+      <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\business_logic\chatbot" />
+      <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\business_logic" />
+      <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\models" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.main (1)">
+    <configuration name="main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ziona_bot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ziona_bot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\myor1\PycharmProjects\ziona_bot\src\main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="proj_w_llama" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ziona_bot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/proj_w_llama.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="react_agent" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ziona_bot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/business_logic/chatbot" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/business_logic/chatbot/react_agent.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="web_search" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ziona_bot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/web_search.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.web_search" />
+        <item itemvalue="Python.react_agent" />
+        <item itemvalue="Python.proj_w_llama" />
+        <item itemvalue="Python.main (1)" />
+        <item itemvalue="Python.main" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-PY-242.23339.19" />
+        <option value="bundled-python-sdk-0029f7779945-399fe30bd8c1-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-242.23339.19" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="" />
+      <created>1743876270068</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1743876270068</updated>
+      <workItem from="1743876271430" duration="6611000" />
+      <workItem from="1745210559662" duration="8284000" />
+      <workItem from="1745218941122" duration="8171000" />
+      <workItem from="1745299962719" duration="281000" />
+      <workItem from="1745383893167" duration="2579000" />
+      <workItem from="1745388937019" duration="6967000" />
+      <workItem from="1745469960272" duration="2256000" />
+      <workItem from="1745674963794" duration="888000" />
+      <workItem from="1746274235659" duration="1811000" />
+      <workItem from="1747890487067" duration="679000" />
+      <workItem from="1747895504212" duration="19951000" />
+      <workItem from="1747996497317" duration="48000" />
+      <workItem from="1748063920344" duration="43825000" />
+      <workItem from="1748181486877" duration="16499000" />
+      <workItem from="1748331474709" duration="21743000" />
+      <workItem from="1748368369269" duration="12123000" />
+      <workItem from="1748410998148" duration="2852000" />
+      <workItem from="1748414110224" duration="914000" />
+      <workItem from="1748691885428" duration="1731000" />
+      <workItem from="1748697086648" duration="3177000" />
+    </task>
+    <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
+      <option name="closed" value="true" />
+      <created>1743881250989</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL‎-00001" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1743881250989</updated>
+    </task>
+    <task id="LOCAL‎-00002" summary="NEED TO FIX BOT">
+      <option name="closed" value="true" />
+      <created>1743883367016</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL‎-00002" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1743883367017</updated>
+    </task>
+    <task id="LOCAL‎-00003" summary="fixed bot + organized project into folders + fixing imports">
+      <option name="closed" value="true" />
+      <created>1745216438592</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL‎-00003" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745216438592</updated>
+    </task>
+    <task id="LOCAL‎-00004" summary="fixing prompt + silent nltk downloads">
+      <option name="closed" value="true" />
+      <created>1745218896713</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL‎-00004" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745218896713</updated>
+    </task>
+    <task id="LOCAL‎-00005" summary="fixing prompt">
+      <option name="closed" value="true" />
+      <created>1745220615905</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL‎-00005" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745220615905</updated>
+    </task>
+    <task id="LOCAL‎-00006" summary="fixing prompt">
+      <option name="closed" value="true" />
+      <created>1745220691676</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL‎-00006" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745220691676</updated>
+    </task>
+    <task id="LOCAL‎-00007" summary="adding evaluation">
+      <option name="closed" value="true" />
+      <created>1745228627086</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL‎-00007" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745228627086</updated>
+    </task>
+    <task id="LOCAL‎-00008" summary="adding binary model - not done yet">
+      <option name="closed" value="true" />
+      <created>1745386448808</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL‎-00008" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745386448808</updated>
+    </task>
+    <task id="LOCAL‎-00009" summary="rewriting binary model - not done yet">
+      <option name="closed" value="true" />
+      <created>1745389478864</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL‎-00009" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745389478864</updated>
+    </task>
+    <task id="LOCAL‎-00010" summary="finish binary model">
+      <option name="closed" value="true" />
+      <created>1745390077432</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL‎-00010" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745390077432</updated>
+    </task>
+    <task id="LOCAL‎-00011" summary="fix evaluation">
+      <option name="closed" value="true" />
+      <created>1745442766039</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL‎-00011" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745442766039</updated>
+    </task>
+    <task id="LOCAL‎-00012" summary="fix multiclass_classifier">
+      <option name="closed" value="true" />
+      <created>1745472161839</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL‎-00012" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1745472161839</updated>
+    </task>
+    <task id="LOCAL‎-00013" summary="fix multiclass_classifier + rename assets folder">
+      <option name="closed" value="true" />
+      <created>1746276024227</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL‎-00013" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1746276024227</updated>
+    </task>
+    <task id="LOCAL‎-00014" summary="gpt and claude rag">
+      <option name="closed" value="true" />
+      <created>1747902903795</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL‎-00014" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1747902903795</updated>
+    </task>
+    <task id="LOCAL‎-00015" summary="working react base responce">
+      <option name="closed" value="true" />
+      <created>1748113608357</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL‎-00015" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748113608357</updated>
+    </task>
+    <task id="LOCAL‎-00016" summary="updated binary_classifier.py + NEED TO UPDATE MULTICLASIFIER">
+      <option name="closed" value="true" />
+      <created>1748120151561</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL‎-00016" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748120151561</updated>
+    </task>
+    <task id="LOCAL‎-00017" summary="tried to use llm for document classification, but it is bad + NEED TO UPDATE MULTICLASIFIER">
+      <option name="closed" value="true" />
+      <created>1748200985280</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL‎-00017" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748200985280</updated>
+    </task>
+    <task id="LOCAL‎-00018" summary="rearanging">
+      <option name="closed" value="true" />
+      <created>1748339672421</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL‎-00018" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748339672421</updated>
+    </task>
+    <task id="LOCAL‎-00019" summary="add final evaluation to react phase">
+      <option name="closed" value="true" />
+      <created>1748368126772</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL‎-00019" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748368126772</updated>
+    </task>
+    <task id="LOCAL‎-00020" summary="done!!!!">
+      <option name="closed" value="true" />
+      <created>1748380211946</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL‎-00020" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748380211946</updated>
+    </task>
+    <task id="LOCAL‎-00021" summary="minor fixes">
+      <option name="closed" value="true" />
+      <created>1748380439539</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL‎-00021" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748380439539</updated>
+    </task>
+    <task id="LOCAL‎-00022" summary="added scaping script NEED TO FIX WIKI">
+      <option name="closed" value="true" />
+      <created>1748413480287</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL‎-00022" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748413480287</updated>
+    </task>
+    <task id="LOCAL‎-00023" summary="minor fix">
+      <option name="closed" value="true" />
+      <created>1748539420272</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL‎-00023" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748539420272</updated>
+    </task>
+    <task id="LOCAL‎-00024" summary="add connection of main to multilabel_classifier.py">
+      <option name="closed" value="true" />
+      <created>1748693563374</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL‎-00024" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748693563374</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="NEED TO FIX BOT" />
+    <MESSAGE value="fixed bot + organized project into folders + fixing imports" />
+    <MESSAGE value="fixing prompt + silent nltk downloads" />
+    <MESSAGE value="fixing prompt" />
+    <MESSAGE value="adding evaluation" />
+    <MESSAGE value="adding binary model - not done yet" />
+    <MESSAGE value="rewriting binary model - not done yet" />
+    <MESSAGE value="finish binary model" />
+    <MESSAGE value="fix evaluation" />
+    <MESSAGE value="fix multiclass_classifier" />
+    <MESSAGE value="fix multiclass_classifier + rename assets folder" />
+    <MESSAGE value="gpt and claude rag" />
+    <MESSAGE value="working react base responce" />
+    <MESSAGE value="updated binary_classifier.py + NEED TO UPDATE MULTICLASIFIER" />
+    <MESSAGE value="tried to use llm for document classification, but it is bad + NEED TO UPDATE MULTICLASIFIER" />
+    <MESSAGE value="rearanging" />
+    <MESSAGE value="add final evaluation to react phase" />
+    <MESSAGE value="done!!!!" />
+    <MESSAGE value="minor fixes" />
+    <MESSAGE value="added scaping script NEED TO FIX WIKI" />
+    <MESSAGE value="minor fix" />
+    <MESSAGE value="add connection of main to multilabel_classifier.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="add connection of main to multilabel_classifier.py" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1745217862042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ziona_bot$proj_for_gpt.coverage" NAME="proj_for_gpt Coverage Results" MODIFIED="1748105835859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$main_claude_rag.coverage" NAME="main_claude_rag Coverage Results" MODIFIED="1747908654225" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1748199653596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/models" />
+    <SUITE FILE_PATH="coverage/ziona_bot$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1748371898706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$web_search.coverage" NAME="web_search Coverage Results" MODIFIED="1743876694501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ziona_bot$proj_for_claude.coverage" NAME="proj_for_claude Coverage Results" MODIFIED="1748092184740" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$react_agent.coverage" NAME="react_agent Coverage Results" MODIFIED="1748369842430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
+    <SUITE FILE_PATH="coverage/ziona_bot$proj_w_llama.coverage" NAME="proj_w_llama Coverage Results" MODIFIED="1748111155642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$ziona.coverage" NAME="ziona Coverage Results" MODIFIED="1748697734378" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+  </component>
+</project>
