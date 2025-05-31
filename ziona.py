@@ -44,19 +44,30 @@ agent = ReActAgent(knowledge_base)
 comment = st.text_area("Enter a potentially anti-Semitic/ anti-Israeli comment:", height=150)
 
 if st.button("Analyze & Generate Response"):
-    with st.spinner("Retrieving knowledge and generating response..."):
-        classification_model = LoadedClassificationModel(r"./models/Multi_model/1805_1/meta_model_best.pkl")
-        pred = classification_model.predict(comment)
-        category_id = pred["predicted_labels"][0]
-        category_name = LABEL_MAP[category_id]
-        result = agent.generate_response(comment, category_id, category_name)
+    if not comment.strip():
+        st.warning("Please enter a comment.")
+    else:
+        with st.status("Classifying comment...", expanded=True) as status:
+            # Step 1: Classify the comment
+            classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
+            pred = classification_model.predict(comment)
+            category_id = pred["predicted_labels"][0]
+            category_name = LABEL_MAP[category_id]
+            st.write(f"**Category ID:** {category_id}")
+            st.write(f"**Category Name:** {category_name}")
+            status.update(label="✅ Comment classified", state="complete")
 
-        st.subheader("Step 1: Retrieval and Context")
-        st.markdown(f"**Comment:** {comment}")
-        st.markdown(f"**Classification:** {category_name}")
-        st.markdown(f"**Source:** {result['source']}")
-        st.markdown(f"**URL:** {result['url']}")
-        st.markdown(f"**Retrieval Score:** {result.get('retrieval_score', 'N/A'):.3f}")
+        with st.status("Retrieving resources and generating response...", expanded=True) as status:
+            # Step 2: Generate the educational response
+            response = agent.generate_response(comment, category_id, category_name)
 
-        st.subheader("Step 2: Suggested Educational Response")
-        st.success(result["final_response"])
+            st.write("### Selected Resource")
+            st.markdown(f"- **Source**: {response['source']}")
+            st.markdown(f"- **URL**: [{response['url']}]({response['url']})")
+            st.markdown(f"- **Retrieval Score**: {response['retrieval_score']:.2f}")
+            st.markdown(f"- **Relevant Paragraph**:\n\n> {response['final_response'][:300]}...")
+
+            status.update(label="Response generated", state="complete")
+
+        st.success("Final Response")
+        st.write(response["final_response"])

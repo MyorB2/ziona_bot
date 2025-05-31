@@ -4,8 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="add streamlit ui that receives only a comment">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="update streamlit ui">
+      <change afterPath="$PROJECT_DIR$/resources/meta_model_best.pkl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/meta_model_val_preds_opt.npy" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/meta_scaler.pkl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/saved_mlb.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ziona.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -76,6 +82,7 @@
     "Python.ziona.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "add__streamlit__ui",
+    "last_opened_file_path": "C:/Users/myor1/PycharmProjects/ziona_bot/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -86,6 +93,9 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\resources" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot" />
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\business_logic\classification" />
@@ -449,7 +459,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1748693563374</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL‎-00025" summary="update streamlit ui">
+      <option name="closed" value="true" />
+      <created>1748703071278</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL‎-00025" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748703071278</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -490,7 +508,8 @@
     <MESSAGE value="minor fix" />
     <MESSAGE value="add connection of main to multilabel_classifier.py" />
     <MESSAGE value="add streamlit ui that receives only a comment" />
-    <option name="LAST_COMMIT_MESSAGE" value="add streamlit ui that receives only a comment" />
+    <MESSAGE value="update streamlit ui" />
+    <option name="LAST_COMMIT_MESSAGE" value="update streamlit ui" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1745217862042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

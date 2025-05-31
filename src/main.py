@@ -55,7 +55,7 @@ def main():
         agent = ReActAgent(knowledge_base)
 
         # Initialize classification model
-        classification_model = LoadedClassificationModel(r"./models/Multi_model/1805_1/meta_model_best.pkl")
+        classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
 
         # Example usage
         # test_cases = [
