@@ -1,0 +1,195 @@
+Index: src/main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import ast\r\nimport logging\r\nimport numpy as np\r\nimport os\r\nimport pandas as pd\r\nfrom collections import Counter\r\n\r\nfrom business_logic.chatbot.react_agent import ReActAgent\r\nfrom business_logic.chatbot.react_evaluator import ResponseEvaluator\r\n\r\n# Setup logging\r\nlogging.basicConfig(level=logging.INFO)\r\nlogger = logging.getLogger(__name__)\r\nlogging.getLogger(\"faiss\").setLevel(logging.WARNING)\r\nlogging.getLogger(\"faiss.loader\").setLevel(logging.WARNING)\r\n\r\nHF_TOKEN = \"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\"\r\n\r\n# Suppress Windows symlink warning for Hugging Face cache\r\nos.environ[\"HF_HUB_DISABLE_SYMLINKS_WARNING\"] = \"1\"\r\n\r\n\r\ndef main():\r\n    \"\"\"Main function to demonstrate usage\"\"\"\r\n\r\n    # Configuration\r\n    KNOWLEDGE_BASE_PATH = r\"C:\\Users\\myor1\\PycharmProjects\\ziona_bot\\resources\\knowledge_base.csv\"\r\n\r\n    try:\r\n        # Categories explanation\r\n        # 1: Calling for annihilation, theory conspiracies, identify Jewish people as evil.\r\n        # 2: Economic stereotypes, biological racism, humiliating external imaging.\r\n        # 3: Demonize Israel, compare Israel and Zionism to Nazis, anti-Zionism, denial of the right to exist.\r\n        # 4: Be cynical about the Holocaust, Holocaust denial.\r\n        # 5: Mention of Jewish or Israeli public figures along with antisemitic connotation, Implying of Jewish people.\r\n        label_map = {1: \"antisemitic ideology\", 2: \"stereotypes and dehumanisation\",\r\n                     3: \"antisemitism against Israel or Zionism\", 4: \"Holocaust or Zionism denial\",\r\n                     5: \"indirect antisemitism or secondary objective\"}\r\n\r\n        # Load knowledge base\r\n        logger.info(\"Reading knowledge base...\")\r\n        knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)\r\n        knowledge_base = knowledge_base[['source', 'url', 'paragraph', 'categories']]\r\n        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'paragraph'])\r\n        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith(\"http\"))]\r\n        knowledge_base.reset_index(drop=True, inplace=True)\r\n        # category_id is list of integers\r\n        knowledge_base[\"categories\"] = knowledge_base[\"categories\"].apply(lambda x: ast.literal_eval(x))\r\n        logger.info(f\"Loaded knowledge base with {len(knowledge_base)} entries\")\r\n\r\n        # Initialize agent\r\n        agent = ReActAgent(knowledge_base)\r\n\r\n        # Example usage\r\n        test_cases = [\r\n            {\r\n                \"comment\": \"They always call you antisemitic just because you criticize Israel. It's just a way to silence people.\",\r\n                \"category_id\": 5,\r\n                \"category_name\": label_map[5]\r\n            },\r\n            {\r\n                \"comment\": \"do all israelis kills babies for fun???\",\r\n                \"category_id\": 3,\r\n                \"category_name\": label_map[3]\r\n            },\r\n            {\r\n                \"comment\": \"Why those penguins have to interrupt the marathon runners, so what it is on Sabath\",\r\n                \"category_id\": 2,\r\n                \"category_name\": label_map[2]\r\n            }\r\n        ]\r\n\r\n        # Save all scores for calculating total evaluation score\r\n        eval_scores = {}\r\n\r\n        for i, test_case in enumerate(test_cases, 1):\r\n            print(f\"\\n{'=' * 50}\")\r\n            print(f\"Test Case {i}\")\r\n            print(f\"{'=' * 50}\")\r\n\r\n            # result = agent.generate_response(\r\n            #     test_case[\"comment\"],\r\n            #     test_case[\"category_id\"],\r\n            #     test_case[\"category_name\"]\r\n            # )\r\n            #\r\n            # print(f\"Comment: {test_case['comment']}\")\r\n            # print(f\"Category: {test_case['category_name']}\")\r\n            # print(f\"Thought 1: {result['thought_1']}\")\r\n            # print(f\"Action 1: {result['action_1']}\")\r\n            # print(f\"Observation 1: {result['observation_1']}\")\r\n            # print(f\"Thought 2: {result['thought_2']}\")\r\n            # print(f\"Action 2: {result['action_2']}\")\r\n            # print(f\"Observation 2: {result['observation_2']}\")\r\n            # print(f\"Thought 3: {result['thought_3']}\")\r\n            # print(f\"Action 3: {result['action_3']}\")\r\n            # print(f\"Observation 3: {result['observation_3']}\")\r\n            # print(f\"Final Response: {result['final_response']}\")\r\n            # print(f\"Source: {result['source']}\")\r\n            # print(f\"URL: {result['url']}\")\r\n\r\n            logger.info(\"Start evaluating...\")\r\n            evaluator = ResponseEvaluator()\r\n            result = \"I understand your concern about being criticized for criticizing Israel, but it's important to recognize that criticism of a country or its policies is different from targeting an entire people group. According to the definition of antisemitism provided by the Wikipedia article (https://en.wikipedia.org/wiki/Antisemitism), it's essential to distinguish between legitimate political disagreements and discriminatory beliefs. While criticizing Israel does not necessarily equate to being antisemitic, it's crucial to be mindful of language and actions that may unintentionally perpetuate harmful stereotypes or biases.\"\r\n            # evals = evaluator.evaluate_agent_response(test_case[\"comment\"], test_case[\"category_name\"], result['final_response'])\r\n            evals = evaluator.evaluate_agent_response(test_case[\"comment\"], test_case[\"category_name\"], result)\r\n            print(\"\\nEvaluation Results:\")\r\n            for key, value in evals.items():\r\n                print(f\"{key}: {value}\")\r\n                if key in eval_scores:\r\n                    if isinstance(value, bool):\r\n                        value = int(value)\r\n                    eval_scores[key].append(value)\r\n                else:\r\n                    eval_scores[key] = [value]\r\n            print()\r\n\r\n        logger.info(f\"Final evaluation results:\")\r\n        for key, val in eval_scores.items():\r\n            if isinstance(eval_scores[key], str):\r\n                eval_scores[key] = Counter(val).most_common(1)[0][0]\r\n            else:\r\n                eval_scores[key] = np.mean(val)\r\n            print(f\"{key}: {eval_scores[key]}\")\r\n\r\n    except Exception as e:\r\n        logger.error(f\"Error in main execution: {e}\")\r\n\r\n\r\nif __name__ == \"__main__\":\r\n    main()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main.py b/src/main.py
+--- a/src/main.py	(revision e1246de9fe86abfc50c8bc900ff140d1a3c2e70c)
++++ b/src/main.py	(date 1748699830335)
+@@ -5,8 +5,11 @@
+ import pandas as pd
+ from collections import Counter
+ 
++from django.db.models.expressions import result
++
+ from business_logic.chatbot.react_agent import ReActAgent
+ from business_logic.chatbot.react_evaluator import ResponseEvaluator
++from business_logic.classification.classification_wrapper import LoadedClassificationModel
+ 
+ # Setup logging
+ logging.basicConfig(level=logging.INFO)
+@@ -51,24 +54,40 @@
+         # Initialize agent
+         agent = ReActAgent(knowledge_base)
+ 
++        # Initialize classification model
++        classification_model = LoadedClassificationModel(r"./models/Multi_model/1805_1/meta_model_best.pkl")
++
+         # Example usage
+-        test_cases = [
+-            {
+-                "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+-                "category_id": 5,
+-                "category_name": label_map[5]
+-            },
+-            {
+-                "comment": "do all israelis kills babies for fun???",
+-                "category_id": 3,
+-                "category_name": label_map[3]
+-            },
+-            {
+-                "comment": "Why those penguins have to interrupt the marathon runners, so what it is on Sabath",
+-                "category_id": 2,
+-                "category_name": label_map[2]
+-            }
++        # test_cases = [
++        #     {
++        #         "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
++        #         "category_id": 5,
++        #         "category_name": label_map[5]
++        #     },
++        #     {
++        #         "comment": "do all israelis kills babies for fun???",
++        #         "category_id": 3,
++        #         "category_name": label_map[3]
++        #     },
++        #     {
++        #         "comment": "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
++        #                    "they should respect them even if it is on their neighborhood and on Sabbath",
++        #         "category_id": 2,
++        #         "category_name": label_map[2]
++        #     }
++        # ]
++
++        test_comments = [
++            "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
++            "do all israelis kills babies for fun???",
++            "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
++            "they should respect them even if it is on their neighborhood and on Sabbath"
+         ]
++        test_cases = []
++        for comment in test_comments:
++            pred = classification_model.predict(comment)
++            category_id = pred["predicted_labels"][0]
++            test_cases.append({"comment": comment, "category_id": category_id, "category_name": label_map[category_id]})
+ 
+         # Save all scores for calculating total evaluation score
+         eval_scores = {}
+@@ -78,26 +97,26 @@
+             print(f"Test Case {i}")
+             print(f"{'=' * 50}")
+ 
+-            # result = agent.generate_response(
+-            #     test_case["comment"],
+-            #     test_case["category_id"],
+-            #     test_case["category_name"]
+-            # )
+-            #
+-            # print(f"Comment: {test_case['comment']}")
+-            # print(f"Category: {test_case['category_name']}")
+-            # print(f"Thought 1: {result['thought_1']}")
+-            # print(f"Action 1: {result['action_1']}")
+-            # print(f"Observation 1: {result['observation_1']}")
+-            # print(f"Thought 2: {result['thought_2']}")
+-            # print(f"Action 2: {result['action_2']}")
+-            # print(f"Observation 2: {result['observation_2']}")
+-            # print(f"Thought 3: {result['thought_3']}")
+-            # print(f"Action 3: {result['action_3']}")
+-            # print(f"Observation 3: {result['observation_3']}")
+-            # print(f"Final Response: {result['final_response']}")
+-            # print(f"Source: {result['source']}")
+-            # print(f"URL: {result['url']}")
++            result = agent.generate_response(
++                test_case["comment"],
++                test_case["category_id"],
++                test_case["category_name"]
++            )
++
++            print(f"Comment: {test_case['comment']}")
++            print(f"Category: {test_case['category_name']}")
++            print(f"Thought 1: {result['thought_1']}")
++            print(f"Action 1: {result['action_1']}")
++            print(f"Observation 1: {result['observation_1']}")
++            print(f"Thought 2: {result['thought_2']}")
++            print(f"Action 2: {result['action_2']}")
++            print(f"Observation 2: {result['observation_2']}")
++            print(f"Thought 3: {result['thought_3']}")
++            print(f"Action 3: {result['action_3']}")
++            print(f"Observation 3: {result['observation_3']}")
++            print(f"Final Response: {result['final_response']}")
++            print(f"Source: {result['source']}")
++            print(f"URL: {result['url']}")
+ 
+             logger.info("Start evaluating...")
+             evaluator = ResponseEvaluator()
+Index: ziona.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/ziona.py b/ziona.py
+new file mode 100644
+--- /dev/null	(date 1748699830341)
++++ b/ziona.py	(date 1748699830341)
+@@ -0,0 +1,59 @@
++import ast
++import os
++
++import streamlit as st
++import pandas as pd
++from business_logic.chatbot.react_agent import ReActAgent
++
++
++# Load knowledge base CSV (only once)
++@st.cache_data
++def load_knowledge_base(path: str):
++    df = pd.read_csv(KNOWLEDGE_BASE_PATH)
++    df = df[['source', 'url', 'paragraph', 'categories']]
++    df = df.dropna(subset=['source', 'url', 'paragraph'])
++    df = df[df['url'].apply(lambda x: x.startswith("http"))]
++    df.reset_index(drop=True, inplace=True)
++    # category_id is list of integers
++    df["categories"] = df["categories"].apply(lambda x: ast.literal_eval(x))
++    return df
++
++
++st.set_page_config(page_title="Educational Response Generator", layout="wide")
++st.title("Welcome to Ziona's consulting App")
++st.subheader("Tell me what is the problematic comment you accounted on social media and i will analys it and suggest an educational response")
++
++# UI Elements
++BASE_DIR = os.path.dirname(os.path.abspath(__file__))
++KNOWLEDGE_BASE_PATH = os.path.join(BASE_DIR, 'resources', 'knowledge_base.csv')
++knowledge_base = load_knowledge_base(KNOWLEDGE_BASE_PATH)
++agent = ReActAgent(knowledge_base)
++
++comment = st.text_area("Enter a potentially antisemitic comment:", height=150)
++
++category_id = st.selectbox("Choose Antisemitism Category", [1, 2, 3, 4, 5])
++category_names = {
++    1: "Ideological claims",
++    2: "Stereotypes",
++    3: "Anti-Zionism",
++    4: "Holocaust denial",
++    5: "Implicit bias"
++}
++category_name = category_names[category_id]
++
++if st.button("Analyze & Generate Response"):
++    with st.spinner("Retrieving knowledge and generating response..."):
++        classification_model = LoadedClassificationModel(r"./models/Multi_model/1805_1/meta_model_best.pkl")
++        pred = classification_model.predict(comment)
++        category_id = pred["predicted_labels"][0]
++        result = agent.generate_response(comment, category_id, category_name)
++
++        st.subheader("Step 1: Retrieval and Context")
++        st.markdown(f"**Comment:** {comment}")
++        st.markdown(f"**Classification:** {category_name}")
++        st.markdown(f"**Source:** {result['source']}")
++        st.markdown(f"**URL:** {result['url']}")
++        st.markdown(f"**Retrieval Score:** {result.get('retrieval_score', 'N/A'):.3f}")
++
++        st.subheader("Step 2: Suggested Educational Response")
++        st.success(result["final_response"])
