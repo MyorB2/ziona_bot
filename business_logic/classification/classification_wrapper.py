@@ -16,5 +16,5 @@ class LoadedClassificationModel:
             # You might want to exit or handle this error appropriately
             exit()
 
-        results = meta_model.predict(self.x_test)
+        results = meta_model.predict([self.x_test])
         return results
