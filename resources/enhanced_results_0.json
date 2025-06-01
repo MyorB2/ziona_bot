@@ -1,0 +1,77 @@
+{
+  "document_id": 0,
+  "success": true,
+  "document_quality": "HIGH",
+  "primary_categories": [
+    {
+      "id": 2,
+      "name": "Antisemitic Ideology",
+      "description": "Educational content countering calls for annihilation, conspiracy theories, or portraying Jewish people as evil"
+    },
+    {
+      "id": 3,
+      "name": "Stereotypes and Dehumanization",
+      "description": "Educational content countering economic stereotypes, biological racism, or humiliating external imaging of Jewish people"
+    },
+    {
+      "id": 4,
+      "name": "Anti-Israel/Anti-Zionism",
+      "description": "Educational content countering demonization of Israel, Nazi comparisons, anti-Zionism, or denial of Israel's right to exist"
+    },
+    {
+      "id": 5,
+      "name": "Holocaust Denial and Sarcasm",
+      "description": "Educational content countering Holocaust denial, minimization, or sarcastic references to the Holocaust"
+    }
+  ],
+  "detailed_scores": [
+    {
+      "category_id": 1,
+      "category_name": "General Hate/Other",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document provides a comprehensive overview of antisemitism, its history, and manifestations. While it does not directly address general hate or discrimination, it does provide context for understanding the broader phenomenon of prejudice.\n\n**"
+    },
+    {
+      "category_id": 2,
+      "category_name": "Antisemitic Ideology",
+      "addresses_category": true,
+      "confidence_score": 0.8,
+      "reasoning": "The document provides a detailed history of antisemitic ideologies and their evolution over time. It also addresses conspiracy theories, such as Holocaust denial, and explains the harm caused by these beliefs.\n\n**"
+    },
+    {
+      "category_id": 3,
+      "category_name": "Stereotypes and Dehumanization",
+      "addresses_category": true,
+      "confidence_score": 0.7,
+      "reasoning": "The document provides information about the diversity of Jewish people, debunking economic myths and addressing racist stereotypes. It also highlights the harmful effects of dehumanizing external imaging.\n\n**"
+    },
+    {
+      "category_id": 4,
+      "category_name": "Anti-Israel/Anti-Zionism",
+      "addresses_category": true,
+      "confidence_score": 0.9,
+      "reasoning": "The document provides factual information about Israel's history, explains Zionism accurately, and counters false narratives about Israel. It also addresses the harm caused by demonization and Nazi comparisons.\n\n**"
+    },
+    {
+      "category_id": 5,
+      "category_name": "Holocaust Denial and Sarcasm",
+      "addresses_category": true,
+      "confidence_score": 0.9,
+      "reasoning": "The document provides Holocaust education, historical facts, and counterarguments to denial claims. It emphasizes the importance of preserving the memory of the Holocaust and its victims.\n\n**"
+    },
+    {
+      "category_id": 6,
+      "category_name": "Indirect Antisemitism",
+      "addresses_category": false,
+      "confidence_score": 0.2,
+      "reasoning": "While the document addresses the harm caused by indirect targeting, it does not provide specific information or arguments to counter this type of antisemitism.\n\nPlease let me know if you'd like me to revise anything!"
+    }
+  ],
+  "error_message": null,
+  "classification_summary": {
+    "total_categories_addressed": 4,
+    "high_confidence_scores": 3,
+    "avg_confidence": 0.6666666666666666
+  }
+}
