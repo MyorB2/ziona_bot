@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 from business_logic.chatbot.react_agent import ReActAgent
 
-# from business_logic.classification.classification_wrapper import LoadedClassificationModel
+from business_logic.classification.classification_wrapper import LoadedClassificationModel
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKGOUND_HOME_DIR = os.path.join(BASE_DIR, 'resources', 'ziona_background_home.png')
@@ -40,7 +40,7 @@ def set_bg_from_local(image_path):
 
 
 # Apply background
-set_bg_from_local(BACKGOUND_HOME_DIR)
+# set_bg_from_local(BACKGOUND_HOME_DIR)
 
 # Inject custom CSS
 st.markdown("""
@@ -107,9 +107,8 @@ if st.button("Analyze & Generate Response"):
     else:
         with st.status("Classifying comment...", expanded=True) as status:
             # Step 1: Classify the comment
-            # classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
-            # pred = classification_model.predict(comment)
-            pred = {"predicted_labels": [5]}
+            classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
+            pred = classification_model.predict(comment)
             category_id = pred["predicted_labels"][0]
             category_name = LABEL_MAP[category_id]
             st.write(f"**Category ID:** {category_id}")
