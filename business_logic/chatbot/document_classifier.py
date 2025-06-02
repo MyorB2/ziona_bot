@@ -403,6 +403,7 @@ if __name__ == "__main__":
         knowledge_base = knowledge_base[['source', 'url', 'content']]
         knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
         knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: str(x).startswith("http"))]
+        knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
         knowledge_base.reset_index(drop=True, inplace=True)
 
         logger.info(f"Processing {len(knowledge_base)} documents")
@@ -424,7 +425,7 @@ if __name__ == "__main__":
 
             classifier = DocumentClassifier(doc, model_name="llama3")
             result = classifier.classify()
-
+            import pdb; pdb.set_trace()
             if result.success:
                 successful_classifications += 1
 
@@ -434,21 +435,21 @@ if __name__ == "__main__":
                 knowledge_base.at[index, 'confidence_scores'] = {
                     score.category.id: score.score for score in result.all_scores
                 }
-
-                # Print summary for first 5 documents
-                if index < 5:
-                    print(f"\n=== Document {index} Classification Results ===")
-                    print(f"Source: {result.source}")
-                    print(f"URL: {result.url}")
-                    print(f"Success: {result.success}")
-                    print(f"Quality: {result.document_quality}")
-                    print(f"Primary Categories ({len(result.primary_categories)}):")
-                    for cat in result.primary_categories:
-                        print(f"  - {cat.category_name}")
-                    print(f"High-confidence scores:")
-                    for score in result.all_scores:
-                        if score.score >= CONFIDENCE_THRESHOLD:
-                            print(f"  - {score.category.category_name}: {score.score:.2f}")
+                knowledge_base.to_csv(str(RESOURCE_PATH / "knowledge_base_categorized.csv"), index=False)
+                # # Print summary for first 5 documents
+                # if index < 5:
+                #     print(f"\n=== Document {index} Classification Results ===")
+                #     print(f"Source: {result.source}")
+                #     print(f"URL: {result.url}")
+                #     print(f"Success: {result.success}")
+                #     print(f"Quality: {result.document_quality}")
+                #     print(f"Primary Categories ({len(result.primary_categories)}):")
+                #     for cat in result.primary_categories:
+                #         print(f"  - {cat.category_name}")
+                #     print(f"High-confidence scores:")
+                #     for score in result.all_scores:
+                #         if score.score >= CONFIDENCE_THRESHOLD:
+                #             print(f"  - {score.category.category_name}: {score.score:.2f}")
 
                 # Export detailed JSON for first 10 documents
                 if index < 10:

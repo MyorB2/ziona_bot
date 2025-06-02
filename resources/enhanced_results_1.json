@@ -2,61 +2,55 @@
   "document_id": 1,
   "success": true,
   "document_quality": "HIGH",
-  "primary_categories": [
-    {
-      "id": 5,
-      "name": "Holocaust Denial and Sarcasm",
-      "description": "Educational content countering Holocaust denial, minimization, or sarcastic references to the Holocaust"
-    }
-  ],
+  "primary_categories": [],
   "detailed_scores": [
     {
       "category_id": 1,
       "category_name": "General Hate/Other",
       "addresses_category": false,
       "confidence_score": 0.5,
-      "reasoning": "The document does not explicitly address general hate or discrimination that is not specifically antisemitic. However, some of the content may indirectly contribute to a broader understanding of prejudice and discrimination by providing information about IHRA's work in promoting Holocaust education and combating antisemitism.\n\n**"
+      "reasoning": "The document does not explicitly address general hate or discrimination that is not specifically antisemitic. However, it does provide information on the IHRA organization's work in promoting education and combating prejudice, which could be seen as indirectly addressing general hate.\n\n**"
     },
     {
       "category_id": 2,
       "category_name": "Antisemitic Ideology",
       "addresses_category": false,
       "confidence_score": 0.5,
-      "reasoning": "The document does not provide facts or arguments that directly counter antisemitic ideologies or conspiracy theories. While it may indirectly contribute to a broader understanding of the importance of combating antisemitism, it does not specifically address these types of narratives.\n\n**"
+      "reasoning": "The document does not directly address antisemitic ideologies or conspiracy theories. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering antisemitic ideologies.\n\n**"
     },
     {
       "category_id": 3,
       "category_name": "Stereotypes and Dehumanization",
       "addresses_category": false,
       "confidence_score": 0.5,
-      "reasoning": "The document does not explicitly counter economic stereotypes or biological racism about Jewish people. While it may provide some general information about IHRA's work in promoting Holocaust education and combating antisemitism, it does not specifically address these types of stereotypes.\n\n**"
+      "reasoning": "The document does not explicitly address stereotypes about Jewish people or dehumanization. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering economic myths or racist stereotypes.\n\n**"
     },
     {
       "category_id": 4,
       "category_name": "Anti-Israel/Anti-Zionism",
       "addresses_category": false,
       "confidence_score": 0.5,
-      "reasoning": "The document does not provide factual information about Israel's history or explain Zionism accurately. While it may indirectly contribute to a broader understanding of the importance of combating antisemitism, it does not specifically address anti-Israel/anti-Zionist narratives.\n\n**"
+      "reasoning": "The document does not directly address anti-Israel or anti-Zionist narratives. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering demonization of Israel or Nazi comparisons.\n\n**"
     },
     {
       "category_id": 5,
       "category_name": "Holocaust Denial and Sarcasm",
-      "addresses_category": true,
-      "confidence_score": 0.8,
-      "reasoning": "The document provides information about IHRA's work in promoting Holocaust education and combating antisemitism, which may help counter Holocaust denial or minimization. Additionally, the document's focus on IHRA's grant program and resources for memorial and museum professionals may indirectly contribute to a broader understanding of the importance of preserving Holocaust memory.\n\n**"
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not directly address Holocaust denial or minimization. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering Holocaust denial.\n\n**"
     },
     {
       "category_id": 6,
       "category_name": "Indirect Antisemitism",
       "addresses_category": false,
       "confidence_score": 0.5,
-      "reasoning": "The document does not explicitly address how public figures are unfairly targeted or explain the harm of antisemitic dog whistles. While it may indirectly contribute to a broader understanding of the importance of combating antisemitism, it does not specifically address indirect forms of antisemitism.\n\nOverall, I would rate this educational document as having limited utility in directly countering specific types of antisemitic narratives. However, it may still be useful in providing general information about IHRA's work and promoting Holocaust education, which can indirectly contribute to a broader understanding of the importance of combating antisemitism."
+      "reasoning": "The document does not directly address indirect antisemitic targeting or the harm of antisemitic dog whistles. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering unfair targeting of public figures.\n\nOverall, I would say that this educational document does not explicitly address any specific type of antisemitic narrative, but it may indirectly provide some information or context that could be useful in combating prejudice."
     }
   ],
   "error_message": null,
   "classification_summary": {
-    "total_categories_addressed": 1,
-    "high_confidence_scores": 1,
-    "avg_confidence": 0.5499999999999999
+    "total_categories_addressed": 0,
+    "high_confidence_scores": 0,
+    "avg_confidence": 0.5
   }
 }

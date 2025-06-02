@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="minor cosmetics">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="working classification script for documents">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_1.json" beforeDir="false" afterPath="$PROJECT_DIR$/resources/enhanced_results_1.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resources/knowledge_base.csv" beforeDir="false" afterPath="$PROJECT_DIR$/resources/knowledge_base.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -73,7 +74,7 @@
     "Python.proj_for_gpt.executor": "Run",
     "Python.proj_w_llama.executor": "Run",
     "Python.react_agent.executor": "Run",
-    "Python.trial_doc_class.executor": "Run",
+    "Python.trial_doc_class.executor": "Debug",
     "Python.web_search.executor": "Run",
     "Python.ziona.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -266,7 +267,7 @@
       <workItem from="1748717362535" duration="3800000" />
       <workItem from="1748723608436" duration="592000" />
       <workItem from="1748769028079" duration="543000" />
-      <workItem from="1748778865131" duration="8657000" />
+      <workItem from="1748778865131" duration="19667000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -492,7 +493,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1748769228101</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL‎-00029" summary="working classification script for documents">
+      <option name="closed" value="true" />
+      <created>1748789142117</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL‎-00029" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748789142117</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -510,7 +519,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing prompt + silent nltk downloads" />
     <MESSAGE value="fixing prompt" />
     <MESSAGE value="adding evaluation" />
     <MESSAGE value="adding binary model - not done yet" />
@@ -535,15 +543,21 @@
     <MESSAGE value="fix a bit the model usage" />
     <MESSAGE value="try to add background - need to fix" />
     <MESSAGE value="minor cosmetics" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor cosmetics" />
+    <MESSAGE value="working classification script for documents" />
+    <option name="LAST_COMMIT_MESSAGE" value="working classification script for documents" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/trial_doc_class.py</url>
-          <line>461</line>
+          <line>462</line>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/business_logic/chatbot/trial_doc_class.py</url>
+          <line>408</line>
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -552,13 +566,14 @@
     <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1745217862042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_gpt.coverage" NAME="proj_for_gpt Coverage Results" MODIFIED="1748105835859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$main_claude_rag.coverage" NAME="main_claude_rag Coverage Results" MODIFIED="1747908654225" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1748199653596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/models" />
     <SUITE FILE_PATH="coverage/ziona_bot$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1748371898706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$web_search.coverage" NAME="web_search Coverage Results" MODIFIED="1743876694501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_claude.coverage" NAME="proj_for_claude Coverage Results" MODIFIED="1748092184740" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$react_agent.coverage" NAME="react_agent Coverage Results" MODIFIED="1748369842430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
-    <SUITE FILE_PATH="coverage/ziona_bot$proj_w_llama.coverage" NAME="proj_w_llama Coverage Results" MODIFIED="1748111155642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$ziona.coverage" NAME="ziona Coverage Results" MODIFIED="1748720097275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ziona_bot$trial_doc_class.coverage" NAME="trial_doc_class Coverage Results" MODIFIED="1748788555842" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
+    <SUITE FILE_PATH="coverage/ziona_bot$trial_doc_class.coverage" NAME="trial_doc_class Coverage Results" MODIFIED="1748835048568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
+    <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1748199653596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/models" />
+    <SUITE FILE_PATH="coverage/ziona_bot$.coverage" NAME=" Coverage Results" MODIFIED="1748833544126" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/ziona_bot$proj_w_llama.coverage" NAME="proj_w_llama Coverage Results" MODIFIED="1748111155642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
 </project>
