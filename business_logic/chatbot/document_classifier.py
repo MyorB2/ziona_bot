@@ -443,7 +443,6 @@ if __name__ == "__main__":
 
             classifier = DocumentClassifier(doc, model_name="llama3")
             result = classifier.classify()
-            import pdb; pdb.set_trace()
             if result.success:
                 successful_classifications += 1
 
