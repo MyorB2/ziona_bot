@@ -1,0 +1,56 @@
+{
+  "document_id": 1,
+  "success": true,
+  "document_quality": "HIGH",
+  "primary_categories": [],
+  "detailed_scores": [
+    {
+      "category_id": 1,
+      "category_name": "General Hate/Other",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not explicitly address general hate or discrimination that is not specifically antisemitic. However, it does provide information on the IHRA organization's work in promoting education and combating prejudice, which could be seen as indirectly addressing general hate.\n\n**"
+    },
+    {
+      "category_id": 2,
+      "category_name": "Antisemitic Ideology",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not directly address antisemitic ideologies or conspiracy theories. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering antisemitic ideologies.\n\n**"
+    },
+    {
+      "category_id": 3,
+      "category_name": "Stereotypes and Dehumanization",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not explicitly address stereotypes about Jewish people or dehumanization. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering economic myths or racist stereotypes.\n\n**"
+    },
+    {
+      "category_id": 4,
+      "category_name": "Anti-Israel/Anti-Zionism",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not directly address anti-Israel or anti-Zionist narratives. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering demonization of Israel or Nazi comparisons.\n\n**"
+    },
+    {
+      "category_id": 5,
+      "category_name": "Holocaust Denial and Sarcasm",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not directly address Holocaust denial or minimization. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering Holocaust denial.\n\n**"
+    },
+    {
+      "category_id": 6,
+      "category_name": "Indirect Antisemitism",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not directly address indirect antisemitic targeting or the harm of antisemitic dog whistles. While it provides information on the IHRA organization's work, this is more focused on promoting education and combating prejudice rather than specifically countering unfair targeting of public figures.\n\nOverall, I would say that this educational document does not explicitly address any specific type of antisemitic narrative, but it may indirectly provide some information or context that could be useful in combating prejudice."
+    }
+  ],
+  "error_message": null,
+  "classification_summary": {
+    "total_categories_addressed": 0,
+    "high_confidence_scores": 0,
+    "avg_confidence": 0.5
+  }
+}

@@ -1,7 +1,8 @@
 import logging
 import os
-from typing import Dict, Any, List, Optional, Tuple
-
+from pathlib import Path
+from typing import Dict, List, Optional
+import re
 import pandas as pd
 from ollama import Client
 from langchain.schema import Document
@@ -22,30 +23,26 @@ logging.getLogger("faiss.loader").setLevel(logging.WARNING)
 # Suppress Windows symlink warning for Hugging Face cache
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logging.getLogger("faiss").setLevel(logging.WARNING)
-logging.getLogger("faiss.loader").setLevel(logging.WARNING)
-
-HF_TOKEN = "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"
-
-# Suppress Windows symlink warning for Hugging Face cache
-os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+ROOT_PATH = Path(__file__).parent.parent.parent
+RESOURCE_PATH = ROOT_PATH / "resources"
+KNOWLEDGE_BASE_PATH = RESOURCE_PATH / "knowledge_base.csv"
+CONFIDENCE_THRESHOLD = 0.55
 
 
 class AntisemitismCategory(Enum):
     """Enum for antisemitism categories with clear definitions"""
-    ANTISEMITIC_IDEOLOGY = (1, "Antisemitic Ideology",
-                            "Calling for annihilation, conspiracy theories, identifying Jewish people as evil")
-    STEREOTYPES_DEHUMANIZATION = (2, "Stereotypes and Dehumanization",
-                                  "Economic stereotypes, biological racism, humiliating external imaging")
-    ANTI_ISRAEL_ZIONISM = (3, "Antisemitism against Israel or Zionism",
-                           "Demonizing Israel, comparing Israel/Zionism to Nazis, anti-Zionism, denial of right to exist")
-    HOLOCAUST_DENIAL = (4, "Holocaust or Zionism Denial",
-                        "Being cynical about the Holocaust, Holocaust denial")
-    INDIRECT_ANTISEMITISM = (5, "Indirect Antisemitism",
-                             "Mentioning Jewish/Israeli public figures with antisemitic connotations, implying Jewish people")
+    GENERAL_HATE = (1, "General Hate/Other",
+                    "Educational content addressing general hatred, discrimination, or forms of prejudice that are not specifically antisemitic")
+    ANTISEMITIC_IDEOLOGY = (2, "Antisemitic Ideology",
+                            "Educational content countering calls for annihilation, conspiracy theories, or portraying Jewish people as evil")
+    STEREOTYPES_DEHUMANIZATION = (3, "Stereotypes and Dehumanization",
+                                  "Educational content countering economic stereotypes, biological racism, or humiliating external imaging of Jewish people")
+    ANTI_ISRAEL_ZIONISM = (4, "Anti-Israel/Anti-Zionism",
+                           "Educational content countering demonization of Israel, Nazi comparisons, anti-Zionism, or denial of Israel's right to exist")
+    HOLOCAUST_DENIAL = (5, "Holocaust Denial and Sarcasm",
+                        "Educational content countering Holocaust denial, minimization, or sarcastic references to the Holocaust")
+    INDIRECT_ANTISEMITISM = (6, "Indirect Antisemitism",
+                             "Educational content countering mentions of Jewish/Israeli public figures with antisemitic implications")
 
     def __init__(self, id: int, name: str, description: str):
         self.id = id
@@ -67,26 +64,29 @@ class AntisemitismCategory(Enum):
 
 
 @dataclass
-class RelevanceResult:
-    """Data class for relevance check results"""
-    is_relevant: bool
-    explanation: str
-    confidence_score: Optional[float] = None
-    category: Optional[AntisemitismCategory] = None
+class CategoryScore:
+    """Data class for individual category scoring"""
+    category: AntisemitismCategory
+    score: float  # 0-1 confidence score
+    reasoning: str
+    addresses_category: bool
 
 
 @dataclass
 class ClassificationResult:
     """Data class for document classification results"""
     document_id: Optional[str]
-    categories: List[AntisemitismCategory]
-    relevance_results: List[RelevanceResult]
+    source: Optional[str]
+    url: Optional[str]
+    primary_categories: List[AntisemitismCategory]  # Categories with high confidence
+    all_scores: List[CategoryScore]
+    document_quality: str  # "HIGH", "MEDIUM", "LOW"
     success: bool
     error_message: Optional[str] = None
 
 
 class DocumentClassifier:
-    """Enhanced ReAct agent for categorizing educational documents against antisemitic content"""
+    """Enhanced classifier for educational documents addressing antisemitic content"""
 
     def __init__(self, document: Document, model_name: str = "llama3"):
         """
@@ -95,13 +95,14 @@ class DocumentClassifier:
         Args:
             document: The document to classify
             model_name: Name of the Ollama model to use
-            ollama_host: Ollama server host URL
         """
         self.document = document
         self.model_name = model_name
         self.ollama_host: str = 'http://localhost:11434'
         self.client = None
         self.categories = AntisemitismCategory.get_all_categories()
+        self.min_content_length = 100  # Minimum content length for classification
+        self.confidence_threshold = CONFIDENCE_THRESHOLD  # Minimum confidence for category assignment
         self._initialize_llm()
 
     def _initialize_llm(self):
@@ -115,233 +116,362 @@ class DocumentClassifier:
             logger.error(f"Error initializing Ollama LLM: {e}")
             raise ConnectionError(f"Failed to connect to Ollama at {self.ollama_host}: {e}")
 
-    def _create_relevance_prompt(self, category: AntisemitismCategory, document_content: str) -> str:
-        """Create a well-structured prompt for relevance checking"""
-        return f"""### TASK: Document Relevance Analysis for Antisemitism Education
+    def _assess_document_quality(self, content: str) -> str:
+        """Assess the quality and length of document content"""
+        content_length = len(content.strip())
+        word_count = len(content.split())
 
-You are analyzing whether an educational document is relevant for addressing a specific type of antisemitism.
+        if content_length < self.min_content_length or word_count < 20:
+            return "LOW"
+        elif content_length > 1000 and word_count > 200:
+            return "HIGH"
+        else:
+            return "MEDIUM"
 
-### ANTISEMITISM CATEGORIES:
+    def _create_classification_prompt(self, document_content: str) -> str:
+        """Create a comprehensive classification prompt"""
+        # Truncate content if too long to avoid token limits
+        max_content_length = 3000
+        if len(document_content) > max_content_length:
+            document_content = document_content[:max_content_length] + "...[content truncated]"
+
+        return f"""### TASK: Educational Counter-Antisemitism Document Classification
+
+You are analyzing EDUCATIONAL DOCUMENTS that fight against antisemitism. These documents provide facts, education, and responses to counter antisemitic narratives.
+
+**CRITICAL UNDERSTANDING**: 
+- ALL documents are educational resources AGAINST antisemitism
+- NO documents contain antisemitic content themselves
+- You are categorizing which types of antisemitic narratives each document helps to counter
+
+### CLASSIFICATION CATEGORIES:
 {AntisemitismCategory.get_category_descriptions()}
 
-### TARGET CATEGORY: 
-{category.id}. {category.category_name}: {category.description}
+### EDUCATIONAL DOCUMENT TO ANALYZE:
+{document_content}
 
-### DOCUMENT TO ANALYZE:
-{document_content[:2000]}{"..." if len(document_content) > 2000 else ""}
+### YOUR TASK:
+For each category (1-6), determine if this educational document provides information, facts, or arguments that would be useful for COUNTERING that specific type of antisemitic narrative.
 
-### INSTRUCTIONS:
-Determine if this document provides relevant educational content to address or counter the target antisemitism category.
-
-Consider:
-- Does the document provide factual information that counters this type of antisemitism?
-- Does it offer educational content about this specific category?
-- Would this document be useful in responding to comments of this antisemitism type?
+**EXAMPLES OF WHAT TO LOOK FOR:**
+- Category 2 (Antisemitic Ideology): Does the document provide facts about Jewish contributions to society, debunk conspiracy theories, or explain Jewish history/culture positively?
+- Category 3 (Stereotypes): Does the document counter economic myths about Jewish people, provide factual information about Jewish diversity, or address racist stereotypes?
+- Category 4 (Anti-Israel/Anti-Zionism): Does the document provide factual information about Israel's history, explain Zionism accurately, or counter false narratives about Israel?
+- Category 5 (Holocaust): Does the document provide Holocaust education, historical facts, or counter denial arguments?
+- Category 6 (Indirect): Does the document address how public figures are unfairly targeted, or explain the harm of antisemitic dog whistles?
+- Category 1 (General Hate): Does the document address general prejudice, discrimination, or hatred that isn't specifically antisemitic?
 
 ### RESPONSE FORMAT:
-Answer: [YES/NO]
-Confidence: [HIGH (confidence>=0.9) /MEDIUM (0.5<confidence<0.9) /LOW (confidence<=0.5)]
-Explanation: [Brief justification for your decision]
 
-### RESPONSE:"""
+CATEGORY_1_GENERAL_HATE:
+ADDRESSES: [YES/NO]
+CONFIDENCE: [0.0-1.0]
+REASONING: [Explain what content in the document helps counter general hate/discrimination]
 
-    @staticmethod
-    def _parse_relevance_response(response: str, category: AntisemitismCategory) -> RelevanceResult:
-        """Parse the LLM response for relevance checking"""
+CATEGORY_2_ANTISEMITIC_IDEOLOGY:
+ADDRESSES: [YES/NO]
+CONFIDENCE: [0.0-1.0]
+REASONING: [Explain what content helps counter antisemitic ideologies/conspiracy theories]
+
+CATEGORY_3_STEREOTYPES_DEHUMANIZATION:
+ADDRESSES: [YES/NO]
+CONFIDENCE: [0.0-1.0]
+REASONING: [Explain what content helps counter stereotypes about Jewish people]
+
+CATEGORY_4_ANTI_ISRAEL_ZIONISM:
+ADDRESSES: [YES/NO]
+CONFIDENCE: [0.0-1.0]
+REASONING: [Explain what content helps counter anti-Israel/anti-Zionist narratives]
+
+CATEGORY_5_HOLOCAUST_DENIAL:
+ADDRESSES: [YES/NO]
+CONFIDENCE: [0.0-1.0]
+REASONING: [Explain what content helps counter Holocaust denial/minimization]
+
+CATEGORY_6_INDIRECT_ANTISEMITISM:
+ADDRESSES: [YES/NO]
+CONFIDENCE: [0.0-1.0]
+REASONING: [Explain what content helps counter indirect antisemitic targeting]
+
+### BEGIN CLASSIFICATION:"""
+
+    def _parse_classification_response(self, response: str) -> List[CategoryScore]:
+        """Parse the comprehensive LLM response"""
+        category_scores = []
+
         try:
-            lines = [line.strip() for line in response.strip().split('\n') if line.strip()]
+            # Split response into category sections
+            category_sections = re.split(r'CATEGORY_\d+_[A-Z_]+:', response)
+            category_sections = [section.strip() for section in category_sections if section.strip()]
 
-            # Extract answer
-            answer_line = next((line for line in lines if line.startswith('Answer:')), '')
-            is_relevant = 'YES' in answer_line.upper()
+            # Match categories with their enum values
+            category_mapping = {
+                'GENERAL_HATE': AntisemitismCategory.GENERAL_HATE,
+                'ANTISEMITIC_IDEOLOGY': AntisemitismCategory.ANTISEMITIC_IDEOLOGY,
+                'STEREOTYPES_DEHUMANIZATION': AntisemitismCategory.STEREOTYPES_DEHUMANIZATION,
+                'ANTI_ISRAEL_ZIONISM': AntisemitismCategory.ANTI_ISRAEL_ZIONISM,
+                'HOLOCAUST_DENIAL': AntisemitismCategory.HOLOCAUST_DENIAL,
+                'INDIRECT_ANTISEMITISM': AntisemitismCategory.INDIRECT_ANTISEMITISM
+            }
 
-            # Extract confidence
-            confidence_line = next((line for line in lines if line.startswith('Confidence:')), '')
-            confidence_map = {'HIGH': 0.9, 'MEDIUM': 0.7, 'LOW': 0.5}
-            confidence_score = confidence_map.get(
-                confidence_line.replace('Confidence:', '').strip().upper(), 0.5
-            )
+            # Find category sections in the response
+            for category_key, category_enum in category_mapping.items():
+                pattern = rf'CATEGORY_\d+_{category_key}:(.*?)(?=CATEGORY_\d+_|$)'
+                match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
 
-            # Extract explanation
-            explanation_line = next((line for line in lines if line.startswith('Explanation:')), '')
-            explanation = explanation_line.replace('Explanation:', '').strip()
+                if match:
+                    section_content = match.group(1).strip()
 
-            if not explanation:
-                explanation = ' '.join(lines[2:]) if len(lines) > 2 else "No explanation provided"
+                    # Extract ADDRESSES
+                    addresses_match = re.search(r'ADDRESSES:\s*(YES|NO)', section_content, re.IGNORECASE)
+                    addresses_category = addresses_match.group(1).upper() == 'YES' if addresses_match else False
 
-            return RelevanceResult(
-                is_relevant=is_relevant,
-                explanation=explanation,
-                confidence_score=confidence_score,
-                category=category
-            )
+                    # Extract CONFIDENCE
+                    confidence_match = re.search(r'CONFIDENCE:\s*([\d.]+)', section_content)
+                    confidence_score = float(confidence_match.group(1)) if confidence_match else 0.0
+                    confidence_score = max(0.0, min(1.0, confidence_score))  # Clamp between 0 and 1
+
+                    # Extract REASONING
+                    reasoning_match = re.search(r'REASONING:\s*(.*)', section_content, re.DOTALL)
+                    reasoning = reasoning_match.group(1).strip() if reasoning_match else "No reasoning provided"
+
+                    category_scores.append(CategoryScore(
+                        category=category_enum,
+                        score=confidence_score,
+                        reasoning=reasoning,
+                        addresses_category=addresses_category
+                    ))
+                else:
+                    # If category not found in response, add default
+                    category_scores.append(CategoryScore(
+                        category=category_enum,
+                        score=0.0,
+                        reasoning="Category not analyzed in response",
+                        addresses_category=False
+                    ))
+
+            return category_scores
 
         except Exception as e:
-            logger.warning(f"Error parsing relevance response: {e}")
-            return RelevanceResult(
-                is_relevant=False,
-                explanation=f"Error parsing response: {str(e)}",
-                confidence_score=0.0,
-                category=category
-            )
+            logger.error(f"Error parsing classification response: {e}")
+            # Return default scores for all categories
+            return [
+                CategoryScore(
+                    category=cat,
+                    score=0.0,
+                    reasoning=f"Error parsing response: {str(e)}",
+                    addresses_category=False
+                ) for cat in AntisemitismCategory
+            ]
 
-    def _check_relevance(self, category: AntisemitismCategory) -> RelevanceResult:
-        """Check if document is relevant to the specified antisemitism category"""
-        prompt = self._create_relevance_prompt(category, self.document.page_content)
+    def classify(self) -> ClassificationResult:
+        """
+        Classify the document comprehensively
+
+        Returns:
+            ClassificationResult with detailed analysis
+        """
+        start_time = time.time()
+        logger.info("Starting comprehensive document classification")
 
         try:
-            logger.info(f"Checking relevance for category: {category.category_name}")
+            # Assess document quality first
+            document_quality = self._assess_document_quality(self.document.page_content)
+            logger.info(f"Document quality assessed as: {document_quality}")
+
+            if document_quality == "LOW":
+                logger.warning("Low quality document detected - results may be unreliable")
+
+            # Create and execute classification prompt
+            prompt = self._create_classification_prompt(self.document.page_content)
+
+            logger.info("Sending classification request to LLM...")
 
             # Add retry logic for robustness
             max_retries = 3
+            response = None
+
             for attempt in range(max_retries):
                 try:
                     result = self.client.generate(
                         model=self.model_name,
                         prompt=prompt,
-                        options={'temperature': 0.1}  # Lower temperature for more consistent results
+                        options={
+                            'temperature': 0.2,  # Low temperature for consistency
+                            'top_p': 0.9,
+                            'num_predict': 2000  # Allow longer responses
+                        }
                     )
-
-                    relevance_result = self._parse_relevance_response(result['response'], category)
-
-                    logger.info(f"Category {category.category_name}: "
-                                f"{'Relevant' if relevance_result.is_relevant else 'Not relevant'} "
-                                f"(Confidence: {relevance_result.confidence_score})")
-
-                    return relevance_result
+                    response = result['response']
+                    break
 
                 except Exception as e:
                     if attempt == max_retries - 1:
                         raise e
                     logger.warning(f"Attempt {attempt + 1} failed, retrying...")
-                    time.sleep(1)
+                    time.sleep(2)
 
-        except Exception as e:
-            logger.error(f"Error checking relevance for category {category.category_name}: {e}")
-            return RelevanceResult(
-                is_relevant=False,
-                explanation=f"Error during relevance check: {str(e)}",
-                confidence_score=0.0,
-                category=category
-            )
+            # Parse the response
+            all_scores = self._parse_classification_response(response)
 
-    def categorize(self) -> ClassificationResult:
-        """
-        Categorize the document using ReAct methodology
+            # Determine primary categories (high confidence + addresses category)
+            primary_categories = [
+                score.category for score in all_scores
+                if score.addresses_category and score.score >= self.confidence_threshold
+            ]
 
-        Returns:
-            ClassificationResult with categories and detailed information
-        """
-        start_time = time.time()
-        logger.info("Starting document categorization using ReAct methodology")
+            # If no primary categories found, check if it's general hate
+            if not primary_categories:
+                general_hate_score = next(
+                    (score for score in all_scores if score.category == AntisemitismCategory.GENERAL_HATE),
+                    None
+                )
+                if general_hate_score and general_hate_score.score >= self.confidence_threshold:
+                    primary_categories = [AntisemitismCategory.GENERAL_HATE]
 
-        try:
-            # Thought: Plan the approach
-            logger.info("THOUGHT: Planning categorization approach for antisemitism education document")
+            # Log results
+            logger.info(f"Classification completed in {time.time() - start_time:.2f} seconds")
+            logger.info(f"Primary categories: {[cat.category_name for cat in primary_categories]}")
 
-            # Action: Check relevance for each category
-            logger.info("ACTION: Checking document relevance against all antisemitism categories")
-
-            relevant_categories = []
-            all_relevance_results = []
-
-            for category in AntisemitismCategory:
-                relevance_result = self._check_relevance(category)
-                all_relevance_results.append(relevance_result)
-
-                if relevance_result.is_relevant:
-                    relevant_categories.append(category)
-
-            # Observation: Analyze results
-            logger.info(f"OBSERVATION: Document categorized into {len(relevant_categories)} "
-                        f"out of {len(AntisemitismCategory)} categories")
-
-            if relevant_categories:
-                category_names = [cat.category_name for cat in relevant_categories]
-                logger.info(f"Relevant categories: {', '.join(category_names)}")
-            else:
-                logger.info("Document not relevant to any antisemitism categories")
+            for score in all_scores:
+                if score.addresses_category:
+                    logger.info(f"  {score.category.category_name}: {score.score:.2f} confidence")
 
             return ClassificationResult(
                 document_id=getattr(self.document, 'metadata', {}).get('id', None),
-                categories=relevant_categories,
-                relevance_results=all_relevance_results,
+                source=getattr(self.document, 'metadata', {}).get('source', None),
+                url=getattr(self.document, 'metadata', {}).get('url', None),
+                primary_categories=primary_categories,
+                all_scores=all_scores,
+                document_quality=document_quality,
                 success=True
             )
 
         except Exception as e:
-            logger.error(f"Error during document categorization: {e}")
-
+            logger.error(f"Error during document classification: {e}")
             return ClassificationResult(
                 document_id=getattr(self.document, 'metadata', {}).get('id', None),
-                categories=[],
-                relevance_results=[],
+                source=getattr(self.document, 'metadata', {}).get('source', None),
+                url=getattr(self.document, 'metadata', {}).get('url', None),
+                primary_categories=[],
+                all_scores=[],
+                document_quality="UNKNOWN",
                 success=False,
                 error_message=str(e)
             )
 
     @staticmethod
     def export_results_json(result: ClassificationResult) -> str:
-        """Export classification results as JSON"""
+        """Export classification results as comprehensive JSON"""
         export_data = {
             "document_id": result.document_id,
             "success": result.success,
-            "categories": [
+            "document_quality": result.document_quality,
+            "primary_categories": [
                 {
                     "id": cat.id,
                     "name": cat.category_name,
                     "description": cat.description
-                } for cat in result.categories
+                } for cat in result.primary_categories
             ],
-            "relevance_details": [
+            "detailed_scores": [
                 {
-                    "category_id": res.category.id,
-                    "category_name": res.category.category_name,
-                    "is_relevant": res.is_relevant,
-                    "confidence_score": res.confidence_score,
-                    "explanation": res.explanation
-                } for res in result.relevance_results
+                    "category_id": score.category.id,
+                    "category_name": score.category.category_name,
+                    "addresses_category": score.addresses_category,
+                    "confidence_score": score.score,
+                    "reasoning": score.reasoning
+                } for score in result.all_scores
             ],
-            "error_message": result.error_message
+            "error_message": result.error_message,
+            "classification_summary": {
+                "total_categories_addressed": len(result.primary_categories),
+                "high_confidence_scores": len([s for s in result.all_scores if s.score >= 0.8]),
+                "avg_confidence": sum(s.score for s in result.all_scores) / len(
+                    result.all_scores) if result.all_scores else 0
+            }
         }
 
         return json.dumps(export_data, indent=2, ensure_ascii=False)
 
 
-# Example usage and testing
+# Enhanced example usage
 if __name__ == "__main__":
-
-    BASE_PATH = r"/resources"
-    KNOWLEDGE_BASE_PATH = r"/resources/all_collected_articles.csv"
-    knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)
-    knowledge_base = knowledge_base[['source', 'url', 'content', 'categories']]
-    knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
-    knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith("http"))]
-    knowledge_base.reset_index(drop=True, inplace=True)
-
     try:
+        # Load and prepare data
+        knowledge_base = pd.read_csv(str(KNOWLEDGE_BASE_PATH))
+        knowledge_base = knowledge_base[['source', 'url', 'content']]
+        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
+        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: str(x).startswith("http"))]
+        knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
+        knowledge_base.reset_index(drop=True, inplace=True)
+
+        # Run only over 200 rows
+        knowledge_base = knowledge_base.iloc[33:234]
+
+        logger.info(f"Processing {len(knowledge_base)} documents")
+
+        # Add new columns for enhanced results
+        knowledge_base['primary_categories'] = None
+        knowledge_base['confidence_scores'] = None
+        knowledge_base['document_quality'] = None
+
+        successful_classifications = 0
+
         for index, row in knowledge_base.iterrows():
+            logger.info(f"Processing document {index + 1}/{len(knowledge_base)}")
+
             doc = Document(
-                page_content=row["content"],
+                page_content=str(row["content"]),
                 metadata={"id": index, "source": row["source"], "url": row["url"]},
             )
-            classifier = DocumentClassifier(doc)
-            result = classifier.categorize()
-            knowledge_base.at[index, 'categories'] = [cat.id for cat in result.categories]
 
-            print("Classification Results:")
-            print(f"Success: {result.success}")
-            print(f"Categories found: {len(result.categories)}")
-            for cat in result.categories:
-                print(f"  - {cat.category_name}")
+            classifier = DocumentClassifier(doc, model_name="llama3")
+            result = classifier.classify()
+            import pdb; pdb.set_trace()
+            if result.success:
+                successful_classifications += 1
 
-            if index < 10:
-                # Export as JSON
-                json_result = classifier.export_results_json(result)
-                print("\nJSON Export:")
-                with open(BASE_PATH + rf"\results_{index}.json", "w", encoding="utf-8") as f:
-                    json.dump(json_result, f, indent=4, ensure_ascii=False)
-        # Export to CSV
-        knowledge_base.to_csv(BASE_PATH + rf"\knowledge_base.csv", index=False)
+                # Store results in dataframe
+                knowledge_base.at[index, 'primary_categories'] = [cat.id for cat in result.primary_categories]
+                knowledge_base.at[index, 'document_quality'] = result.document_quality
+                knowledge_base.at[index, 'confidence_scores'] = {
+                    score.category.id: score.score for score in result.all_scores
+                }
+                knowledge_base.to_csv(str(RESOURCE_PATH / "knowledge_base_categorized.csv"), index=False)
+                # # Print summary for first 5 documents
+                # if index < 5:
+                #     print(f"\n=== Document {index} Classification Results ===")
+                #     print(f"Source: {result.source}")
+                #     print(f"URL: {result.url}")
+                #     print(f"Success: {result.success}")
+                #     print(f"Quality: {result.document_quality}")
+                #     print(f"Primary Categories ({len(result.primary_categories)}):")
+                #     for cat in result.primary_categories:
+                #         print(f"  - {cat.category_name}")
+                #     print(f"High-confidence scores:")
+                #     for score in result.all_scores:
+                #         if score.score >= CONFIDENCE_THRESHOLD:
+                #             print(f"  - {score.category.category_name}: {score.score:.2f}")
+
+                # Export detailed JSON for first 10 documents
+                if index < 10:
+                    json_result = classifier.export_results_json(result)
+                    with open(str(RESOURCE_PATH / f"enhanced_results_{index}.json"), "w", encoding="utf-8") as f:
+                        f.write(json_result)
+
+            else:
+                logger.error(f"Failed to classify document {index}: {result.error_message}")
+
+        # Export enhanced CSV
+        knowledge_base.to_csv(str(RESOURCE_PATH / "knowledge_base_categorized.csv"), index=False)
+
+        # Print final statistics
+        print(f"\n=== Classification Statistics ===")
+        print(f"Total documents: {len(knowledge_base)}")
+        print(f"Successful classifications: {successful_classifications}")
+        print(f"Success rate: {successful_classifications / len(knowledge_base) * 100:.1f}%")
+
     except Exception as e:
-        logger.error(f"Error in example usage: {e}")
+        logger.error(f"Error in enhanced example usage: {e}")
+        raise
