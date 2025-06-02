@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="working classification script for documents">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="working classification script - need to rerun to save jsons">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_1.json" beforeDir="false" afterPath="$PROJECT_DIR$/resources/enhanced_results_1.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/knowledge_base.csv" beforeDir="false" afterPath="$PROJECT_DIR$/resources/knowledge_base.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -267,7 +264,7 @@
       <workItem from="1748717362535" duration="3800000" />
       <workItem from="1748723608436" duration="592000" />
       <workItem from="1748769028079" duration="543000" />
-      <workItem from="1748778865131" duration="19667000" />
+      <workItem from="1748778865131" duration="22605000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -501,7 +498,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1748789142117</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL‎-00030" summary="working classification script - need to rerun to save jsons">
+      <option name="closed" value="true" />
+      <created>1748837683233</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL‎-00030" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748837683233</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -519,7 +524,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixing prompt" />
     <MESSAGE value="adding evaluation" />
     <MESSAGE value="adding binary model - not done yet" />
     <MESSAGE value="rewriting binary model - not done yet" />
@@ -544,23 +548,8 @@
     <MESSAGE value="try to add background - need to fix" />
     <MESSAGE value="minor cosmetics" />
     <MESSAGE value="working classification script for documents" />
-    <option name="LAST_COMMIT_MESSAGE" value="working classification script for documents" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/business_logic/chatbot/trial_doc_class.py</url>
-          <line>462</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/business_logic/chatbot/trial_doc_class.py</url>
-          <line>408</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="working classification script - need to rerun to save jsons" />
+    <option name="LAST_COMMIT_MESSAGE" value="working classification script - need to rerun to save jsons" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1745217862042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
