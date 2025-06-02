@@ -29,6 +29,21 @@ KNOWLEDGE_BASE_PATH = RESOURCE_PATH / "knowledge_base.csv"
 CONFIDENCE_THRESHOLD = 0.55
 
 
+def read_csv_with_encoding(file_path):
+    encodings = ['utf-8', 'latin-1', 'windows-1252', 'cp1252', 'iso-8859-1']
+
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(file_path, encoding=encoding)
+            print(f"Successfully read file with encoding: {encoding}")
+            return df
+        except UnicodeDecodeError:
+            print(f"Failed to read with encoding: {encoding}")
+            continue
+
+    raise ValueError("Could not read the file with any of the attempted encodings")
+
+
 class AntisemitismCategory(Enum):
     """Enum for antisemitism categories with clear definitions"""
     GENERAL_HATE = (1, "General Hate/Other",
@@ -399,15 +414,15 @@ REASONING: [Explain what content helps counter indirect antisemitic targeting]
 if __name__ == "__main__":
     try:
         # Load and prepare data
-        knowledge_base = pd.read_csv(str(KNOWLEDGE_BASE_PATH))
+        knowledge_base = read_csv_with_encoding(str(KNOWLEDGE_BASE_PATH))
         knowledge_base = knowledge_base[['source', 'url', 'content']]
         knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
-        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: str(x).startswith("http"))]
-        knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
+        # knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: str(x).startswith("http"))]
+        # knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
         knowledge_base.reset_index(drop=True, inplace=True)
 
         # Run only over 200 rows
-        knowledge_base = knowledge_base.iloc[33:234]
+        knowledge_base = knowledge_base.iloc[234:435]
 
         logger.info(f"Processing {len(knowledge_base)} documents")
 
