@@ -406,6 +406,9 @@ if __name__ == "__main__":
         knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
         knowledge_base.reset_index(drop=True, inplace=True)
 
+        # Run only over 200 rows
+        knowledge_base = knowledge_base.iloc[33:234]
+
         logger.info(f"Processing {len(knowledge_base)} documents")
 
         # Add new columns for enhanced results
