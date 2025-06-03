@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from transformers import Trainer, AutoTokenizer
 from sklearn.model_selection import train_test_split
 import torch
@@ -13,6 +15,9 @@ from transformers.modeling_outputs import SequenceClassifierOutput
 
 from models.binary_dataset import BinaryClassificationDataset
 from src.global_parameters import ANTISEMITIC_PREFIXES
+
+ROOT_PATH = Path(__file__).parent.parent.parent
+RESOURCE_PATH = ROOT_PATH / "resources"
 
 
 def extract_bin_categories(category_list, as_categories):
@@ -184,6 +189,6 @@ class BinaryAntisemitismClassifier:
         print(report)
 
         # Save model
-        model_path = "./final_model_weighted"
-        self.trainer.save_model(model_path)
+        model_path = RESOURCE_PATH / "binary_model_weighted"
+        self.trainer.save_model(str(model_path))
         self.tokenizer.save_pretrained(model_path)

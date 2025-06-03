@@ -2,7 +2,7 @@ from business_logic.classification.multilabel_classifier import predict
 
 
 class LoadedClassificationModel:
-    def __init__(self, save_dir, model_paths):
+    def __init__(self, save_dir):
         self.save_dir = save_dir
         self.x_test = None
 

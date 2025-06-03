@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="adaptive csv reader">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="minor fix">
+      <change afterPath="$PROJECT_DIR$/business_logic/classification/classifiers_training.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/classification/binary_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/binary_classifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/classification/multilabel_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/multilabel_classifier.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +79,7 @@
     "Python.web_search.executor": "Run",
     "Python.ziona.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "milti-class__only__deberta",
     "last_opened_file_path": "C:/Users/myor1/PycharmProjects/ziona_bot/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -266,6 +269,7 @@
       <workItem from="1748723608436" duration="592000" />
       <workItem from="1748769028079" duration="543000" />
       <workItem from="1748778865131" duration="22922000" />
+      <workItem from="1748930330371" duration="4974000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -523,7 +527,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1748845938822</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL‎-00033" summary="minor fix">
+      <option name="closed" value="true" />
+      <created>1748847759409</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL‎-00033" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748847759409</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -556,7 +568,6 @@
     <MESSAGE value="done!!!!" />
     <MESSAGE value="minor fixes" />
     <MESSAGE value="added scaping script NEED TO FIX WIKI" />
-    <MESSAGE value="minor fix" />
     <MESSAGE value="add connection of main to multilabel_classifier.py" />
     <MESSAGE value="add streamlit ui that receives only a comment" />
     <MESSAGE value="update streamlit ui" />
@@ -566,7 +577,8 @@
     <MESSAGE value="working classification script for documents" />
     <MESSAGE value="working classification script - need to rerun to save jsons" />
     <MESSAGE value="adaptive csv reader" />
-    <option name="LAST_COMMIT_MESSAGE" value="adaptive csv reader" />
+    <MESSAGE value="minor fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
