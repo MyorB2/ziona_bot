@@ -146,3 +146,11 @@ def test_model(model, device, test_dataset, batch_size=8):
 
     print("\nTest Set Metrics:", test_metrics)
     return test_metrics
+
+
+def normalize_categories(cat_list):
+    if cat_list is None or len(cat_list) == 0:
+        return None
+    for i in range(len(cat_list)):
+        cat_list[i] = cat_list[i] - 1
+    return cat_list

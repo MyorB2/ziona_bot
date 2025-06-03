@@ -11,6 +11,8 @@ from enum import Enum
 import json
 import time
 
+from src.utils import normalize_categories
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
@@ -417,8 +419,8 @@ if __name__ == "__main__":
         knowledge_base = read_csv_with_encoding(str(KNOWLEDGE_BASE_PATH))
         knowledge_base = knowledge_base[['source', 'url', 'content']]
         knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
-        # knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: str(x).startswith("http"))]
-        # knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
+        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith("http"))]
+        knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
         knowledge_base.reset_index(drop=True, inplace=True)
 
         # Run only over 200 rows
@@ -478,6 +480,9 @@ if __name__ == "__main__":
                 logger.error(f"Failed to classify document {index}: {result.error_message}")
 
         # Export enhanced CSV
+        knowledge_base["primary_categories"] = knowledge_base["primary_categories"].apply(
+            lambda x: normalize_categories(x))
+        knowledge_base = knowledge_base.dropna(subset=['primary_categories'])
         knowledge_base.to_csv(str(RESOURCE_PATH / "knowledge_base_categorized.csv"), index=False)
 
         # Print final statistics

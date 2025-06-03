@@ -47,7 +47,7 @@ class DocumentsRetriever:
             metadata={
                 "source": row["source"],
                 "url": row["url"],
-                "categories": row["categories"]
+                "categories": row["primary_categories"]
             }
         )
             for _, row in self.knowledge_base.iterrows()

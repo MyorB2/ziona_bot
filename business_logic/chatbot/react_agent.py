@@ -178,6 +178,7 @@ class ReActAgent:
                 "action_3": action_3,
                 "observation_3": observation_3,
                 "final_response": response_text,
+                "paragraph": best_result.page_content,
                 "source": best_result.metadata["source"],
                 "url": best_result.metadata["url"]
             }

@@ -5,11 +5,12 @@ import os
 import pandas as pd
 from collections import Counter
 
-from django.db.models.expressions import result
+# from django.db.models.expressions import result
 
 from business_logic.chatbot.react_agent import ReActAgent
 from business_logic.chatbot.react_evaluator import ResponseEvaluator
-from business_logic.classification.classification_wrapper import LoadedClassificationModel
+# from business_logic.classification.classification_wrapper import LoadedClassificationModel
+from src.utils import normalize_categories
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +28,7 @@ def main():
     """Main function to demonstrate usage"""
 
     # Configuration
-    KNOWLEDGE_BASE_PATH = r"C:\Users\myor1\PycharmProjects\ziona_bot\resources\knowledge_base.csv"
+    KNOWLEDGE_BASE_PATH = r"C:\Users\myor1\PycharmProjects\ziona_bot\resources\knowledge_base_categorized.csv"
 
     try:
         # Categories explanation
@@ -43,58 +44,69 @@ def main():
         # Load knowledge base
         logger.info("Reading knowledge base...")
         knowledge_base = pd.read_csv(KNOWLEDGE_BASE_PATH)
-        knowledge_base = knowledge_base[['source', 'url', 'paragraph', 'categories']]
-        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'paragraph'])
-        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith("http"))]
-        knowledge_base.reset_index(drop=True, inplace=True)
+        knowledge_base = knowledge_base[['source', 'url', 'paragraph', 'primary_categories']]
         # category_id is list of integers
-        knowledge_base["categories"] = knowledge_base["categories"].apply(lambda x: ast.literal_eval(x))
+        knowledge_base["primary_categories"] = knowledge_base["primary_categories"].apply(lambda x: ast.literal_eval(x))
+        knowledge_base["primary_categories"] = knowledge_base["primary_categories"].apply(lambda x: normalize_categories(x))
+        knowledge_base = knowledge_base.dropna(subset=['primary_categories'])
         logger.info(f"Loaded knowledge base with {len(knowledge_base)} entries")
 
         # Initialize agent
         agent = ReActAgent(knowledge_base)
 
-        # Initialize classification model
-        model_paths = {
-            "deberta": "/content/drive/MyDrive/Project/Models/Multi_model/1805_1/final_multilabel_model/saving",
-            "hatebert": "Hate-speech-CNERG/dehatebert-mono-english",
-            "twitter": "cardiffnlp/twitter-roberta-base",
-        }
-        save_dir = r"./resources"
-        classification_model = LoadedClassificationModel(save_dir, model_paths)
+        #######################################
+        # # Initialize classification model
+        # model_paths = {
+        #     "deberta": "/content/drive/MyDrive/Project/Models/Multi_model/1805_1/final_multilabel_model/saving",
+        #     "hatebert": "Hate-speech-CNERG/dehatebert-mono-english",
+        #     "twitter": "cardiffnlp/twitter-roberta-base",
+        # }
+        # save_dir = r"./resources"
+        # classification_model = LoadedClassificationModel(save_dir, model_paths)
+        #
+        # test_comments = [
+        #     "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+        #     "do all israelis kills babies for fun???",
+        #     "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
+        #     "they should respect them even if it is on their neighborhood and on Sabbath"
+        # ]
+        # test_cases = []
+        # for comment in test_comments:
+        #     pred = classification_model.predict(comment)
+        #     category_id = pred["predicted_labels"][0]
+        #     test_cases.append({"comment": comment, "category_id": category_id, "category_name": label_map[category_id]})
+        #######################################
 
         # Example usage
-        # test_cases = [
-        #     {
-        #         "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
-        #         "category_id": 5,
-        #         "category_name": label_map[5]
-        #     },
-        #     {
-        #         "comment": "do all israelis kills babies for fun???",
-        #         "category_id": 3,
-        #         "category_name": label_map[3]
-        #     },
-        #     {
-        #         "comment": "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
-        #                    "they should respect them even if it is on their neighborhood and on Sabbath",
-        #         "category_id": 2,
-        #         "category_name": label_map[2]
-        #     }
-        # ]
-
-        test_comments = [
-            "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
-            "do all israelis kills babies for fun???",
-            "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
-            "they should respect them even if it is on their neighborhood and on Sabbath"
+        test_cases = [
+            {
+                "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+                "category_id": 5,
+                "category_name": label_map[5]
+            },
+            {
+                "comment": "do all israelis kills babies for fun???",
+                "category_id": 3,
+                "category_name": label_map[3]
+            },
+            {
+                "comment": "why do those penguins always have to not fit to the society, they interfere the marathon runners, "
+                           "they should respect them even if it is on their neighborhood and on Sabbath",
+                "category_id": 2,
+                "category_name": label_map[2]
+            },
+            {
+                "comment": "think facebook care? the last name of the ceo is Zuckerberg, is there more greedy person them a jew?",
+                "category_id": 1,
+                "category_name": label_map[1]
+            },
+            {
+                "comment": "what did you expect??? they insist the germans did them a genocide(!) "
+                           "of course they insist hamas try to eliminate them!",
+                "category_id": 4,
+                "category_name": label_map[4]
+            }
         ]
-        test_cases = []
-        for comment in test_comments:
-            pred = classification_model.predict(comment)
-            category_id = pred["predicted_labels"][0]
-            test_cases.append({"comment": comment, "category_id": category_id, "category_name": label_map[category_id]})
-
         # Save all scores for calculating total evaluation score
         eval_scores = {}
 
@@ -126,9 +138,9 @@ def main():
 
             logger.info("Start evaluating...")
             evaluator = ResponseEvaluator()
-            result = "I understand your concern about being criticized for criticizing Israel, but it's important to recognize that criticism of a country or its policies is different from targeting an entire people group. According to the definition of antisemitism provided by the Wikipedia article (https://en.wikipedia.org/wiki/Antisemitism), it's essential to distinguish between legitimate political disagreements and discriminatory beliefs. While criticizing Israel does not necessarily equate to being antisemitic, it's crucial to be mindful of language and actions that may unintentionally perpetuate harmful stereotypes or biases."
-            # evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result['final_response'])
             evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result)
+            # result = "I understand your concern about being criticized for criticizing Israel, but it's important to recognize that criticism of a country or its policies is different from targeting an entire people group. According to the definition of antisemitism provided by the Wikipedia article (https://en.wikipedia.org/wiki/Antisemitism), it's essential to distinguish between legitimate political disagreements and discriminatory beliefs. While criticizing Israel does not necessarily equate to being antisemitic, it's crucial to be mindful of language and actions that may unintentionally perpetuate harmful stereotypes or biases."
+            # evals = evaluator.evaluate_agent_response(test_case["comment"], test_case["category_name"], result)
             print("\nEvaluation Results:")
             for key, value in evals.items():
                 print(f"{key}: {value}")

@@ -42,12 +42,16 @@ class ResponseEvaluator:
 
     @staticmethod
     def cosine_similarity_numpy(vec1: np.ndarray, vec2: np.ndarray) -> float:
-        """Compute cosine similarity with improved error handling."""
-        norm1 = np.linalg.norm(vec1)
-        norm2 = np.linalg.norm(vec2)
-        if norm1 == 0.0 or norm2 == 0.0:
-            return 0.0
-        return np.dot(vec1, vec2) / (norm1 * norm2)
+        try:
+            """Compute cosine similarity with improved error handling."""
+            norm1 = np.linalg.norm(vec1)
+            norm2 = np.linalg.norm(vec2)
+            if norm1 == 0.0 or norm2 == 0.0:
+                return 0.0
+            return np.dot(vec1, vec2) / (norm1 * norm2)
+        except Exception as e:
+            raise Exception(f"Error cosine_similarity_numpy: {e}")
+
 
     @staticmethod
     def validate_url(url: str, timeout: int = 5) -> Dict[str, any]:
@@ -234,8 +238,8 @@ class ResponseEvaluator:
         Returns:
             Dict with comprehensive evaluation metrics
         """
-        response = agent_output.get("response", "")
-        thought = agent_output.get("thought", "")
+        response = agent_output.get("final_response", "")
+        thought = agent_output.get("thought_1", "") + agent_output.get("thought_2", "") + agent_output.get("thought_3", "")
         paragraph = agent_output.get("paragraph", "")
         source = agent_output.get("source", "")
         url = agent_output.get("url", "")
@@ -328,8 +332,9 @@ class ResponseEvaluator:
 
         return metrics
 
-    @staticmethod
-    def evaluate_agent_response(comment, label, agent_output, expected_keywords=None):
-        """Convenience function for backward compatibility."""
-        evaluator = ResponseEvaluator()
-        return evaluator.evaluate_comprehensive(comment, label, agent_output, expected_keywords)
+    def evaluate_agent_response(self, comment, label, agent_output, expected_keywords=None):
+        try:
+            """Convenience function for backward compatibility."""
+            return self.evaluate_comprehensive(comment, label, agent_output, expected_keywords)
+        except Exception as e:
+            raise Exception(f"Error in evaluate_agent_response: {e}")
