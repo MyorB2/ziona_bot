@@ -258,8 +258,6 @@ class ResponseEvaluator:
         if url:
             url_validation = self.validate_url(url)
             metrics['url_valid'] = url_validation["valid"]
-            metrics['url_status_code'] = url_validation["status_code"]
-            metrics['url_error'] = url_validation["error"]
         else:
             metrics.update({"url_valid": False, "url_status_code": None, "url_error": "No URL provided"})
 
@@ -292,9 +290,6 @@ class ResponseEvaluator:
             found_keywords = [kw for kw in expected_keywords if kw.lower() in response.lower()]
             metrics['keyword_coverage'] = len(found_keywords) / len(expected_keywords)
             metrics['found_keywords'] = found_keywords
-        else:
-            metrics['keyword_coverage'] = None
-            metrics['found_keywords'] = []
 
         # Sentiment and toxicity (with error handling)
         try:
