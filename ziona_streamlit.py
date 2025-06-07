@@ -77,7 +77,6 @@ def load_knowledge_base(path: str):
     df = pd.read_csv(KNOWLEDGE_BASE_PATH)
     df = df[['source', 'url', 'paragraph', 'categories']]
     df = df.dropna(subset=['source', 'url', 'paragraph'])
-    df = df[df['url'].apply(lambda x: x.startswith("http"))]
     df.reset_index(drop=True, inplace=True)
     # category_id is list of integers
     df["primary_categories"] = df["primary_categories"].apply(lambda x: ast.literal_eval(x))
@@ -107,10 +106,9 @@ if st.button("Analyze & Generate Response"):
     else:
         with st.status("Classifying comment...", expanded=True) as status:
             # Step 1: Classify the comment
-            # classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
-            # pred = classification_model.predict(comment)
-            # category_id = pred["predicted_labels"][0]
-            category_id =
+            classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
+            pred = classification_model.predict(comment)
+            category_id = pred["predicted_labels"][0]
             category_name = LABEL_MAP[category_id]
             st.write(f"**Category ID:** {category_id}")
             st.write(f"**Category Name:** {category_name}")
