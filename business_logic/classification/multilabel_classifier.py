@@ -1,6 +1,7 @@
 import os
 import warnings
 from collections import Counter
+from pathlib import Path
 
 import joblib
 import numpy as np
@@ -32,11 +33,14 @@ from models.save_model_callback import SaveBestModelCallback
 os.environ["WANDB_DISABLED"] = "true"
 warnings.filterwarnings("ignore")
 
+ROOT_PATH = Path(__file__).parent.parent.parent
+RESOURCE_PATH = ROOT_PATH / "resources"
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class MultilabelClassifier(Dataset):
-    def __init__(self, texts, labels, tokenizer):
+    def __init__(self, texts, labels, tokenizer, dataset_path):
         self.X_meta_scaled = None
         self.labels_bin = None
         self.texts = None
@@ -46,8 +50,10 @@ class MultilabelClassifier(Dataset):
         self.texts_train = None
         self.encodings = tokenizer(texts, truncation=True, padding=True, max_length=128)
         self.labels = labels
-        self.filtered_df = pd.read_csv("/content/drive/MyDrive/Project/Datasets/filtered_df.csv")
-        self.filtered_df['category_count_check'] = self.filtered_df['updated_mapped_categories'].apply(
+        self.df = pd.read_csv(dataset_path)
+        self.df['updated_mapped_categories'] = self.df['updated_mapped_categories'].apply(self.clean_category_list)
+        self.filtered_df = self.df[self.df["binary_category"] == 1][["clean_text", "updated_mapped_categories"]].reset_index(drop=True)
+        self.filtered_df['category_count'] = self.filtered_df['updated_mapped_categories'].apply(
             lambda x: len(x) if isinstance(x, list) else 0)
         self.save_model_dir = "/content/drive/MyDrive/Project/Models/Multi_model/1805_1/final_multilabel_model"
         self.root_save_dir = "/content/drive/MyDrive/Project/Models/Multi_model/1805_1"

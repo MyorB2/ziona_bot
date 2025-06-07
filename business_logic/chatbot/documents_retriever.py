@@ -35,8 +35,8 @@ class DocumentsRetriever:
         self.category_id: Optional[int] = None
         self.query: Optional[str] = None
         self.embedding_function = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        self.bm25_weight: float = 0.6
-        self.faiss_weight: float = 0.4
+        self.bm25_weight: float = 0.4
+        self.faiss_weight: float = 0.6
 
         self._set_documents()
         logger.info("Retriever initialized successfully")
@@ -47,7 +47,7 @@ class DocumentsRetriever:
             metadata={
                 "source": row["source"],
                 "url": row["url"],
-                "categories": row["categories"]
+                "categories": row["primary_categories"]
             }
         )
             for _, row in self.knowledge_base.iterrows()

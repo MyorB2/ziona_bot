@@ -42,12 +42,16 @@ class ResponseEvaluator:
 
     @staticmethod
     def cosine_similarity_numpy(vec1: np.ndarray, vec2: np.ndarray) -> float:
-        """Compute cosine similarity with improved error handling."""
-        norm1 = np.linalg.norm(vec1)
-        norm2 = np.linalg.norm(vec2)
-        if norm1 == 0.0 or norm2 == 0.0:
-            return 0.0
-        return np.dot(vec1, vec2) / (norm1 * norm2)
+        try:
+            """Compute cosine similarity with improved error handling."""
+            norm1 = np.linalg.norm(vec1)
+            norm2 = np.linalg.norm(vec2)
+            if norm1 == 0.0 or norm2 == 0.0:
+                return 0.0
+            return np.dot(vec1, vec2) / (norm1 * norm2)
+        except Exception as e:
+            raise Exception(f"Error cosine_similarity_numpy: {e}")
+
 
     @staticmethod
     def validate_url(url: str, timeout: int = 5) -> Dict[str, any]:
@@ -83,18 +87,15 @@ class ResponseEvaluator:
 
             # Check for specific educational patterns
             has_citations = bool(re.search(r'\[[^]]+]|\([^)]+\)|according to|research shows', combined_text))
-            has_statistics = bool(re.search(r'\d+%|\d+\s*(percent|million|billion|thousand)', combined_text))
             provides_context = len(combined_text.split()) > 50  # Reasonable length for context
 
             return {
                 "educational_keyword_score": educational_score,
                 "has_citations": has_citations,
-                "has_statistics": has_statistics,
                 "provides_context": provides_context,
                 "overall_educational_score": np.mean([
                     educational_score,
                     float(has_citations),
-                    float(has_statistics),
                     float(provides_context)
                 ])
             }
@@ -234,8 +235,8 @@ class ResponseEvaluator:
         Returns:
             Dict with comprehensive evaluation metrics
         """
-        response = agent_output.get("response", "")
-        thought = agent_output.get("thought", "")
+        response = agent_output.get("final_response", "")
+        thought = agent_output.get("thought_1", "") + agent_output.get("thought_2", "") + agent_output.get("thought_3", "")
         paragraph = agent_output.get("paragraph", "")
         source = agent_output.get("source", "")
         url = agent_output.get("url", "")
@@ -250,19 +251,9 @@ class ResponseEvaluator:
         metrics['source_present'] = bool(source.strip())
         metrics['url_present'] = bool(url.strip())
 
-        # URL validation
-        if url:
-            url_validation = self.validate_url(url)
-            metrics['url_valid'] = url_validation["valid"]
-            metrics['url_status_code'] = url_validation["status_code"]
-            metrics['url_error'] = url_validation["error"]
-        else:
-            metrics.update({"url_valid": False, "url_status_code": None, "url_error": "No URL provided"})
-
         # Enhanced URL analysis
         found_urls = re.findall(r'https?://\S+', response)
         metrics['num_urls_found'] = len(found_urls)
-        metrics['includes_agent_url'] = url in response if url else False
 
         # Semantic analysis
         if response and comment:
@@ -289,9 +280,6 @@ class ResponseEvaluator:
             found_keywords = [kw for kw in expected_keywords if kw.lower() in response.lower()]
             metrics['keyword_coverage'] = len(found_keywords) / len(expected_keywords)
             metrics['found_keywords'] = found_keywords
-        else:
-            metrics['keyword_coverage'] = None
-            metrics['found_keywords'] = []
 
         # Sentiment and toxicity (with error handling)
         try:
@@ -301,16 +289,9 @@ class ResponseEvaluator:
         except Exception as e:
             metrics.update({"sentiment_label": "ERROR", "sentiment_score": 0.0, "sentiment_error": str(e)})
 
-        try:
-            toxicity = self.toxicity_pipeline(response[:512])[0]
-            metrics['toxicity_label'] = toxicity['label']
-            metrics['toxicity_score'] = toxicity['score']
-        except Exception as e:
-            metrics.update({"toxicity_label": "ERROR", "toxicity_score": 0.0, "toxicity_error": str(e)})
-
         # Length and richness
-        metrics['response_length_tokens'] = len(response.split())
-        metrics['response_length_chars'] = len(response)
+        metrics['response_length_words [max=200]'] = len(response.split())
+        metrics['response_sentences [max=4]'] = len(response.split(".")) - 1
         metrics['paragraph_length_tokens'] = len(paragraph.split())
         metrics['avg_sentence_length'] = np.mean([len(sent.split()) for sent in response.split('.') if sent.strip()])
 
@@ -328,8 +309,9 @@ class ResponseEvaluator:
 
         return metrics
 
-    @staticmethod
-    def evaluate_agent_response(comment, label, agent_output, expected_keywords=None):
-        """Convenience function for backward compatibility."""
-        evaluator = ResponseEvaluator()
-        return evaluator.evaluate_comprehensive(comment, label, agent_output, expected_keywords)
+    def evaluate_agent_response(self, comment, label, agent_output, expected_keywords=None) -> Dict[str, any]:
+        try:
+            """Convenience function for backward compatibility."""
+            return self.evaluate_comprehensive(comment, label, agent_output, expected_keywords)
+        except Exception as e:
+            raise Exception(f"Error in evaluate_agent_response: {e}")

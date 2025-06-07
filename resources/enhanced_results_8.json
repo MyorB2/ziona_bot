@@ -1,0 +1,62 @@
+{
+  "document_id": 8,
+  "success": true,
+  "document_quality": "HIGH",
+  "primary_categories": [
+    {
+      "id": 6,
+      "name": "Indirect Antisemitism",
+      "description": "Educational content countering mentions of Jewish/Israeli public figures with antisemitic implications"
+    }
+  ],
+  "detailed_scores": [
+    {
+      "category_id": 1,
+      "category_name": "General Hate/Other",
+      "addresses_category": false,
+      "confidence_score": 0.8,
+      "reasoning": "The document does not specifically address general hate or discrimination, but it does provide information about the misuse of statistics and propaganda by white supremacists to perpetuate harmful stereotypes. This content can be used as a broader educational tool to counter general prejudice and discrimination.\n\n**"
+    },
+    {
+      "category_id": 2,
+      "category_name": "Antisemitic Ideology",
+      "addresses_category": false,
+      "confidence_score": 0.6,
+      "reasoning": "The document does not directly address antisemitic ideologies or conspiracy theories, but it does provide information about the misuse of statistics and propaganda by white supremacists to perpetuate harmful stereotypes. This content can be used as a broader educational tool to counter general prejudice and discrimination.\n\n**"
+    },
+    {
+      "category_id": 3,
+      "category_name": "Stereotypes and Dehumanization",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not specifically address economic myths about Jewish people, provide factual information about Jewish diversity, or address racist stereotypes. However, it does provide information about the misuse of statistics and propaganda by white supremacists to perpetuate harmful stereotypes.\n\n**"
+    },
+    {
+      "category_id": 4,
+      "category_name": "Anti-Israel/Anti-Zionism",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not specifically address anti-Israel or anti-Zionist narratives, but it does provide information about the misuse of statistics and propaganda by white supremacists to perpetuate harmful stereotypes.\n\n**"
+    },
+    {
+      "category_id": 5,
+      "category_name": "Holocaust Denial and Sarcasm",
+      "addresses_category": false,
+      "confidence_score": 0.4,
+      "reasoning": "The document does not specifically address Holocaust denial or minimization, but it does provide information about the misuse of statistics and propaganda by white supremacists to perpetuate harmful stereotypes.\n\n**"
+    },
+    {
+      "category_id": 6,
+      "category_name": "Indirect Antisemitism",
+      "addresses_category": true,
+      "confidence_score": 0.9,
+      "reasoning": "The document provides information about how public figures are unfairly targeted and how antisemitic dog whistles can be used to perpetuate harmful stereotypes. This content can be used as a broader educational tool to counter indirect antisemitic targeting."
+    }
+  ],
+  "error_message": null,
+  "classification_summary": {
+    "total_categories_addressed": 1,
+    "high_confidence_scores": 2,
+    "avg_confidence": 0.6166666666666667
+  }
+}

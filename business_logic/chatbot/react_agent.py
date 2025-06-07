@@ -55,10 +55,11 @@ class ReActAgent:
                                                 "Provide a factual, educational response.")
 
         return (f"You are an educational assistant helping counter antisemitism with facts and respectful dialogue."
+                f"\nYou are responding to a person that wrote a problematic statement online."
                 f"\nUser's problematic statement: '{comment}'."
                 f"\nFactual information from trusted source:\n{retrieval_result.page_content}."
                 f"\nTask: {instruction}"
-                f"\nRequirements: Write exactly 4 sentences, Be calm, respectful, and educational, "
+                f"\nRequirements: Write exactly 4 sentences with up to 200 words, Be calm, respectful, and educational, "
                 f"Use facts from the provided source, Include the source URL: {retrieval_result.metadata["url"]}, "
                 f"Focus on education, not confrontation."
                 f"\nResponse:")
@@ -178,6 +179,7 @@ class ReActAgent:
                 "action_3": action_3,
                 "observation_3": observation_3,
                 "final_response": response_text,
+                "paragraph": best_result.page_content,
                 "source": best_result.metadata["source"],
                 "url": best_result.metadata["url"]
             }

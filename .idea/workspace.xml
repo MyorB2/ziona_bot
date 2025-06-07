@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="adaptive csv reader">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py">
+      <change afterPath="$PROJECT_DIR$/ziona_gui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ziona.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona_streamlit.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +77,7 @@
     "Python.web_search.executor": "Run",
     "Python.ziona.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "milti-class__only__deberta",
     "last_opened_file_path": "C:/Users/myor1/PycharmProjects/ziona_bot/resources",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -99,7 +100,7 @@
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\models" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.document_classifier">
+  <component name="RunManager" selected="Python.main">
     <configuration name="document_classifier" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ziona_bot" />
       <option name="ENV_FILES" value="" />
@@ -123,7 +124,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="react_agent" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ziona_bot" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -132,12 +133,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/business_logic/chatbot" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/business_logic/chatbot/react_agent.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -192,7 +193,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="ziona" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="ziona_streamlit" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ziona_bot" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -206,7 +207,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ziona.py" />
+      <option name="SCRIPT_NAME" value="C:\Users\myor1\PycharmProjects\ziona_bot\ziona_streamlit.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -217,11 +218,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.document_classifier" />
         <item itemvalue="Python.trial_doc_class" />
-        <item itemvalue="Python.ziona" />
+        <item itemvalue="Python.ziona_streamlit" />
         <item itemvalue="Python.web_search" />
-        <item itemvalue="Python.react_agent" />
       </list>
     </recent_temporary>
   </component>
@@ -266,6 +267,9 @@
       <workItem from="1748723608436" duration="592000" />
       <workItem from="1748769028079" duration="543000" />
       <workItem from="1748778865131" duration="22922000" />
+      <workItem from="1748930330371" duration="5221000" />
+      <workItem from="1748974853751" duration="7768000" />
+      <workItem from="1749280693629" duration="13903000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -523,7 +527,55 @@
       <option name="project" value="LOCAL‎" />
       <updated>1748845938822</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL‎-00033" summary="minor fix">
+      <option name="closed" value="true" />
+      <created>1748847759409</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL‎-00033" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748847759409</updated>
+    </task>
+    <task id="LOCAL‎-00034" summary="need to keep modify multilabel_classifier.py for using only DeBERTA">
+      <option name="closed" value="true" />
+      <created>1748937138705</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL‎-00034" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748937138705</updated>
+    </task>
+    <task id="LOCAL‎-00035" summary="need to keep modify multilabel_classifier.py for using only DeBERTA + need to fix react evaluation">
+      <option name="closed" value="true" />
+      <created>1748982943591</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL‎-00035" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1748982943591</updated>
+    </task>
+    <task id="LOCAL‎-00036" summary="need to keep modify multilabel_classifier.py for using only DeBERTA + minor improve in react_evaluator.py">
+      <option name="closed" value="true" />
+      <created>1749288187215</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL‎-00036" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749288187215</updated>
+    </task>
+    <task id="LOCAL‎-00037" summary="need to keep modify multilabel_classifier.py for using only DeBERTA + minor improve in react_evaluator.py">
+      <option name="closed" value="true" />
+      <created>1749291555325</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL‎-00037" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749291555325</updated>
+    </task>
+    <task id="LOCAL‎-00038" summary="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py">
+      <option name="closed" value="true" />
+      <created>1749296790942</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL‎-00038" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749296790942</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -541,10 +593,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="adding binary model - not done yet" />
-    <MESSAGE value="rewriting binary model - not done yet" />
-    <MESSAGE value="finish binary model" />
-    <MESSAGE value="fix evaluation" />
     <MESSAGE value="fix multiclass_classifier" />
     <MESSAGE value="fix multiclass_classifier + rename assets folder" />
     <MESSAGE value="gpt and claude rag" />
@@ -556,7 +604,6 @@
     <MESSAGE value="done!!!!" />
     <MESSAGE value="minor fixes" />
     <MESSAGE value="added scaping script NEED TO FIX WIKI" />
-    <MESSAGE value="minor fix" />
     <MESSAGE value="add connection of main to multilabel_classifier.py" />
     <MESSAGE value="add streamlit ui that receives only a comment" />
     <MESSAGE value="update streamlit ui" />
@@ -566,27 +613,32 @@
     <MESSAGE value="working classification script for documents" />
     <MESSAGE value="working classification script - need to rerun to save jsons" />
     <MESSAGE value="adaptive csv reader" />
-    <option name="LAST_COMMIT_MESSAGE" value="adaptive csv reader" />
+    <MESSAGE value="minor fix" />
+    <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA" />
+    <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + need to fix react evaluation" />
+    <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + minor improve in react_evaluator.py" />
+    <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
-          <line>426</line>
+          <line>429</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
-          <line>417</line>
+          <line>420</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1745217862042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_gpt.coverage" NAME="proj_for_gpt Coverage Results" MODIFIED="1748105835859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1749296737552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$main_claude_rag.coverage" NAME="main_claude_rag Coverage Results" MODIFIED="1747908654225" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1748371898706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$web_search.coverage" NAME="web_search Coverage Results" MODIFIED="1743876694501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

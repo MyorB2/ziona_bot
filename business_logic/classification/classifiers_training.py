@@ -1,0 +1,1 @@
+filtered_df = df[df["binary_category"] == 1][["clean_text", "updated_mapped_categories"]].reset_index(drop=True)

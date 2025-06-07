@@ -77,10 +77,9 @@ def load_knowledge_base(path: str):
     df = pd.read_csv(KNOWLEDGE_BASE_PATH)
     df = df[['source', 'url', 'paragraph', 'categories']]
     df = df.dropna(subset=['source', 'url', 'paragraph'])
-    df = df[df['url'].apply(lambda x: x.startswith("http"))]
     df.reset_index(drop=True, inplace=True)
     # category_id is list of integers
-    df["categories"] = df["categories"].apply(lambda x: ast.literal_eval(x))
+    df["primary_categories"] = df["primary_categories"].apply(lambda x: ast.literal_eval(x))
     return df
 
 
