@@ -87,18 +87,15 @@ class ResponseEvaluator:
 
             # Check for specific educational patterns
             has_citations = bool(re.search(r'\[[^]]+]|\([^)]+\)|according to|research shows', combined_text))
-            has_statistics = bool(re.search(r'\d+%|\d+\s*(percent|million|billion|thousand)', combined_text))
             provides_context = len(combined_text.split()) > 50  # Reasonable length for context
 
             return {
                 "educational_keyword_score": educational_score,
                 "has_citations": has_citations,
-                "has_statistics": has_statistics,
                 "provides_context": provides_context,
                 "overall_educational_score": np.mean([
                     educational_score,
                     float(has_citations),
-                    float(has_statistics),
                     float(provides_context)
                 ])
             }
@@ -254,13 +251,6 @@ class ResponseEvaluator:
         metrics['source_present'] = bool(source.strip())
         metrics['url_present'] = bool(url.strip())
 
-        # URL validation
-        if url:
-            url_validation = self.validate_url(url)
-            metrics['url_valid'] = url_validation["valid"]
-        else:
-            metrics.update({"url_valid": False, "url_status_code": None, "url_error": "No URL provided"})
-
         # Enhanced URL analysis
         found_urls = re.findall(r'https?://\S+', response)
         metrics['num_urls_found'] = len(found_urls)
@@ -299,16 +289,9 @@ class ResponseEvaluator:
         except Exception as e:
             metrics.update({"sentiment_label": "ERROR", "sentiment_score": 0.0, "sentiment_error": str(e)})
 
-        try:
-            toxicity = self.toxicity_pipeline(response[:512])[0]
-            metrics['toxicity_label'] = toxicity['label']
-            metrics['toxicity_score'] = toxicity['score']
-        except Exception as e:
-            metrics.update({"toxicity_label": "ERROR", "toxicity_score": 0.0, "toxicity_error": str(e)})
-
         # Length and richness
         metrics['response_length_words [max=200]'] = len(response.split())
-        metrics['response_sentences [max=4]'] = len(response.split("."))
+        metrics['response_sentences [max=4]'] = len(response.split(".")) - 1
         metrics['paragraph_length_tokens'] = len(paragraph.split())
         metrics['avg_sentence_length'] = np.mean([len(sent.split()) for sent in response.split('.') if sent.strip()])
 

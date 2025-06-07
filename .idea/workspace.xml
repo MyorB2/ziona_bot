@@ -5,7 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="need to keep modify multilabel_classifier.py for using only DeBERTA + minor improve in react_evaluator.py">
-      <change beforePath="$PROJECT_DIR$/src/faiss_index/index.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/src/faiss_index/index.pkl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/documents_retriever.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/documents_retriever.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/react_agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/react_agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/react_evaluator.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/react_evaluator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/classification/classification_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ziona.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,31 +67,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.document_classifier.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.main_claude_rag.executor&quot;: &quot;Run&quot;,
-    &quot;Python.proj_for_claude.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.proj_for_gpt.executor&quot;: &quot;Run&quot;,
-    &quot;Python.proj_w_llama.executor&quot;: &quot;Run&quot;,
-    &quot;Python.react_agent.executor&quot;: &quot;Run&quot;,
-    &quot;Python.trial_doc_class.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.web_search.executor&quot;: &quot;Run&quot;,
-    &quot;Python.ziona.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;milti-class__only__deberta&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/myor1/PycharmProjects/ziona_bot/resources&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.document_classifier.executor": "Run",
+    "Python.main (1).executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.main_claude_rag.executor": "Run",
+    "Python.proj_for_claude.executor": "Debug",
+    "Python.proj_for_gpt.executor": "Run",
+    "Python.proj_w_llama.executor": "Run",
+    "Python.react_agent.executor": "Run",
+    "Python.trial_doc_class.executor": "Debug",
+    "Python.web_search.executor": "Run",
+    "Python.ziona.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "milti-class__only__deberta",
+    "last_opened_file_path": "C:/Users/myor1/PycharmProjects/ziona_bot/resources",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\resources" />
@@ -267,7 +273,7 @@
       <workItem from="1748778865131" duration="22922000" />
       <workItem from="1748930330371" duration="5221000" />
       <workItem from="1748974853751" duration="7768000" />
-      <workItem from="1749280693629" duration="7359000" />
+      <workItem from="1749280693629" duration="12818000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -557,7 +563,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749288187215</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL‎-00037" summary="need to keep modify multilabel_classifier.py for using only DeBERTA + minor improve in react_evaluator.py">
+      <option name="closed" value="true" />
+      <created>1749291555325</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL‎-00037" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749291555325</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -620,7 +634,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_gpt.coverage" NAME="proj_for_gpt Coverage Results" MODIFIED="1748105835859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1749285578984" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/ziona_bot$main.coverage" NAME="main Coverage Results" MODIFIED="1749296737552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$main_claude_rag.coverage" NAME="main_claude_rag Coverage Results" MODIFIED="1747908654225" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1748371898706" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$web_search.coverage" NAME="web_search Coverage Results" MODIFIED="1743876694501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

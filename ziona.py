@@ -107,9 +107,10 @@ if st.button("Analyze & Generate Response"):
     else:
         with st.status("Classifying comment...", expanded=True) as status:
             # Step 1: Classify the comment
-            classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
-            pred = classification_model.predict(comment)
-            category_id = pred["predicted_labels"][0]
+            # classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
+            # pred = classification_model.predict(comment)
+            # category_id = pred["predicted_labels"][0]
+            category_id =
             category_name = LABEL_MAP[category_id]
             st.write(f"**Category ID:** {category_id}")
             st.write(f"**Category Name:** {category_name}")

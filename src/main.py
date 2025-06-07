@@ -81,11 +81,11 @@ def main():
 
         # Example usage
         test_cases = [
-            {
-                "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
-                "category_id": 5,
-                "category_name": label_map[5]
-            },
+            # {
+            #     "comment": "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",
+            #     "category_id": 5,
+            #     "category_name": label_map[5]
+            # },
             {
                 "comment": "do all israelis kills babies for fun???",
                 "category_id": 3,
@@ -98,12 +98,12 @@ def main():
                 "category_name": label_map[2]
             },
             {
-                "comment": "think facebook care? the last name of the ceo is Zuckerberg, is there more greedy person them a jew?",
+                "comment": "think facebook care? the last name of the ceo is Zuckerberg, is there more greedy person then a jew?",
                 "category_id": 1,
                 "category_name": label_map[1]
             },
             {
-                "comment": "what did you expect??? they insist the germans did them a genocide(!) "
+                "comment": "what did you expect??? they claim the Germans genocide(!) them "
                            "of course they insist hamas try to eliminate them!",
                 "category_id": 4,
                 "category_name": label_map[4]
@@ -113,9 +113,9 @@ def main():
         eval_scores = {}
 
         for i, test_case in enumerate(test_cases, 1):
-            print(f"\n{'=' * 50}")
+            print(f"\n{'=' * 10}")
             print(f"Test Case {i}")
-            print(f"{'=' * 50}")
+            print(f"{'=' * 10}")
 
             result = agent.generate_response(
                 test_case["comment"],
@@ -129,14 +129,14 @@ def main():
                 "Category": test_case['category_name'],
                 "Thought 1": result['thought_1'],
                 "Action 1": result['action_1'],
-                "Observation 1": "{result['observation_1']}",
-                "Thought 2": "{result['thought_2']}",
-                "Action 2": "{result['action_2']}",
+                "Observation 1": result['observation_1'],
+                "Thought 2": result['thought_2'],
+                "Action 2": result['action_2'],
                 "Observation 2": result['observation_2'],
                 "Thought 3": result['thought_3'],
                 "Action 3": result['action_3'],
                 "Observation 3": result['observation_3'],
-                "Final Response": result['final_response'],
+                "Final Response": result['final_response'].split("\n").join(" "),
                 "Source": result['source'],
                 "URL": result['url']
             }

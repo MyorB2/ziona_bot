@@ -55,6 +55,7 @@ class ReActAgent:
                                                 "Provide a factual, educational response.")
 
         return (f"You are an educational assistant helping counter antisemitism with facts and respectful dialogue."
+                f"\nYou are responding to a person that wrote a problematic statement online."
                 f"\nUser's problematic statement: '{comment}'."
                 f"\nFactual information from trusted source:\n{retrieval_result.page_content}."
                 f"\nTask: {instruction}"
