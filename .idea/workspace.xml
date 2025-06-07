@@ -4,26 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="adding a beautiful flet gui">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/faiss_index/index.faiss" beforeDir="false" afterPath="$PROJECT_DIR$/faiss_index/index.faiss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/faiss_index/index.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/faiss_index/index.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_0.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_1.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_2.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_3.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_4.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_5.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_6.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_7.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_8.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/enhanced_results_9.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/response_1.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/response_2.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/response_3.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/response_4.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/response_5.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ziona_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona_gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/knowledge_base.csv" beforeDir="false" afterPath="$PROJECT_DIR$/resources/knowledge_base.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/knowledge_base_categorized.csv" beforeDir="false" afterPath="$PROJECT_DIR$/resources/knowledge_base_categorized.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +104,7 @@
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\models" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ziona_gui">
+  <component name="RunManager" selected="Python.document_classifier">
     <configuration name="document_classifier" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ziona_bot" />
       <option name="ENV_FILES" value="" />
@@ -235,9 +222,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.document_classifier" />
         <item itemvalue="Python.ziona_gui" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.document_classifier" />
         <item itemvalue="Python.trial_doc_class" />
         <item itemvalue="Python.ziona_streamlit" />
       </list>
@@ -287,6 +274,7 @@
       <workItem from="1748930330371" duration="5221000" />
       <workItem from="1748974853751" duration="7768000" />
       <workItem from="1749280693629" duration="13903000" />
+      <workItem from="1749306423293" duration="3291000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -592,7 +580,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749296790942</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL‎-00039" summary="adding a beautiful flet gui">
+      <option name="closed" value="true" />
+      <created>1749305889361</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL‎-00039" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749305889361</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -610,7 +606,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix multiclass_classifier" />
     <MESSAGE value="fix multiclass_classifier + rename assets folder" />
     <MESSAGE value="gpt and claude rag" />
     <MESSAGE value="working react base responce" />
@@ -635,45 +630,26 @@
     <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + need to fix react evaluation" />
     <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + minor improve in react_evaluator.py" />
     <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py" />
+    <MESSAGE value="adding a beautiful flet gui" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding a beautiful flet gui" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
-          <line>429</line>
+          <line>431</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
-          <line>420</line>
-          <option name="timeStamp" value="17" />
+          <line>424</line>
+          <option name="timeStamp" value="56" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>36</line>
-          <option name="timeStamp" value="48" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>39</line>
-          <option name="timeStamp" value="49" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>35</line>
-          <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>37</line>
-          <option name="timeStamp" value="53" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>38</line>
-          <option name="timeStamp" value="54" />
+          <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
+          <line>426</line>
+          <option name="timeStamp" value="57" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -689,7 +665,7 @@
     <SUITE FILE_PATH="coverage/ziona_bot$ziona_gui.coverage" NAME="ziona_gui Coverage Results" MODIFIED="1749304438465" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$ziona.coverage" NAME="ziona Coverage Results" MODIFIED="1748720097275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$trial_doc_class.coverage" NAME="trial_doc_class Coverage Results" MODIFIED="1748835048568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
-    <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1748847723535" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
+    <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1749311924309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
     <SUITE FILE_PATH="coverage/ziona_bot$.coverage" NAME=" Coverage Results" MODIFIED="1748833544126" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/ziona_bot$proj_w_llama.coverage" NAME="proj_w_llama Coverage Results" MODIFIED="1748111155642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
