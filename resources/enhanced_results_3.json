@@ -1,0 +1,77 @@
+{
+  "document_id": 3,
+  "success": true,
+  "document_quality": "HIGH",
+  "primary_categories": [
+    {
+      "id": 2,
+      "name": "Antisemitic Ideology",
+      "description": "Educational content countering calls for annihilation, conspiracy theories, or portraying Jewish people as evil"
+    },
+    {
+      "id": 3,
+      "name": "Stereotypes and Dehumanization",
+      "description": "Educational content countering economic stereotypes, biological racism, or humiliating external imaging of Jewish people"
+    },
+    {
+      "id": 4,
+      "name": "Anti-Israel/Anti-Zionism",
+      "description": "Educational content countering demonization of Israel, Nazi comparisons, anti-Zionism, or denial of Israel's right to exist"
+    },
+    {
+      "id": 5,
+      "name": "Holocaust Denial and Sarcasm",
+      "description": "Educational content countering Holocaust denial, minimization, or sarcastic references to the Holocaust"
+    }
+  ],
+  "detailed_scores": [
+    {
+      "category_id": 1,
+      "category_name": "General Hate/Other",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not specifically address general hate or discrimination, but it does provide an introduction to antisemitism and its historical context, which could be used as a foundation for discussing broader issues of prejudice."
+    },
+    {
+      "category_id": 2,
+      "category_name": "Antisemitic Ideology",
+      "addresses_category": true,
+      "confidence_score": 0.8,
+      "reasoning": "The document provides key facts about the history and development of antisemitism, including its role in the Holocaust. This information can be used to counter conspiracy theories and debunk myths about Jewish people."
+    },
+    {
+      "category_id": 3,
+      "category_name": "Stereotypes and Dehumanization",
+      "addresses_category": true,
+      "confidence_score": 0.7,
+      "reasoning": "The document provides an introduction to the history of antisemitism, which includes addressing stereotypes and dehumanization of Jewish people. It also mentions the genocide of European Roma (Gypsies) during World War II, which can be used to counter economic myths about Jewish people."
+    },
+    {
+      "category_id": 4,
+      "category_name": "Anti-Israel/Anti-Zionism",
+      "addresses_category": true,
+      "confidence_score": 0.6,
+      "reasoning": "The document provides factual information about Israel's history and the Holocaust, which can be used to counter false narratives about Israel and Zionism."
+    },
+    {
+      "category_id": 5,
+      "category_name": "Holocaust Denial and Sarcasm",
+      "addresses_category": true,
+      "confidence_score": 0.9,
+      "reasoning": "The document provides historical facts about the Holocaust, including the number of people murdered by the Nazis, which can be used to counter denial arguments."
+    },
+    {
+      "category_id": 6,
+      "category_name": "Indirect Antisemitism",
+      "addresses_category": false,
+      "confidence_score": 0.2,
+      "reasoning": "The document does not specifically address indirect antisemitic targeting or the harm caused by dog whistles. However, it does provide information about the Holocaust and its impact on Jewish people, which can be used to counter broader issues of prejudice.\n\nPlease note that the confidence levels are subjective and based on my understanding of the document's content."
+    }
+  ],
+  "error_message": null,
+  "classification_summary": {
+    "total_categories_addressed": 4,
+    "high_confidence_scores": 2,
+    "avg_confidence": 0.6166666666666667
+  }
+}

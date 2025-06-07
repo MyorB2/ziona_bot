@@ -58,7 +58,7 @@ class ReActAgent:
                 f"\nUser's problematic statement: '{comment}'."
                 f"\nFactual information from trusted source:\n{retrieval_result.page_content}."
                 f"\nTask: {instruction}"
-                f"\nRequirements: Write exactly 4 sentences, Be calm, respectful, and educational, "
+                f"\nRequirements: Write exactly 4 sentences with up to 200 words, Be calm, respectful, and educational, "
                 f"Use facts from the provided source, Include the source URL: {retrieval_result.metadata["url"]}, "
                 f"Focus on education, not confrontation."
                 f"\nResponse:")

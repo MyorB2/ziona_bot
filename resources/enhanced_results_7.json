@@ -1,0 +1,56 @@
+{
+  "document_id": 7,
+  "success": true,
+  "document_quality": "MEDIUM",
+  "primary_categories": [],
+  "detailed_scores": [
+    {
+      "category_id": 1,
+      "category_name": "General Hate/Other",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document appears to be discussing a specific racist prison gang and its symbolism, which is not directly related to general hate or discrimination. However, it could potentially be used as an example of how symbols can be misused for hateful purposes.\n\n**"
+    },
+    {
+      "category_id": 2,
+      "category_name": "Antisemitic Ideology",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not contain any explicit antisemitic ideologies or conspiracy theories. It is focused on a specific racist prison gang and its symbolism, which is not directly related to antisemitism.\n\n**"
+    },
+    {
+      "category_id": 3,
+      "category_name": "Stereotypes and Dehumanization",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not contain any stereotypes or dehumanizing language about Jewish people. It is focused on a specific racist prison gang and its symbolism, which is not related to Jewish stereotypes.\n\n**"
+    },
+    {
+      "category_id": 4,
+      "category_name": "Anti-Israel/Anti-Zionism",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not contain any anti-Israel or anti-Zionist narratives. It is focused on a specific racist prison gang and its symbolism, which is not related to Israel or Zionism.\n\n**"
+    },
+    {
+      "category_id": 5,
+      "category_name": "Holocaust Denial and Sarcasm",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not contain any Holocaust denial or minimization arguments. It is focused on a specific racist prison gang and its symbolism, which is not related to the Holocaust.\n\n**"
+    },
+    {
+      "category_id": 6,
+      "category_name": "Indirect Antisemitism",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "The document does not contain any indirect antisemitic targeting or language. It is focused on a specific racist prison gang and its symbolism, which is not related to Jewish people.\n\nPlease note that the confidence levels are relatively low since the document does not directly address any of the categories."
+    }
+  ],
+  "error_message": null,
+  "classification_summary": {
+    "total_categories_addressed": 0,
+    "high_confidence_scores": 0,
+    "avg_confidence": 0.5
+  }
+}

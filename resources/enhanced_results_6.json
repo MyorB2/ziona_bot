@@ -1,0 +1,67 @@
+{
+  "document_id": 6,
+  "success": true,
+  "document_quality": "MEDIUM",
+  "primary_categories": [
+    {
+      "id": 2,
+      "name": "Antisemitic Ideology",
+      "description": "Educational content countering calls for annihilation, conspiracy theories, or portraying Jewish people as evil"
+    },
+    {
+      "id": 6,
+      "name": "Indirect Antisemitism",
+      "description": "Educational content countering mentions of Jewish/Israeli public figures with antisemitic implications"
+    }
+  ],
+  "detailed_scores": [
+    {
+      "category_id": 1,
+      "category_name": "General Hate/Other",
+      "addresses_category": false,
+      "confidence_score": 0.5,
+      "reasoning": "This document does not specifically address general hate or discrimination, but it does provide information about a specific symbol (12) and its association with racist prison gangs. While this content may indirectly contribute to countering general hate by highlighting the harm caused by such symbols, the primary focus is on the numeric symbol itself rather than addressing general prejudice."
+    },
+    {
+      "category_id": 2,
+      "category_name": "Antisemitic Ideology",
+      "addresses_category": true,
+      "confidence_score": 0.8,
+      "reasoning": "The document provides information about the Aryan Brotherhood and its association with racist prison gangs, which can be seen as countering antisemitic ideologies that portray Jewish people as evil or associated with white supremacy."
+    },
+    {
+      "category_id": 3,
+      "category_name": "Stereotypes and Dehumanization",
+      "addresses_category": false,
+      "confidence_score": 0.2,
+      "reasoning": "The document does not specifically address stereotypes about Jewish people, nor does it provide information that would help counter dehumanizing external imaging of Jewish people."
+    },
+    {
+      "category_id": 4,
+      "category_name": "Anti-Israel/Anti-Zionism",
+      "addresses_category": false,
+      "confidence_score": 0.1,
+      "reasoning": "The document does not address Israel or Zionism specifically, so it does not provide content that would help counter anti-Israel/anti-Zionist narratives."
+    },
+    {
+      "category_id": 5,
+      "category_name": "Holocaust Denial and Sarcasm",
+      "addresses_category": false,
+      "confidence_score": 0.0,
+      "reasoning": "The document does not mention the Holocaust or provide information that would help counter Holocaust denial or minimization."
+    },
+    {
+      "category_id": 6,
+      "category_name": "Indirect Antisemitism",
+      "addresses_category": true,
+      "confidence_score": 0.7,
+      "reasoning": "By highlighting the association of the number 12 with racist prison gangs, this document can be seen as countering indirect antisemitic targeting by showing how symbols and numbers can be used to perpetuate hate and discrimination against Jewish people."
+    }
+  ],
+  "error_message": null,
+  "classification_summary": {
+    "total_categories_addressed": 2,
+    "high_confidence_scores": 1,
+    "avg_confidence": 0.3833333333333333
+  }
+}

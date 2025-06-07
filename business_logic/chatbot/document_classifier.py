@@ -212,7 +212,8 @@ REASONING: [Explain what content helps counter indirect antisemitic targeting]
 
 ### BEGIN CLASSIFICATION:"""
 
-    def _parse_classification_response(self, response: str) -> List[CategoryScore]:
+    @staticmethod
+    def _parse_classification_response(response: str) -> List[CategoryScore]:
         """Parse the comprehensive LLM response"""
         category_scores = []
 
@@ -424,7 +425,7 @@ if __name__ == "__main__":
         knowledge_base.reset_index(drop=True, inplace=True)
 
         # Run only over 200 rows
-        knowledge_base = knowledge_base.iloc[234:435]
+        knowledge_base = knowledge_base.iloc[335:435]
 
         logger.info(f"Processing {len(knowledge_base)} documents")
 
@@ -452,7 +453,7 @@ if __name__ == "__main__":
                 knowledge_base.at[index, 'primary_categories'] = [cat.id for cat in result.primary_categories]
                 knowledge_base.at[index, 'document_quality'] = result.document_quality
                 knowledge_base.at[index, 'confidence_scores'] = {
-                    score.category.id: score.score for score in result.all_scores
+                    score.category.id: (score.addresses_category, score.score) for score in result.all_scores
                 }
                 knowledge_base.to_csv(str(RESOURCE_PATH / "knowledge_base_categorized.csv"), index=False)
                 # # Print summary for first 5 documents

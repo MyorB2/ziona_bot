@@ -1,5 +1,8 @@
 import ast
+import json
 import logging
+from pathlib import Path
+
 import numpy as np
 import os
 import pandas as pd
@@ -19,6 +22,9 @@ logging.getLogger("faiss").setLevel(logging.WARNING)
 logging.getLogger("faiss.loader").setLevel(logging.WARNING)
 
 HF_TOKEN = "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"
+ROOT_PATH = Path(__file__).parent.parent
+RESOURCE_PATH = ROOT_PATH / "resources"
+KNOWLEDGE_BASE_PATH = RESOURCE_PATH / "knowledge_base_categorized.csv"
 
 # Suppress Windows symlink warning for Hugging Face cache
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
@@ -26,10 +32,6 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 def main():
     """Main function to demonstrate usage"""
-
-    # Configuration
-    KNOWLEDGE_BASE_PATH = r"C:\Users\myor1\PycharmProjects\ziona_bot\resources\knowledge_base_categorized.csv"
-
     try:
         # Categories explanation
         # 1: Calling for annihilation, theory conspiracies, identify Jewish people as evil.
@@ -121,20 +123,41 @@ def main():
                 test_case["category_name"]
             )
 
-            print(f"Comment: {test_case['comment']}")
-            print(f"Category: {test_case['category_name']}")
-            print(f"Thought 1: {result['thought_1']}")
-            print(f"Action 1: {result['action_1']}")
-            print(f"Observation 1: {result['observation_1']}")
-            print(f"Thought 2: {result['thought_2']}")
-            print(f"Action 2: {result['action_2']}")
-            print(f"Observation 2: {result['observation_2']}")
-            print(f"Thought 3: {result['thought_3']}")
-            print(f"Action 3: {result['action_3']}")
-            print(f"Observation 3: {result['observation_3']}")
-            print(f"Final Response: {result['final_response']}")
-            print(f"Source: {result['source']}")
-            print(f"URL: {result['url']}")
+            # Export detailed JSON
+            json_result = {
+                "Comment": test_case['comment'],
+                "Category": test_case['category_name'],
+                "Thought 1": result['thought_1'],
+                "Action 1": result['action_1'],
+                "Observation 1": "{result['observation_1']}",
+                "Thought 2": "{result['thought_2']}",
+                "Action 2": "{result['action_2']}",
+                "Observation 2": result['observation_2'],
+                "Thought 3": result['thought_3'],
+                "Action 3": result['action_3'],
+                "Observation 3": result['observation_3'],
+                "Final Response": result['final_response'],
+                "Source": result['source'],
+                "URL": result['url']
+            }
+            json_result = json.dumps(json_result, indent=2, ensure_ascii=False)
+            with open(str(RESOURCE_PATH / f"response_{i}.json"), "w", encoding="utf-8") as f:
+                f.write(json_result)
+
+            # print(f"Comment: {test_case['comment']}")
+            # print(f"Category: {test_case['category_name']}")
+            # print(f"Thought 1: {result['thought_1']}")
+            # print(f"Action 1: {result['action_1']}")
+            # print(f"Observation 1: {result['observation_1']}")
+            # print(f"Thought 2: {result['thought_2']}")
+            # print(f"Action 2: {result['action_2']}")
+            # print(f"Observation 2: {result['observation_2']}")
+            # print(f"Thought 3: {result['thought_3']}")
+            # print(f"Action 3: {result['action_3']}")
+            # print(f"Observation 3: {result['observation_3']}")
+            # print(f"Final Response: {result['final_response']}")
+            # print(f"Source: {result['source']}")
+            # print(f"URL: {result['url']}")
 
             logger.info("Start evaluating...")
             evaluator = ResponseEvaluator()

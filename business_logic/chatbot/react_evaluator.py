@@ -266,7 +266,6 @@ class ResponseEvaluator:
         # Enhanced URL analysis
         found_urls = re.findall(r'https?://\S+', response)
         metrics['num_urls_found'] = len(found_urls)
-        metrics['includes_agent_url'] = url in response if url else False
 
         # Semantic analysis
         if response and comment:
@@ -313,8 +312,8 @@ class ResponseEvaluator:
             metrics.update({"toxicity_label": "ERROR", "toxicity_score": 0.0, "toxicity_error": str(e)})
 
         # Length and richness
-        metrics['response_length_tokens'] = len(response.split())
-        metrics['response_length_chars'] = len(response)
+        metrics['response_length_words [max=200]'] = len(response.split())
+        metrics['response_sentences [max=4]'] = len(response.split("."))
         metrics['paragraph_length_tokens'] = len(paragraph.split())
         metrics['avg_sentence_length'] = np.mean([len(sent.split()) for sent in response.split('.') if sent.strip()])
 
@@ -332,7 +331,7 @@ class ResponseEvaluator:
 
         return metrics
 
-    def evaluate_agent_response(self, comment, label, agent_output, expected_keywords=None):
+    def evaluate_agent_response(self, comment, label, agent_output, expected_keywords=None) -> Dict[str, any]:
         try:
             """Convenience function for backward compatibility."""
             return self.evaluate_comprehensive(comment, label, agent_output, expected_keywords)
