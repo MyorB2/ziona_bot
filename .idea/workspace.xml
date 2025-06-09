@@ -4,14 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="minor fix in document_classifier.py">
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="add excel for ziona bot">
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/knowledge_base.csv" beforeDir="false" afterPath="$PROJECT_DIR$/resources/knowledge_base.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/knowledge_base_categorized.csv" beforeDir="false" afterPath="$PROJECT_DIR$/resources/knowledge_base_categorized.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/faiss_index/index.faiss" beforeDir="false" afterPath="$PROJECT_DIR$/faiss_index/index.faiss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/faiss_index/index.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/faiss_index/index.pkl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ziona_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona_gui.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -277,7 +277,8 @@
       <workItem from="1748974853751" duration="7768000" />
       <workItem from="1749280693629" duration="13903000" />
       <workItem from="1749306423293" duration="3670000" />
-      <workItem from="1749444899589" duration="4362000" />
+      <workItem from="1749444899589" duration="4519000" />
+      <workItem from="1749494412199" duration="4243000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -599,7 +600,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749313699176</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL‎-00041" summary="add excel for ziona bot">
+      <option name="closed" value="true" />
+      <created>1749449445732</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL‎-00041" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749449445732</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -617,7 +626,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="gpt and claude rag" />
     <MESSAGE value="working react base responce" />
     <MESSAGE value="updated binary_classifier.py + NEED TO UPDATE MULTICLASIFIER" />
     <MESSAGE value="tried to use llm for document classification, but it is bad + NEED TO UPDATE MULTICLASIFIER" />
@@ -642,38 +650,8 @@
     <MESSAGE value="need to keep modify multilabel_classifier.py for using only DeBERTA + another improve in react_evaluator.py" />
     <MESSAGE value="adding a beautiful flet gui" />
     <MESSAGE value="minor fix in document_classifier.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor fix in document_classifier.py" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>187</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>189</line>
-          <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>200</line>
-          <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>201</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ziona_gui.py</url>
-          <line>574</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="add excel for ziona bot" />
+    <option name="LAST_COMMIT_MESSAGE" value="add excel for ziona bot" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_gpt.coverage" NAME="proj_for_gpt Coverage Results" MODIFIED="1748105835859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
@@ -683,7 +661,7 @@
     <SUITE FILE_PATH="coverage/ziona_bot$web_search.coverage" NAME="web_search Coverage Results" MODIFIED="1743876694501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_claude.coverage" NAME="proj_for_claude Coverage Results" MODIFIED="1748092184740" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/ziona_bot$react_agent.coverage" NAME="react_agent Coverage Results" MODIFIED="1748369842430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
-    <SUITE FILE_PATH="coverage/ziona_bot$ziona_gui.coverage" NAME="ziona_gui Coverage Results" MODIFIED="1749449291676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ziona_bot$ziona_gui.coverage" NAME="ziona_gui Coverage Results" MODIFIED="1749498543142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$ziona.coverage" NAME="ziona Coverage Results" MODIFIED="1748720097275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$trial_doc_class.coverage" NAME="trial_doc_class Coverage Results" MODIFIED="1748835048568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
     <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1749311924309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />

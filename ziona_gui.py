@@ -34,6 +34,8 @@ def normalize_categories_column(row):
 
 class ZionaApp:
     def __init__(self):
+        self.is_valid_comment_df = None
+        self.comments_df = None
         self.knowledge_base = None
         self.classification_model = None
         self.page = None
@@ -61,12 +63,12 @@ class ZionaApp:
             self.resources_loaded = False
             return False
 
-    def analyze_comment_async(self, comment_text, progress_bar, status_text, result_container, analyze_button):
+    def analyze_comment_async(self, comment_text, result_container):
         """Analyze comment in a separate thread to prevent UI blocking"""
         try:
             # Update UI - Classification step
             self.page.run_thread(
-                lambda: self.update_progress(progress_bar, status_text, 0.3, "Classifying comment..."))
+                lambda: self.update_progress(0.3, "Classifying comment..."))
 
             # Step 1: Classify the comment
             # pred = self.classification_model.predict(comment_text)
@@ -76,14 +78,14 @@ class ZionaApp:
 
             # Update UI - Response generation step
             self.page.run_thread(
-                lambda: self.update_progress(progress_bar, status_text, 0.6, "Generating educational response..."))
+                lambda: self.update_progress(0.6, "Generating educational response..."))
 
             # Step 2: Generate the educational response
             agent = ReActAgent(self.knowledge_base)
             response = agent.generate_response(comment_text, category_id, category_name)
 
             # Update UI - Complete
-            self.page.run_thread(lambda: self.update_progress(progress_bar, status_text, 1.0, "Analysis complete!"))
+            self.page.run_thread(lambda: self.update_progress(1.0, "Analysis complete!"))
 
             # Display results
             self.page.run_thread(
@@ -91,26 +93,26 @@ class ZionaApp:
 
         except Exception as e:
             error_msg = f"Error during analysis: {str(e)}"
-            self.page.run_thread(lambda: self.show_error(status_text, error_msg))
+            self.page.run_thread(lambda: self.show_error(error_msg))
         finally:
             # Re-enable button and reset text
             def reset_button():
-                analyze_button.disabled = False
-                analyze_button.text = "Analyze & Generate Response"
+                self.analyze_button.disabled = False
+                self.analyze_button.text = "Analyze & Generate Response"
                 self.page.update()
 
             self.page.run_thread(reset_button)
 
-    def update_progress(self, progress_bar, status_text, value, text):
+    def update_progress(self, progress_bar_value, status_text_value):
         """Update progress bar and status text"""
-        progress_bar.value = value
-        status_text.value = text
+        self.progress_bar.value = progress_bar_value
+        self.status_text.value = status_text_value
         self.page.update()
 
-    def show_error(self, status_text, error_msg):
+    def show_error(self, error_msg):
         """Show error message"""
-        status_text.value = error_msg
-        status_text.color = ft.Colors.RED
+        self.status_text.value = error_msg
+        self.status_text.color = ft.Colors.RED
         self.page.update()
 
     def display_results(self, result_container, category_id, category_name, response):
@@ -182,65 +184,71 @@ class ZionaApp:
         self.page.update()
 
     @staticmethod
-    def validate_excel_file(file_path):
+    def read_excel_file(excel_path):
+        # Try reading the file with and without headers
+        try:
+            # Attempt to read with headers
+            df = pd.read_excel(excel_path)
+
+            # We expect a header to be only one word.
+            # If all columns are longer then one word, treat as no headers
+            if all(len(str(col).split()) > 1 for col in df.columns):
+                raise ValueError("Detected no proper headers, switching to header=None")
+            df.columns = ["comment"]
+            df["comment"].dropna()
+            print("Excel read with headers...")
+            return df
+        except Exception:
+            # Read without headers
+            df = pd.read_excel(excel_path, header=None)
+            df.columns = ["comment"]
+            df["comment"].dropna()
+            print("Excel read without headers...")
+            return df
+
+    def validate_excel_file(self, file_path):
         """Validate uploaded Excel file"""
         try:
-            df = pd.read_excel(file_path, names=["comment"])
+            self.comments_df = self.read_excel_file(file_path)
 
-            if df.empty:
+            if self.comments_df.empty:
                 return False, "Excel file is empty"
 
-            # Check for 'comment' column (case insensitive)
-            comment_columns = [col for col in df.columns if 'comment' in col.lower()]
-            if not comment_columns:
-                return False, "Excel file must contain a 'comment' column"
-
-            comment_col = comment_columns[0]
-
-            # Check if comment column has valid data
-            valid_comments = df[comment_col].dropna()
-            valid_comments = valid_comments[valid_comments.astype(str).str.strip() != '']
-
-            if len(valid_comments) == 0:
+            if len(self.comments_df["comment"]) == 0:
                 return False, "No valid comments found in the file"
 
-            if len(valid_comments) > 100:
+            if len(self.comments_df["comment"]) > 100:
                 return False, "Too many comments (maximum 100 allowed)"
 
-            return True, f"Found {len(valid_comments)} valid comments to analyze"
+            return True, f"Found {len(self.comments_df["comment"])} valid comments to analyze"
 
         except Exception as e:
             return False, f"Error reading Excel file: {str(e)}"
 
-    def process_batch_analysis(self, file_path, progress_bar, status_text, result_container, analyze_button):
+    def process_batch_analysis(self, result_container):
         """Process batch analysis of Excel file"""
         try:
             # Read Excel file
-            df = pd.read_excel(file_path)
-            comment_columns = [col for col in df.columns if 'comment' in col.lower()]
-            comment_col = comment_columns[0]
 
             # Filter valid comments
-            valid_df = df[df[comment_col].notna() & (df[comment_col].astype(str).str.strip() != '')]
-            total_comments = len(valid_df)
+            total_comments = len(self.comments_df)
 
             results = []
             agent = ReActAgent(self.knowledge_base)
 
-            j = 0
-            for index, row in valid_df.iterrows():
-                comment_text = str(row[comment_col]).strip()
+            i = 1
+            for index, row in self.comments_df.iterrows():
+                comment_text = str(row["comment"]).strip()
 
                 # Update progress
-                current_progress = (j + 1) / total_comments
-                self.page.run_in_thread(
+                current_progress = i / total_comments
+                self.page.run_thread(
                     lambda idx=index: self.update_progress(
-                        progress_bar, status_text,
                         current_progress,
-                        f"Processing comment {j + 1}/{total_comments}..."
+                        f"Processing comment {i}/{total_comments}..."
                     )
                 )
-                j += 1
+                i += 1
 
                 try:
                     # Classify comment
@@ -261,8 +269,7 @@ class ZionaApp:
                         'educational_response': response.get('final_response', ''),
                         'source': response.get('source', ''),
                         'source_url': response.get('url', ''),
-                        'retrieval_score': response.get('retrieval_score', 0),
-                        'analysis_timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        'retrieval_score': response.get('retrieval_score', 0)
                     }
                     results.append(result)
 
@@ -276,8 +283,7 @@ class ZionaApp:
                         'educational_response': f'Error processing comment: {str(e)}',
                         'source': '',
                         'source_url': '',
-                        'retrieval_score': 0,
-                        'analysis_timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                        'retrieval_score': 0
                     }
                     results.append(result)
 
@@ -289,26 +295,26 @@ class ZionaApp:
             results_df.to_csv(output_path, index=False, encoding='utf-8-sig')
 
             # Update UI with completion
-            self.page.run_in_thread(
-                lambda: self.update_progress(progress_bar, status_text, 1.0, "Batch analysis complete!")
+            self.page.run_thread(
+                lambda: self.update_progress(1.0, "Batch analysis complete!")
             )
 
             # Display batch results
-            self.page.run_in_thread(
+            self.page.run_thread(
                 lambda: self.display_batch_results(result_container, results, output_path)
             )
 
         except Exception as e:
             error_msg = f"Error during batch analysis: {str(e)}"
-            self.page.run_in_thread(lambda: self.show_error(status_text, error_msg))
+            self.page.run_thread(lambda: self.show_error(error_msg))
         finally:
             # Re-enable button
             def reset_button():
-                analyze_button.disabled = False
-                analyze_button.text = "Analyze Excel File"
+                self.analyze_button.disabled = False
+                self.analyze_button.text = "Analyze Excel File"
                 self.page.update()
 
-            self.page.run_in_thread(reset_button)
+            self.page.run_thread(reset_button)
 
     def display_batch_results(self, result_container, results, output_path):
         """Display batch analysis results"""
@@ -363,7 +369,7 @@ class ZionaApp:
         preview_card = ft.Card(
             content=ft.Container(
                 content=ft.Column([
-                    ft.Text("Sample Results (First 3)", size=18, weight=ft.FontWeight.BOLD),
+                    ft.Text("Sample Results", size=18, weight=ft.FontWeight.BOLD),
                     *[
                         ft.Container(
                             content=ft.Column([
@@ -405,28 +411,28 @@ class ZionaApp:
 
         return True, ""
 
-    def update_analyze_button_state(self, button, input_text, status_text=None):
+    def update_analyze_button_state(self, button, input_text):
         """Update analyze button state based on validation"""
         if not self.resources_loaded:
             button.disabled = True
-            if status_text:
-                status_text.value = "Please restart the application - resources failed to load"
-                status_text.color = ft.Colors.RED
-                status_text.visible = True
+            if self.status_text:
+                self.status_text.value = "Please restart the application - resources failed to load"
+                self.status_text.color = ft.Colors.RED
+                self.status_text.visible = True
 
         is_valid, error_msg = self.validate_input(input_text)
         button.disabled = not is_valid
         if is_valid:
             button.text = "Analyze & Generate Response"
             button.disabled = False
-            if status_text:
-                status_text.visible = False
+            if self.status_text:
+                self.status_text.visible = False
         else:
             button.text = "Enter Valid Comment"
-            if status_text:
-                status_text.value = error_msg
-                status_text.color = ft.Colors.ORANGE_600
-                status_text.visible = True
+            if self.status_text:
+                self.status_text.value = error_msg
+                self.status_text.color = ft.Colors.ORANGE_600
+                self.status_text.visible = True
 
         self.page.update()
 
@@ -539,7 +545,7 @@ class ZionaApp:
 
         validation_text = ft.Text("", size=12, color=ft.Colors.ORANGE_600, visible=False)
 
-        analyze_button = ft.ElevatedButton(
+        self.analyze_button = ft.ElevatedButton(
             text="Enter Valid Comment",
             icon=ft.Icons.ANALYTICS,
             disabled=True,
@@ -555,7 +561,7 @@ class ZionaApp:
             comment_input,
             validation_text,
             ft.Container(height=10),
-            analyze_button,
+            self.analyze_button,
         ], visible=True)
 
         # === BATCH MODE CONTENT ===
@@ -572,19 +578,19 @@ class ZionaApp:
                 selected_file_text.color = ft.Colors.GREEN_700
 
                 # Validate file
-                is_valid, message = self.validate_excel_file(file_path)
-                if is_valid:
+                self.is_valid_comment_df, message = self.validate_excel_file(file_path)
+                if self.is_valid_comment_df:
                     file_validation_text.value = message
                     file_validation_text.color = ft.Colors.GREEN_600
                     file_validation_text.visible = True
-                    batch_analyze_button.disabled = not self.resources_loaded
-                    batch_analyze_button.text = "Analyze Excel File" if self.resources_loaded else "Resources not loaded"
+                    self.batch_analyze_button.disabled = not self.resources_loaded
+                    self.batch_analyze_button.text = "Analyze Excel File" if self.resources_loaded else "Resources not loaded"
                 else:
                     file_validation_text.value = message
                     file_validation_text.color = ft.Colors.RED
                     file_validation_text.visible = True
-                    batch_analyze_button.disabled = True
-                    batch_analyze_button.text = "Invalid File"
+                    self.batch_analyze_button.disabled = True
+                    self.batch_analyze_button.text = "Invalid File"
 
                 page.update()
 
@@ -606,7 +612,7 @@ class ZionaApp:
             height=50
         )
 
-        batch_analyze_button = ft.ElevatedButton(
+        self.batch_analyze_button = ft.ElevatedButton(
             text="Select File First",
             icon=ft.Icons.BATCH_PREDICTION,
             disabled=True,
@@ -639,12 +645,12 @@ class ZionaApp:
             selected_file_text,
             file_validation_text,
             ft.Container(height=10),
-            batch_analyze_button,
+            self.batch_analyze_button,
         ], visible=False)
 
         # Progress and status
-        progress_bar = ft.ProgressBar(value=0, visible=False)
-        status_text = ft.Text("", size=14, color=ft.Colors.BLUE_600, visible=False)
+        self.progress_bar = ft.ProgressBar(value=0, visible=False)
+        self.status_text = ft.Text("", size=14, color=ft.Colors.BLUE_600, visible=False)
 
         # Results container
         result_container = ft.Column(spacing=10)
@@ -656,21 +662,21 @@ class ZionaApp:
                 self.show_notification(error_msg or "Resources not available", ft.Colors.RED)
                 return
 
-            progress_bar.visible = True
-            status_text.visible = True
+            self.progress_bar.visible = True
+            self.status_text.visible = True
             validation_text.visible = False
-            progress_bar.value = 0.1
-            status_text.value = "Initializing analysis..."
-            status_text.color = ft.Colors.BLUE_600
+            self.progress_bar.value = 0.1
+            self.status_text.value = "Initializing analysis..."
+            self.status_text.color = ft.Colors.BLUE_600
             result_container.controls.clear()
 
-            analyze_button.disabled = True
-            analyze_button.text = "Processing..."
+            self.analyze_button.disabled = True
+            self.analyze_button.text = "Processing..."
             page.update()
 
             threading.Thread(
                 target=self.analyze_comment_async,
-                args=(comment_input.value.strip(), progress_bar, status_text, result_container, analyze_button),
+                args=(comment_input.value.strip(), result_container),
                 daemon=True
             ).start()
 
@@ -680,37 +686,36 @@ class ZionaApp:
                 return
 
             file_path = file_picker.result.files[0].path
-            is_valid, _ = self.validate_excel_file(file_path)
 
-            if not is_valid or not self.resources_loaded:
+            if not self.is_valid_comment_df or not self.resources_loaded:
                 self.show_notification("Invalid file or resources not available", ft.Colors.RED)
                 return
 
-            progress_bar.visible = True
-            status_text.visible = True
+            self.progress_bar.visible = True
+            self.status_text.visible = True
             file_validation_text.visible = False
-            progress_bar.value = 0.1
-            status_text.value = "Starting batch analysis..."
-            status_text.color = ft.Colors.BLUE_600
+            self.progress_bar.value = 0.1
+            self.status_text.value = "Starting analysis..."
+            self.status_text.color = ft.Colors.BLUE_600
             result_container.controls.clear()
 
-            batch_analyze_button.disabled = True
-            batch_analyze_button.text = "Processing..."
+            self.batch_analyze_button.disabled = True
+            self.batch_analyze_button.text = "Processing..."
             page.update()
 
             threading.Thread(
                 target=self.process_batch_analysis,
-                args=(file_path, progress_bar, status_text, result_container, batch_analyze_button),
+                args=([result_container]),
                 daemon=True
             ).start()
 
         def on_input_change(e):
-            self.update_analyze_button_state(analyze_button, comment_input.value, validation_text)
+            self.update_analyze_button_state(self.analyze_button, comment_input.value)
 
         # Set event handlers
         comment_input.on_change = on_input_change
-        analyze_button.on_click = on_single_analyze_click
-        batch_analyze_button.on_click = on_batch_analyze_click
+        self.analyze_button.on_click = on_single_analyze_click
+        self.batch_analyze_button.on_click = on_batch_analyze_click
 
         # Main layout
         main_content = ft.Column([
@@ -720,8 +725,8 @@ class ZionaApp:
             single_mode_content,
             batch_mode_content,
             ft.Container(height=20),
-            progress_bar,
-            status_text,
+            self.progress_bar,
+            self.status_text,
             ft.Container(height=10),
             result_container,
         ], spacing=0, scroll=ft.ScrollMode.AUTO)
@@ -739,7 +744,7 @@ class ZionaApp:
         resources_loaded = self.load_resources()
 
         # Set initial button state
-        self.update_analyze_button_state(analyze_button, "", validation_text)
+        self.update_analyze_button_state(self.analyze_button, "")
 
         if not resources_loaded:
             self.show_notification(
