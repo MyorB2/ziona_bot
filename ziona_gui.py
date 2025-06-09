@@ -1,11 +1,15 @@
 import ast
 import os
-import time
 import threading
+import csv
+import time
+from datetime import datetime
 import flet as ft
 import pandas as pd
+from sqlalchemy.dialects.mssql.information_schema import columns
+
 from business_logic.chatbot.react_agent import ReActAgent
-from business_logic.classification.classification_wrapper import LoadedClassificationModel
+# from business_logic.classification.classification_wrapper import LoadedClassificationModel
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,12 +25,20 @@ LABEL_MAP = {
 }
 
 
+def normalize_categories_column(row):
+    norm_list = ast.literal_eval(row)
+    if len(norm_list) == 0:
+        norm_list = None
+    return norm_list
+
+
 class ZionaApp:
     def __init__(self):
         self.knowledge_base = None
         self.classification_model = None
         self.page = None
         self.resources_loaded = False
+        self.current_mode = "single"  # "single" or "batch"
 
     def load_resources(self):
         """Load knowledge base and classification model"""
@@ -34,7 +46,8 @@ class ZionaApp:
             # Load knowledge base
             df = pd.read_csv(KNOWLEDGE_BASE_PATH, encoding='utf-8-sig')
             df = df[['source', 'url', 'paragraph', 'primary_categories']]
-            df["primary_categories"] = df["primary_categories"].apply(lambda x: ast.literal_eval(x))
+            df = df.dropna()
+            df["primary_categories"] = df["primary_categories"].apply(lambda x: normalize_categories_column(x))
             df = df.dropna()
             df.reset_index(drop=True, inplace=True)
             self.knowledge_base = df
@@ -169,6 +182,213 @@ class ZionaApp:
         self.page.update()
 
     @staticmethod
+    def validate_excel_file(file_path):
+        """Validate uploaded Excel file"""
+        try:
+            df = pd.read_excel(file_path, names=["comment"])
+
+            if df.empty:
+                return False, "Excel file is empty"
+
+            # Check for 'comment' column (case insensitive)
+            comment_columns = [col for col in df.columns if 'comment' in col.lower()]
+            if not comment_columns:
+                return False, "Excel file must contain a 'comment' column"
+
+            comment_col = comment_columns[0]
+
+            # Check if comment column has valid data
+            valid_comments = df[comment_col].dropna()
+            valid_comments = valid_comments[valid_comments.astype(str).str.strip() != '']
+
+            if len(valid_comments) == 0:
+                return False, "No valid comments found in the file"
+
+            if len(valid_comments) > 100:
+                return False, "Too many comments (maximum 100 allowed)"
+
+            return True, f"Found {len(valid_comments)} valid comments to analyze"
+
+        except Exception as e:
+            return False, f"Error reading Excel file: {str(e)}"
+
+    def process_batch_analysis(self, file_path, progress_bar, status_text, result_container, analyze_button):
+        """Process batch analysis of Excel file"""
+        try:
+            # Read Excel file
+            df = pd.read_excel(file_path)
+            comment_columns = [col for col in df.columns if 'comment' in col.lower()]
+            comment_col = comment_columns[0]
+
+            # Filter valid comments
+            valid_df = df[df[comment_col].notna() & (df[comment_col].astype(str).str.strip() != '')]
+            total_comments = len(valid_df)
+
+            results = []
+            agent = ReActAgent(self.knowledge_base)
+
+            j = 0
+            for index, row in valid_df.iterrows():
+                comment_text = str(row[comment_col]).strip()
+
+                # Update progress
+                current_progress = (j + 1) / total_comments
+                self.page.run_in_thread(
+                    lambda idx=index: self.update_progress(
+                        progress_bar, status_text,
+                        current_progress,
+                        f"Processing comment {j + 1}/{total_comments}..."
+                    )
+                )
+                j += 1
+
+                try:
+                    # Classify comment
+                    # pred = self.classification_model.predict(comment_text)
+                    # category_id = pred["predicted_labels"][0]
+                    category_id = 3
+                    category_name = LABEL_MAP[category_id]
+
+                    # Generate response
+                    response = agent.generate_response(comment_text, category_id, category_name)
+
+                    # Store result
+                    result = {
+                        'original_row': index + 1,
+                        'comment': comment_text,
+                        'category_id': category_id,
+                        'category_name': category_name,
+                        'educational_response': response.get('final_response', ''),
+                        'source': response.get('source', ''),
+                        'source_url': response.get('url', ''),
+                        'retrieval_score': response.get('retrieval_score', 0),
+                        'analysis_timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                    results.append(result)
+
+                except Exception as e:
+                    # Handle individual comment errors
+                    result = {
+                        'original_row': index + 1,
+                        'comment': comment_text,
+                        'category_id': 'ERROR',
+                        'category_name': 'Analysis Failed',
+                        'educational_response': f'Error processing comment: {str(e)}',
+                        'source': '',
+                        'source_url': '',
+                        'retrieval_score': 0,
+                        'analysis_timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                    results.append(result)
+
+            # Save results to CSV
+            output_filename = f"ziona_analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            output_path = os.path.join(os.getcwd(), output_filename)
+
+            results_df = pd.DataFrame(results)
+            results_df.to_csv(output_path, index=False, encoding='utf-8-sig')
+
+            # Update UI with completion
+            self.page.run_in_thread(
+                lambda: self.update_progress(progress_bar, status_text, 1.0, "Batch analysis complete!")
+            )
+
+            # Display batch results
+            self.page.run_in_thread(
+                lambda: self.display_batch_results(result_container, results, output_path)
+            )
+
+        except Exception as e:
+            error_msg = f"Error during batch analysis: {str(e)}"
+            self.page.run_in_thread(lambda: self.show_error(status_text, error_msg))
+        finally:
+            # Re-enable button
+            def reset_button():
+                analyze_button.disabled = False
+                analyze_button.text = "Analyze Excel File"
+                self.page.update()
+
+            self.page.run_in_thread(reset_button)
+
+    def display_batch_results(self, result_container, results, output_path):
+        """Display batch analysis results"""
+        result_container.controls.clear()
+
+        # Summary card
+        summary_card = ft.Card(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Text("Batch Analysis Complete", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Text(f"Total comments processed: {len(results)}", size=16),
+                    ft.Text(f"Results saved to: {os.path.basename(output_path)}", size=14),
+                    ft.Row([
+                        ft.ElevatedButton(
+                            text="Open Results Folder",
+                            icon=ft.Icons.FOLDER_OPEN,
+                            on_click=lambda _: os.startfile(os.path.dirname(output_path))
+                        ),
+                        ft.ElevatedButton(
+                            text="Copy File Path",
+                            icon=ft.Icons.COPY,
+                            on_click=lambda _: self.copy_to_clipboard(output_path)
+                        ),
+                    ], alignment=ft.MainAxisAlignment.START)
+                ]),
+                padding=20,
+            ),
+            elevation=3,
+            margin=ft.margin.only(bottom=10)
+        )
+
+        # Category breakdown
+        category_counts = {}
+        for result in results:
+            cat = result['category_name']
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+
+        breakdown_card = ft.Card(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Text("Category Breakdown", size=18, weight=ft.FontWeight.BOLD),
+                    *[ft.Text(f"• {cat}: {count} comments", size=14)
+                      for cat, count in category_counts.items()]
+                ]),
+                padding=20,
+            ),
+            elevation=3,
+            margin=ft.margin.only(bottom=10)
+        )
+
+        # Sample results preview
+        preview_card = ft.Card(
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Text("Sample Results (First 3)", size=18, weight=ft.FontWeight.BOLD),
+                    *[
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Text(f"Comment {i + 1}: {result['comment'][:100]}...",
+                                        size=12, weight=ft.FontWeight.W_500),
+                                ft.Text(f"Category: {result['category_name']}", size=11),
+                                ft.Text(f"Response: {result['educational_response'][:150]}...", size=11),
+                            ]),
+                            padding=10,
+                            bgcolor=ft.Colors.GREY_50,
+                            border_radius=5,
+                            margin=ft.margin.only(bottom=5)
+                        )
+                        for i, result in enumerate(results[:3])
+                    ]
+                ]),
+                padding=20,
+            ),
+            elevation=3,
+        )
+
+        result_container.controls.extend([summary_card, breakdown_card, preview_card])
+        self.page.update()
+
+    @staticmethod
     def validate_input(text):
         """Validate user input text"""
         if not isinstance(text, str):
@@ -265,8 +485,8 @@ class ZionaApp:
         self.page = page
         page.title = "Ziona - Anti-Semitic Comment Analyzer"
         page.theme_mode = ft.ThemeMode.LIGHT
-        page.window_width = 800
-        page.window_height = 900
+        page.window_width = 900
+        page.window_height = 1000
         page.window_resizable = True
         page.scroll = ft.ScrollMode.AUTO
 
@@ -288,7 +508,24 @@ class ZionaApp:
             padding=ft.padding.only(bottom=20)
         )
 
-        # Comment input with validation
+        # Mode selection tabs
+        def on_tab_change(e):
+            self.current_mode = "single" if e.control.selected_index == 0 else "batch"
+            single_mode_content.visible = (self.current_mode == "single")
+            batch_mode_content.visible = (self.current_mode == "batch")
+            result_container.controls.clear()
+            page.update()
+
+        mode_tabs = ft.Tabs(
+            selected_index=0,
+            on_change=on_tab_change,
+            tabs=[
+                ft.Tab(text="Single Comment", icon=ft.Icons.CHAT),
+                ft.Tab(text="Multiple Comments", icon=ft.Icons.TABLE_VIEW),
+            ],
+        )
+
+        # === SINGLE MODE CONTENT ===
         comment_input = ft.TextField(
             label="Enter a potentially anti-Semitic/anti-Israeli comment",
             multiline=True,
@@ -300,54 +537,11 @@ class ZionaApp:
             max_length=5000,
         )
 
-        # Progress and status
-        progress_bar = ft.ProgressBar(value=0, visible=False)
-        status_text = ft.Text("", size=14, color=ft.Colors.BLUE_600, visible=False)
         validation_text = ft.Text("", size=12, color=ft.Colors.ORANGE_600, visible=False)
 
-        # Results container
-        result_container = ft.Column(spacing=10)
-
-        def on_analyze_click(e):
-            # Double-check validation before processing
-            is_valid, error_msg = self.validate_input(comment_input.value)
-            if not is_valid or not self.resources_loaded:
-                self.show_notification(error_msg or "Resources not available", ft.Colors.RED)
-                return
-
-            # Show progress indicators
-            progress_bar.visible = True
-            status_text.visible = True
-            validation_text.visible = False
-            progress_bar.value = 0.1
-            status_text.value = "Initializing analysis..."
-            status_text.color = ft.Colors.BLUE_600
-            result_container.controls.clear()
-
-            # Disable button during processing
-            analyze_button.disabled = True
-            analyze_button.text = "Processing..."
-            page.update()
-
-            # Start analysis in separate thread
-            threading.Thread(
-                target=self.analyze_comment_async,
-                args=(comment_input.value.strip(), progress_bar, status_text, result_container, analyze_button),
-                daemon=True
-            ).start()
-
-        def on_input_change(e):
-            # Update button state whenever input changes
-            self.update_analyze_button_state(analyze_button, comment_input.value, validation_text)
-
-        # Set input change handler
-        comment_input.on_change = on_input_change
-
-        # Analyze button (initially disabled)
         analyze_button = ft.ElevatedButton(
             text="Enter Valid Comment",
             icon=ft.Icons.ANALYTICS,
-            on_click=on_analyze_click,
             disabled=True,
             style=ft.ButtonStyle(
                 color=ft.Colors.WHITE,
@@ -357,17 +551,178 @@ class ZionaApp:
             height=50
         )
 
+        single_mode_content = ft.Column([
+            comment_input,
+            validation_text,
+            ft.Container(height=10),
+            analyze_button,
+        ], visible=True)
+
+        # === BATCH MODE CONTENT ===
+        file_picker = ft.FilePicker()
+        page.overlay.append(file_picker)
+
+        selected_file_text = ft.Text("No file selected", size=14, color=ft.Colors.GREY_600)
+        file_validation_text = ft.Text("", size=12, color=ft.Colors.ORANGE_600, visible=False)
+
+        def on_file_picked(e: ft.FilePickerResultEvent):
+            if e.files:
+                file_path = e.files[0].path
+                selected_file_text.value = f"Selected: {os.path.basename(file_path)}"
+                selected_file_text.color = ft.Colors.GREEN_700
+
+                # Validate file
+                is_valid, message = self.validate_excel_file(file_path)
+                if is_valid:
+                    file_validation_text.value = message
+                    file_validation_text.color = ft.Colors.GREEN_600
+                    file_validation_text.visible = True
+                    batch_analyze_button.disabled = not self.resources_loaded
+                    batch_analyze_button.text = "Analyze Excel File" if self.resources_loaded else "Resources not loaded"
+                else:
+                    file_validation_text.value = message
+                    file_validation_text.color = ft.Colors.RED
+                    file_validation_text.visible = True
+                    batch_analyze_button.disabled = True
+                    batch_analyze_button.text = "Invalid File"
+
+                page.update()
+
+        file_picker.on_result = on_file_picked
+
+        upload_button = ft.ElevatedButton(
+            text="Select Excel File",
+            icon=ft.Icons.UPLOAD_FILE,
+            on_click=lambda _: file_picker.pick_files(
+                dialog_title="Select Excel file with comments",
+                file_type=ft.FilePickerFileType.CUSTOM,
+                allowed_extensions=["xlsx", "xls"]
+            ),
+            style=ft.ButtonStyle(
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.GREEN_600,
+                padding=ft.padding.symmetric(horizontal=20, vertical=10)
+            ),
+            height=50
+        )
+
+        batch_analyze_button = ft.ElevatedButton(
+            text="Select File First",
+            icon=ft.Icons.BATCH_PREDICTION,
+            disabled=True,
+            style=ft.ButtonStyle(
+                color=ft.Colors.WHITE,
+                bgcolor=ft.Colors.BLUE_600,
+                padding=ft.padding.symmetric(horizontal=20, vertical=10)
+            ),
+            height=50
+        )
+
+        file_instructions = ft.Container(
+            content=ft.Column([
+                ft.Text("Excel File Requirements:", size=14, weight=ft.FontWeight.BOLD),
+                ft.Text("• File must contain a column named 'comment' (case insensitive)", size=12),
+                ft.Text("• Maximum 100 comments per file", size=12),
+                ft.Text("• Supported formats: .xlsx, .xls", size=12),
+                ft.Text("• Results will be saved as CSV file", size=12),
+            ]),
+            bgcolor=ft.Colors.BLUE_50,
+            padding=15,
+            border_radius=8,
+            border=ft.border.all(1, ft.Colors.BLUE_200)
+        )
+
+        batch_mode_content = ft.Column([
+            file_instructions,
+            ft.Container(height=10),
+            upload_button,
+            selected_file_text,
+            file_validation_text,
+            ft.Container(height=10),
+            batch_analyze_button,
+        ], visible=False)
+
+        # Progress and status
+        progress_bar = ft.ProgressBar(value=0, visible=False)
+        status_text = ft.Text("", size=14, color=ft.Colors.BLUE_600, visible=False)
+
+        # Results container
+        result_container = ft.Column(spacing=10)
+
+        # Event handlers
+        def on_single_analyze_click(e):
+            is_valid, error_msg = self.validate_input(comment_input.value)
+            if not is_valid or not self.resources_loaded:
+                self.show_notification(error_msg or "Resources not available", ft.Colors.RED)
+                return
+
+            progress_bar.visible = True
+            status_text.visible = True
+            validation_text.visible = False
+            progress_bar.value = 0.1
+            status_text.value = "Initializing analysis..."
+            status_text.color = ft.Colors.BLUE_600
+            result_container.controls.clear()
+
+            analyze_button.disabled = True
+            analyze_button.text = "Processing..."
+            page.update()
+
+            threading.Thread(
+                target=self.analyze_comment_async,
+                args=(comment_input.value.strip(), progress_bar, status_text, result_container, analyze_button),
+                daemon=True
+            ).start()
+
+        def on_batch_analyze_click(e):
+            if not file_picker.result or not file_picker.result.files:
+                self.show_notification("Please select an Excel file first", ft.Colors.RED)
+                return
+
+            file_path = file_picker.result.files[0].path
+            is_valid, _ = self.validate_excel_file(file_path)
+
+            if not is_valid or not self.resources_loaded:
+                self.show_notification("Invalid file or resources not available", ft.Colors.RED)
+                return
+
+            progress_bar.visible = True
+            status_text.visible = True
+            file_validation_text.visible = False
+            progress_bar.value = 0.1
+            status_text.value = "Starting batch analysis..."
+            status_text.color = ft.Colors.BLUE_600
+            result_container.controls.clear()
+
+            batch_analyze_button.disabled = True
+            batch_analyze_button.text = "Processing..."
+            page.update()
+
+            threading.Thread(
+                target=self.process_batch_analysis,
+                args=(file_path, progress_bar, status_text, result_container, batch_analyze_button),
+                daemon=True
+            ).start()
+
+        def on_input_change(e):
+            self.update_analyze_button_state(analyze_button, comment_input.value, validation_text)
+
+        # Set event handlers
+        comment_input.on_change = on_input_change
+        analyze_button.on_click = on_single_analyze_click
+        batch_analyze_button.on_click = on_batch_analyze_click
+
         # Main layout
         main_content = ft.Column([
             header,
-            comment_input,
-            validation_text,
-            ft.Container(height=10),  # Spacer
-            analyze_button,
-            ft.Container(height=20),  # Spacer
+            mode_tabs,
+            ft.Container(height=20),
+            single_mode_content,
+            batch_mode_content,
+            ft.Container(height=20),
             progress_bar,
             status_text,
-            ft.Container(height=10),  # Spacer
+            ft.Container(height=10),
             result_container,
         ], spacing=0, scroll=ft.ScrollMode.AUTO)
 
