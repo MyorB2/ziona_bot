@@ -1,3 +1,4 @@
+import ast
 import logging
 import os
 from pathlib import Path
@@ -27,12 +28,12 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 ROOT_PATH = Path(__file__).parent.parent.parent
 RESOURCE_PATH = ROOT_PATH / "resources"
-KNOWLEDGE_BASE_PATH = RESOURCE_PATH / "knowledge_base.csv"
+KNOWLEDGE_BASE_PATH = RESOURCE_PATH / "knowledge_base_categorized_remain.csv"
 CONFIDENCE_THRESHOLD = 0.55
 
 
 def read_csv_with_encoding(file_path):
-    encodings = ['utf-8', 'latin-1', 'windows-1252', 'cp1252', 'iso-8859-1']
+    encodings = ['utf-8', 'utf-8-sig', 'latin-1', 'windows-1252', 'cp1252', 'iso-8859-1']
 
     for encoding in encodings:
         try:
@@ -417,15 +418,16 @@ REASONING: [Explain what content helps counter indirect antisemitic targeting]
 if __name__ == "__main__":
     try:
         # Load and prepare data
-        knowledge_base = read_csv_with_encoding(str(KNOWLEDGE_BASE_PATH))
-        knowledge_base = knowledge_base[['source', 'url', 'content']]
-        knowledge_base = knowledge_base.dropna(subset=['source', 'url', 'content'])
-        knowledge_base = knowledge_base[knowledge_base['url'].apply(lambda x: x.startswith("http"))]
-        knowledge_base = knowledge_base[knowledge_base['content'].apply(lambda x: len(str(x)) > 200)]
-        knowledge_base.reset_index(drop=True, inplace=True)
+        df = read_csv_with_encoding(str(KNOWLEDGE_BASE_PATH))
+        df = df[['source', 'url', 'paragraph']]
+        df = df[df['url'].apply(lambda x: x.startswith("http"))]
+        df = df[df['paragraph'].apply(lambda x: len(str(x)) > 100)]
+        df = df.dropna()
+        df.reset_index(drop=True, inplace=True)
+        knowledge_base = df[['source', 'url', 'paragraph']]
 
         # Run only over 200 rows
-        knowledge_base = knowledge_base.iloc[335:435]
+        knowledge_base = knowledge_base.iloc[244:]
 
         logger.info(f"Processing {len(knowledge_base)} documents")
 
@@ -440,7 +442,7 @@ if __name__ == "__main__":
             logger.info(f"Processing document {index + 1}/{len(knowledge_base)}")
 
             doc = Document(
-                page_content=str(row["content"]),
+                page_content=str(row["paragraph"]),
                 metadata={"id": index, "source": row["source"], "url": row["url"]},
             )
 
