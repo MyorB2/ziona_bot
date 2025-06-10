@@ -236,7 +236,7 @@ class ZionaApp:
             results = []
             agent = ReActAgent(self.knowledge_base)
 
-            i = 1
+            i = 0
             for index, row in self.comments_df.iterrows():
                 comment_text = str(row["comment"]).strip()
 
@@ -506,7 +506,7 @@ class ZionaApp:
                     color=ft.Colors.BLUE_800
                 ),
                 ft.Text(
-                    "Analyze problematic comments and get educational responses",
+                    "Hi! I'm Ziona, I will analyze the problematic comments and suggest educational responses",
                     size=16,
                     color=ft.Colors.GREY_700
                 ),
@@ -578,6 +578,7 @@ class ZionaApp:
                 selected_file_text.color = ft.Colors.GREEN_700
 
                 # Validate file
+                self.status_text.visible = False
                 self.is_valid_comment_df, message = self.validate_excel_file(file_path)
                 if self.is_valid_comment_df:
                     file_validation_text.value = message
