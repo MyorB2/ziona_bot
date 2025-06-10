@@ -1,17 +1,19 @@
 import ast
+import concurrent.futures
 import logging
 import os
-from pathlib import Path
-from typing import Dict, List, Optional
+import json
+import time
 import re
 import pandas as pd
+from pathlib import Path
+from typing import Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor
 from ollama import Client
 from langchain.schema import Document
 from dataclasses import dataclass
 from enum import Enum
-import json
-import time
-
+from functools import lru_cache
 from src.utils import normalize_categories
 
 # Setup logging
@@ -68,17 +70,28 @@ class AntisemitismCategory(Enum):
         self.description = description
 
     @classmethod
+    @lru_cache(maxsize=1)
     def get_all_categories(cls) -> Dict[int, 'AntisemitismCategory']:
-        """Get all categories as a dictionary"""
+        """Get all categories as a dictionary (cached)"""
         return {cat.id: cat for cat in cls}
 
     @classmethod
+    @lru_cache(maxsize=1)
     def get_category_descriptions(cls) -> str:
         """Get formatted category descriptions for prompts"""
         descriptions = []
         for cat in cls:
             descriptions.append(f"{cat.id}. {cat.category_name}: {cat.description}")
         return "\n".join(descriptions)
+
+
+@dataclass
+class RelevanceResult:
+    """Data class for relevance check results"""
+    is_relevant: bool
+    explanation: str
+    confidence_score: Optional[float] = None
+    category: Optional[AntisemitismCategory] = None
 
 
 @dataclass
@@ -97,6 +110,7 @@ class ClassificationResult:
     source: Optional[str]
     url: Optional[str]
     primary_categories: List[AntisemitismCategory]  # Categories with high confidence
+    relevance_results: List[RelevanceResult]
     all_scores: List[CategoryScore]
     document_quality: str  # "HIGH", "MEDIUM", "LOW"
     success: bool
@@ -106,7 +120,7 @@ class ClassificationResult:
 class DocumentClassifier:
     """Enhanced classifier for educational documents addressing antisemitic content"""
 
-    def __init__(self, document: Document, model_name: str = "llama3"):
+    def __init__(self, document: Document, model_name: str = "llama3", max_workers: int = 4, batch_size: int = 10):
         """
         Initialize the DocumentClassifier
 
@@ -117,21 +131,25 @@ class DocumentClassifier:
         self.document = document
         self.model_name = model_name
         self.ollama_host: str = 'http://localhost:11434'
-        self.client = None
+        self.client_pool = []
+        self.max_workers = max_workers
+        self.batch_size = batch_size
         self.categories = AntisemitismCategory.get_all_categories()
         self.min_content_length = 100  # Minimum content length for classification
         self.confidence_threshold = CONFIDENCE_THRESHOLD  # Minimum confidence for category assignment
         self._initialize_llm()
 
     def _initialize_llm(self):
-        """Initialize the Ollama LLaMA model with error handling"""
+        """Initialize multiple Ollama clients for parallel processing"""
         try:
-            self.client = Client(host=self.ollama_host)
-            # Test connection
-            self.client.list()
-            logger.info(f"Successfully initialized Ollama LLM client with model: {self.model_name}")
+            for i in range(self.max_workers):
+                client = Client(host=self.ollama_host)
+                # Test connection
+                client.list()
+                self.client_pool.append(client)
+            logger.info(f"Successfully initialized {self.max_workers} Ollama clients with model: {self.model_name}")
         except Exception as e:
-            logger.error(f"Error initializing Ollama LLM: {e}")
+            logger.error(f"Error initializing Ollama clients: {e}")
             raise ConnectionError(f"Failed to connect to Ollama at {self.ollama_host}: {e}")
 
     def _assess_document_quality(self, content: str) -> str:
@@ -145,6 +163,239 @@ class DocumentClassifier:
             return "HIGH"
         else:
             return "MEDIUM"
+
+    @lru_cache(maxsize=100)
+    def _create_batch_prompt(self, document_content: str) -> str:
+        """Create an optimized prompt for batch classification of all categories"""
+        # Truncate content more aggressively for speed
+        truncated_content = document_content[:1500] + "..." if len(document_content) > 1500 else document_content
+
+        return f"""### TASK: Multi-Category Document Analysis for Antisemitism Education
+
+    Analyze this educational document for relevance to ALL antisemitism categories simultaneously.
+
+    ### ANTISEMITISM CATEGORIES:
+    {AntisemitismCategory.get_category_descriptions()}
+
+    ### EDUCATIONAL DOCUMENT TO ANALYZE:
+    {truncated_content}
+    
+    **CRITICAL UNDERSTANDING**: 
+    - ALL documents are educational resources AGAINST antisemitism
+    - NO documents contain antisemitic content themselves
+    - You are categorizing which types of antisemitic narratives each document helps to counter
+
+    ### YOUR TASK:
+    For each category (1-6), determine if this educational document provides information, facts, or arguments that would be useful for COUNTERING that specific type of antisemitic narrative.
+    
+    **EXAMPLES OF WHAT TO LOOK FOR:**
+    - Category 2 (Antisemitic Ideology): Does the document provide facts about Jewish contributions to society, debunk conspiracy theories, or explain Jewish history/culture positively?
+    - Category 3 (Stereotypes): Does the document counter economic myths about Jewish people, provide factual information about Jewish diversity, or address racist stereotypes?
+    - Category 4 (Anti-Israel/Anti-Zionism): Does the document provide factual information about Israel's history, explain Zionism accurately, or counter false narratives about Israel?
+    - Category 5 (Holocaust): Does the document provide Holocaust education, historical facts, or counter denial arguments?
+    - Category 6 (Indirect): Does the document address how public figures are unfairly targeted, or explain the harm of antisemitic dog whistles?
+    - Category 1 (General Hate): Does the document address general prejudice, discrimination, or hatred that isn't specifically antisemitic?
+    
+    ### RESPONSE FORMAT:
+    
+    CATEGORY_1_GENERAL_HATE:
+    ADDRESSES: [YES/NO]
+    CONFIDENCE: [0.0-1.0]
+    REASONING: [Explain what content in the document helps counter general hate/discrimination]
+    
+    CATEGORY_2_ANTISEMITIC_IDEOLOGY:
+    ADDRESSES: [YES/NO]
+    CONFIDENCE: [0.0-1.0]
+    REASONING: [Explain what content helps counter antisemitic ideologies/conspiracy theories]
+    
+    CATEGORY_3_STEREOTYPES_DEHUMANIZATION:
+    ADDRESSES: [YES/NO]
+    CONFIDENCE: [0.0-1.0]
+    REASONING: [Explain what content helps counter stereotypes about Jewish people]
+    
+    CATEGORY_4_ANTI_ISRAEL_ZIONISM:
+    ADDRESSES: [YES/NO]
+    CONFIDENCE: [0.0-1.0]
+    REASONING: [Explain what content helps counter anti-Israel/anti-Zionist narratives]
+    
+    CATEGORY_5_HOLOCAUST_DENIAL:
+    ADDRESSES: [YES/NO]
+    CONFIDENCE: [0.0-1.0]
+    REASONING: [Explain what content helps counter Holocaust denial/minimization]
+    
+    CATEGORY_6_INDIRECT_ANTISEMITISM:
+    ADDRESSES: [YES/NO]
+    CONFIDENCE: [0.0-1.0]
+    REASONING: [Explain what content helps counter indirect antisemitic targeting]
+
+    ### RESPONSE:"""
+
+    @staticmethod
+    def _parse_classification_response(response: str) -> list[RelevanceResult]:
+        """Parse the comprehensive LLM response"""
+        category_scores = []
+
+        try:
+            # Split response into category sections
+            category_sections = re.split(r'CATEGORY_\d+_[A-Z_]+:', response)
+            category_sections = [section.strip() for section in category_sections if section.strip()]
+
+            # Match categories with their enum values
+            category_mapping = {
+                'GENERAL_HATE': AntisemitismCategory.GENERAL_HATE,
+                'ANTISEMITIC_IDEOLOGY': AntisemitismCategory.ANTISEMITIC_IDEOLOGY,
+                'STEREOTYPES_DEHUMANIZATION': AntisemitismCategory.STEREOTYPES_DEHUMANIZATION,
+                'ANTI_ISRAEL_ZIONISM': AntisemitismCategory.ANTI_ISRAEL_ZIONISM,
+                'HOLOCAUST_DENIAL': AntisemitismCategory.HOLOCAUST_DENIAL,
+                'INDIRECT_ANTISEMITISM': AntisemitismCategory.INDIRECT_ANTISEMITISM
+            }
+
+            # Find category sections in the response
+            for category_key, category_enum in category_mapping.items():
+                pattern = rf'CATEGORY_\d+_{category_key}:(.*?)(?=CATEGORY_\d+_|$)'
+                match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
+
+                if match:
+                    section_content = match.group(1).strip()
+
+                    # Extract ADDRESSES
+                    addresses_match = re.search(r'ADDRESSES:\s*(YES|NO)', section_content, re.IGNORECASE)
+                    addresses_category = addresses_match.group(1).upper() == 'YES' if addresses_match else False
+
+                    # Extract CONFIDENCE
+                    confidence_match = re.search(r'CONFIDENCE:\s*([\d.]+)', section_content)
+                    confidence_score = float(confidence_match.group(1)) if confidence_match else 0.0
+                    confidence_score = max(0.0, min(1.0, confidence_score))  # Clamp between 0 and 1
+
+                    # Extract REASONING
+                    reasoning_match = re.search(r'REASONING:\s*(.*)', section_content, re.DOTALL)
+                    reasoning = reasoning_match.group(1).strip() if reasoning_match else "No reasoning provided"
+
+                    category_scores.append(RelevanceResult(
+                        is_relevant=addresses_category,
+                        explanation=reasoning,
+                        confidence_score=confidence_score,
+                        category=category_enum
+                    ))
+                else:
+                    # Default response if category not found
+                    category_scores.append(RelevanceResult(
+                        is_relevant=False,
+                        explanation="No response found for this category",
+                        confidence_score=0.0,
+                        category=category_enum
+                    ))
+            return category_scores
+
+        except Exception as e:
+            logger.warning(f"Error parsing classification response: {e}")
+            # Return default results for all categories
+            return [RelevanceResult(
+                is_relevant=False,
+                explanation=f"Error parsing response: {str(e)}",
+                confidence_score=0.0,
+                category=category
+            ) for category in AntisemitismCategory]
+
+    def _classify_single_document(self, document: Document, client_index: int = 0) -> ClassificationResult:
+        """Classify a single document using batch processing"""
+        client = self.client_pool[client_index % len(self.client_pool)]
+        prompt = self._create_batch_prompt(document.page_content)
+
+        try:
+            # Assess document quality first
+            document_quality = self._assess_document_quality(self.document.page_content)
+            logger.info(f"Document quality assessed as: {document_quality}")
+
+            if document_quality == "LOW":
+                logger.warning("Low quality document detected - results may be unreliable")
+
+            # Single API call for all categories
+            result = client.generate(
+                model=self.model_name,
+                prompt=prompt,
+                options={
+                    'temperature': 0.1,
+                    'num_predict': 300,  # Limit response length for speed
+                    'top_k': 10,  # Reduce sampling space
+                    'top_p': 0.9  # Focus on high-probability tokens
+                }
+            )
+
+            relevance_results = self._parse_classification_response(result['response'])
+            relevant_categories = [res.category for res in relevance_results if res.is_relevant]
+
+            return ClassificationResult(
+                document_id=getattr(document, 'metadata', {}).get('id', None),
+                source=getattr(self.document, 'metadata', {}).get('source', None),
+                url=getattr(self.document, 'metadata', {}).get('url', None),
+                primary_categories=relevant_categories,
+                document_quality=document_quality,
+                relevance_results=relevance_results,
+                success=True
+            )
+
+        except Exception as e:
+            logger.error(f"Error classifying document: {e}")
+            return ClassificationResult(
+                document_id=getattr(document, 'metadata', {}).get('id', None),
+                source=getattr(self.document, 'metadata', {}).get('source', None),
+                url=getattr(self.document, 'metadata', {}).get('url', None),
+                primary_categories=[],
+                document_quality="LOW",
+                relevance_results=[],
+                success=False,
+                error_message=str(e)
+            )
+
+    def classify_documents_batch(self, documents: List[Document]) -> List[ClassificationResult]:
+        """Classify multiple documents in parallel"""
+        logger.info(f"Starting batch classification of {len(documents)} documents")
+        start_time = time.time()
+
+        results = []
+
+        # Process documents in parallel using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Create futures for all documents
+            futures = []
+            for i, doc in enumerate(documents):
+                future = executor.submit(self._classify_single_document, doc, i)
+                futures.append(future)
+
+            # Collect results as they complete
+            for i, future in enumerate(concurrent.futures.as_completed(futures)):
+                try:
+                    result = future.result(timeout=30)  # 30 second timeout per document
+                    results.append(result)
+
+                    if (i + 1) % 10 == 0:  # Progress logging
+                        logger.info(f"Processed {i + 1}/{len(documents)} documents")
+
+                except concurrent.futures.TimeoutError:
+                    logger.warning(f"Document classification timed out")
+                    results.append(ClassificationResult(
+                        document_id=None,
+                        categories=[],
+                        relevance_results=[],
+                        success=False,
+                        error_message="Classification timeout"
+                    ))
+                except Exception as e:
+                    logger.error(f"Error in document classification: {e}")
+                    results.append(ClassificationResult(
+                        document_id=None,
+                        categories=[],
+                        relevance_results=[],
+                        success=False,
+                        error_message=str(e)
+                    ))
+
+        end_time = time.time()
+        logger.info(f"Batch classification completed in {end_time - start_time:.2f} seconds")
+        logger.info(f"Average time per document: {(end_time - start_time) / len(documents):.2f} seconds")
+
+        return results
 
     def _create_classification_prompt(self, document_content: str) -> str:
         """Create a comprehensive classification prompt"""
@@ -212,76 +463,6 @@ CONFIDENCE: [0.0-1.0]
 REASONING: [Explain what content helps counter indirect antisemitic targeting]
 
 ### BEGIN CLASSIFICATION:"""
-
-    @staticmethod
-    def _parse_classification_response(response: str) -> List[CategoryScore]:
-        """Parse the comprehensive LLM response"""
-        category_scores = []
-
-        try:
-            # Split response into category sections
-            category_sections = re.split(r'CATEGORY_\d+_[A-Z_]+:', response)
-            category_sections = [section.strip() for section in category_sections if section.strip()]
-
-            # Match categories with their enum values
-            category_mapping = {
-                'GENERAL_HATE': AntisemitismCategory.GENERAL_HATE,
-                'ANTISEMITIC_IDEOLOGY': AntisemitismCategory.ANTISEMITIC_IDEOLOGY,
-                'STEREOTYPES_DEHUMANIZATION': AntisemitismCategory.STEREOTYPES_DEHUMANIZATION,
-                'ANTI_ISRAEL_ZIONISM': AntisemitismCategory.ANTI_ISRAEL_ZIONISM,
-                'HOLOCAUST_DENIAL': AntisemitismCategory.HOLOCAUST_DENIAL,
-                'INDIRECT_ANTISEMITISM': AntisemitismCategory.INDIRECT_ANTISEMITISM
-            }
-
-            # Find category sections in the response
-            for category_key, category_enum in category_mapping.items():
-                pattern = rf'CATEGORY_\d+_{category_key}:(.*?)(?=CATEGORY_\d+_|$)'
-                match = re.search(pattern, response, re.DOTALL | re.IGNORECASE)
-
-                if match:
-                    section_content = match.group(1).strip()
-
-                    # Extract ADDRESSES
-                    addresses_match = re.search(r'ADDRESSES:\s*(YES|NO)', section_content, re.IGNORECASE)
-                    addresses_category = addresses_match.group(1).upper() == 'YES' if addresses_match else False
-
-                    # Extract CONFIDENCE
-                    confidence_match = re.search(r'CONFIDENCE:\s*([\d.]+)', section_content)
-                    confidence_score = float(confidence_match.group(1)) if confidence_match else 0.0
-                    confidence_score = max(0.0, min(1.0, confidence_score))  # Clamp between 0 and 1
-
-                    # Extract REASONING
-                    reasoning_match = re.search(r'REASONING:\s*(.*)', section_content, re.DOTALL)
-                    reasoning = reasoning_match.group(1).strip() if reasoning_match else "No reasoning provided"
-
-                    category_scores.append(CategoryScore(
-                        category=category_enum,
-                        score=confidence_score,
-                        reasoning=reasoning,
-                        addresses_category=addresses_category
-                    ))
-                else:
-                    # If category not found in response, add default
-                    category_scores.append(CategoryScore(
-                        category=category_enum,
-                        score=0.0,
-                        reasoning="Category not analyzed in response",
-                        addresses_category=False
-                    ))
-
-            return category_scores
-
-        except Exception as e:
-            logger.error(f"Error parsing classification response: {e}")
-            # Return default scores for all categories
-            return [
-                CategoryScore(
-                    category=cat,
-                    score=0.0,
-                    reasoning=f"Error parsing response: {str(e)}",
-                    addresses_category=False
-                ) for cat in AntisemitismCategory
-            ]
 
     def classify(self) -> ClassificationResult:
         """
@@ -414,6 +595,279 @@ REASONING: [Explain what content helps counter indirect antisemitic targeting]
         return json.dumps(export_data, indent=2, ensure_ascii=False)
 
 
+class OptimizedDocumentClassifier:
+    """Optimized ReAct agent for categorizing educational documents against antisemitic content"""
+
+    def __init__(self, model_name: str = "llama3", max_workers: int = 4, batch_size: int = 10):
+        """
+        Initialize the OptimizedDocumentClassifier
+
+        Args:
+            model_name: Name of the Ollama model to use
+            max_workers: Number of parallel workers for processing
+            batch_size: Batch size for processing documents
+        """
+        self.model_name = model_name
+        self.ollama_host: str = 'http://localhost:11434'
+        self.client_pool = []
+        self.max_workers = max_workers
+        self.batch_size = batch_size
+        self.categories = AntisemitismCategory.get_all_categories()
+        self._initialize_clients()
+
+    def _initialize_clients(self):
+        """Initialize multiple Ollama clients for parallel processing"""
+        try:
+            for i in range(self.max_workers):
+                client = Client(host=self.ollama_host)
+                # Test connection
+                client.list()
+                self.client_pool.append(client)
+            logger.info(f"Successfully initialized {self.max_workers} Ollama clients with model: {self.model_name}")
+        except Exception as e:
+            logger.error(f"Error initializing Ollama clients: {e}")
+            raise ConnectionError(f"Failed to connect to Ollama at {self.ollama_host}: {e}")
+
+    @lru_cache(maxsize=100)
+    def _create_batch_prompt(self, document_content: str) -> str:
+        """Create an optimized prompt for batch classification of all categories"""
+        # Truncate content more aggressively for speed
+        truncated_content = document_content[:1500] + "..." if len(document_content) > 1500 else document_content
+
+        return f"""### TASK: Multi-Category Document Analysis for Antisemitism Education
+
+Analyze this educational document for relevance to ALL antisemitism categories simultaneously.
+
+### ANTISEMITISM CATEGORIES:
+{AntisemitismCategory.get_category_descriptions()}
+
+### DOCUMENT:
+{truncated_content}
+
+### INSTRUCTIONS:
+For EACH category (1-6), determine if this document provides educational content to address that type of antisemitism.
+
+### RESPONSE FORMAT (be concise):
+Category 1: [YES/NO] - [Brief reason]
+Category 2: [YES/NO] - [Brief reason]  
+Category 3: [YES/NO] - [Brief reason]
+Category 4: [YES/NO] - [Brief reason]
+Category 5: [YES/NO] - [Brief reason]
+Category 6: [YES/NO] - [Brief reason]
+
+### RESPONSE:"""
+
+    def _parse_batch_response(self, response: str) -> List[RelevanceResult]:
+        """Parse the batch LLM response for all categories"""
+        try:
+            lines = [line.strip() for line in response.strip().split('\n') if line.strip()]
+            results = []
+
+            categories_list = list(AntisemitismCategory)
+
+            for i, category in enumerate(categories_list, 1):
+                # Find the line for this category
+                category_line = next((line for line in lines if line.startswith(f'Category {i}:')), '')
+
+                if category_line:
+                    # Extract YES/NO and explanation
+                    content = category_line.replace(f'Category {i}:', '').strip()
+                    is_relevant = content.upper().startswith('YES')
+
+                    # Extract explanation after the dash
+                    parts = content.split(' - ', 1)
+                    explanation = parts[1] if len(parts) > 1 else content
+
+                    # Simple confidence scoring based on response clarity
+                    confidence = 0.8 if ('YES' in content.upper() or 'NO' in content.upper()) else 0.5
+
+                    results.append(RelevanceResult(
+                        is_relevant=is_relevant,
+                        explanation=explanation,
+                        confidence_score=confidence,
+                        category=category
+                    ))
+                else:
+                    # Default response if category not found
+                    results.append(RelevanceResult(
+                        is_relevant=False,
+                        explanation="No response found for this category",
+                        confidence_score=0.3,
+                        category=category
+                    ))
+
+            return results
+
+        except Exception as e:
+            logger.warning(f"Error parsing batch response: {e}")
+            # Return default results for all categories
+            return [RelevanceResult(
+                is_relevant=False,
+                explanation=f"Error parsing response: {str(e)}",
+                confidence_score=0.0,
+                category=category
+            ) for category in AntisemitismCategory]
+
+    def _classify_single_document(self, document: Document, client_index: int = 0) -> ClassificationResult:
+        """Classify a single document using batch processing"""
+        client = self.client_pool[client_index % len(self.client_pool)]
+        prompt = self._create_batch_prompt(document.page_content)
+
+        try:
+            # Single API call for all categories
+            result = client.generate(
+                model=self.model_name,
+                prompt=prompt,
+                options={
+                    'temperature': 0.1,
+                    'num_predict': 300,  # Limit response length for speed
+                    'top_k': 10,  # Reduce sampling space
+                    'top_p': 0.9  # Focus on high-probability tokens
+                }
+            )
+
+            relevance_results = self._parse_batch_response(result['response'])
+            relevant_categories = [res.category for res in relevance_results if res.is_relevant]
+
+            return ClassificationResult(
+                document_id=getattr(document, 'metadata', {}).get('id', None),
+                categories=relevant_categories,
+                relevance_results=relevance_results,
+                success=True
+            )
+
+        except Exception as e:
+            logger.error(f"Error classifying document: {e}")
+            return ClassificationResult(
+                document_id=getattr(document, 'metadata', {}).get('id', None),
+                categories=[],
+                relevance_results=[],
+                success=False,
+                error_message=str(e)
+            )
+
+    def classify_documents_batch(self, documents: List[Document]) -> List[ClassificationResult]:
+        """Classify multiple documents in parallel"""
+        logger.info(f"Starting batch classification of {len(documents)} documents")
+        start_time = time.time()
+
+        results = []
+
+        # Process documents in parallel using ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Create futures for all documents
+            futures = []
+            for i, doc in enumerate(documents):
+                future = executor.submit(self._classify_single_document, doc, i)
+                futures.append(future)
+
+            # Collect results as they complete
+            for i, future in enumerate(concurrent.futures.as_completed(futures)):
+                try:
+                    result = future.result(timeout=30)  # 30 second timeout per document
+                    results.append(result)
+
+                    if (i + 1) % 10 == 0:  # Progress logging
+                        logger.info(f"Processed {i + 1}/{len(documents)} documents")
+
+                except concurrent.futures.TimeoutError:
+                    logger.warning(f"Document classification timed out")
+                    results.append(ClassificationResult(
+                        document_id=None,
+                        categories=[],
+                        relevance_results=[],
+                        success=False,
+                        error_message="Classification timeout"
+                    ))
+                except Exception as e:
+                    logger.error(f"Error in document classification: {e}")
+                    results.append(ClassificationResult(
+                        document_id=None,
+                        categories=[],
+                        relevance_results=[],
+                        success=False,
+                        error_message=str(e)
+                    ))
+
+        end_time = time.time()
+        logger.info(f"Batch classification completed in {end_time - start_time:.2f} seconds")
+        logger.info(f"Average time per document: {(end_time - start_time) / len(documents):.2f} seconds")
+
+        return results
+
+    def process_dataframe_optimized(self, df: pd.DataFrame, content_col: str = 'content',
+                                    source_col: str = 'source', url_col: str = 'url') -> pd.DataFrame:
+        """Process entire dataframe with optimizations"""
+        logger.info(f"Processing dataframe with {len(df)} rows")
+
+        # Create Document objects
+        documents = []
+        for index, row in df.iterrows():
+            doc = Document(
+                page_content=str(row[content_col])[:2000],  # Truncate for speed
+                metadata={"id": index, "source": row[source_col], "url": row[url_col]},
+            )
+            documents.append(doc)
+
+        # Process in batches
+        all_results = []
+        for i in range(0, len(documents), self.batch_size):
+            batch = documents[i:i + self.batch_size]
+            batch_results = self.classify_documents_batch(batch)
+            all_results.extend(batch_results)
+
+        # Update dataframe with results
+        df_copy = df.copy()
+        df_copy['primary_categories'] = None
+        df_copy['confidence_scores'] = None
+        df_copy['document_quality'] = None
+        df_copy['classification_success'] = False
+        df_copy['error_message'] = None
+
+        for i, result in enumerate(all_results):
+            if i < len(df_copy):
+                df_copy.at[i, 'primary_categories'] = [cat.id for cat in
+                                                       result.primary_categories] if result.success else []
+                df_copy.at[i, 'confidence_scores'] = {
+                    score.category.id: (score.addresses_category, score.score) for score in result.all_scores
+                }
+                df_copy.at[i, 'document_quality'] = result.document_quality
+                df_copy.at[i, 'classification_success'] = result.success
+                df_copy.at[i, 'error_message'] = result.error_message
+                # Export detailed JSON for first 10 documents
+                if i < 10:
+                    json_result = classifier.export_results_json(result)
+                    with open(str(RESOURCE_PATH / f"enhanced_results_{i}.json"), "w", encoding="utf-8") as f:
+                        f.write(json_result)
+        return df_copy
+
+    @staticmethod
+    def export_results_json(result: ClassificationResult) -> str:
+        """Export classification results as JSON"""
+        export_data = {
+            "document_id": result.document_id,
+            "success": result.success,
+            "categories": [
+                {
+                    "id": cat.id,
+                    "name": cat.category_name,
+                    "description": cat.description
+                } for cat in result.primary_categories
+            ],
+            "relevance_details": [
+                {
+                    "category_id": res.category.id,
+                    "category_name": res.category.category_name,
+                    "is_relevant": res.is_relevant,
+                    "confidence_score": res.confidence_score,
+                    "explanation": res.explanation
+                } for res in result.relevance_results
+            ],
+            "error_message": result.error_message
+        }
+        return json.dumps(export_data, indent=2, ensure_ascii=False)
+
+
 # Enhanced example usage
 if __name__ == "__main__":
     try:
@@ -431,10 +885,19 @@ if __name__ == "__main__":
 
         logger.info(f"Processing {len(knowledge_base)} documents")
 
-        # Add new columns for enhanced results
-        knowledge_base['primary_categories'] = None
-        knowledge_base['confidence_scores'] = None
-        knowledge_base['document_quality'] = None
+        # Initialize optimized classifier
+        classifier = OptimizedDocumentClassifier(
+            model_name="llama3",
+            max_workers=4,  # Adjust based on your system
+            batch_size=20  # Process 20 documents at a time
+        )
+
+        # Process all documents efficiently
+        knowledge_base = classifier.process_dataframe_optimized(knowledge_base)
+
+        # Save results
+        knowledge_base.to_csv(KNOWLEDGE_BASE_PATH, index=False)
+        logger.info(f"Results saved to {KNOWLEDGE_BASE_PATH}")
 
         successful_classifications = 0
 
