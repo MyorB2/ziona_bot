@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="fix excel for ziona bot">
-      <change afterPath="$PROJECT_DIR$/src/parallel_project.py" afterDir="false" />
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="NEED TO KEEP PARALLELIZE">
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -278,7 +276,8 @@
       <workItem from="1749306423293" duration="3670000" />
       <workItem from="1749444899589" duration="4519000" />
       <workItem from="1749494412199" duration="4435000" />
-      <workItem from="1749532013037" duration="3721000" />
+      <workItem from="1749532013037" duration="3882000" />
+      <workItem from="1749574765858" duration="1349000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -616,7 +615,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749498751998</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL‎-00043" summary="NEED TO KEEP PARALLELIZE">
+      <option name="closed" value="true" />
+      <created>1749535894547</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL‎-00043" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749535894547</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -634,7 +641,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="updated binary_classifier.py + NEED TO UPDATE MULTICLASIFIER" />
     <MESSAGE value="tried to use llm for document classification, but it is bad + NEED TO UPDATE MULTICLASIFIER" />
     <MESSAGE value="rearanging" />
     <MESSAGE value="add final evaluation to react phase" />
@@ -659,7 +665,8 @@
     <MESSAGE value="minor fix in document_classifier.py" />
     <MESSAGE value="add excel for ziona bot" />
     <MESSAGE value="fix excel for ziona bot" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix excel for ziona bot" />
+    <MESSAGE value="NEED TO KEEP PARALLELIZE" />
+    <option name="LAST_COMMIT_MESSAGE" value="NEED TO KEEP PARALLELIZE" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ziona_bot$proj_for_gpt.coverage" NAME="proj_for_gpt Coverage Results" MODIFIED="1748105835859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
