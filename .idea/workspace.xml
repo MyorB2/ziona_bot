@@ -5,13 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="create exe file">
+      <change afterPath="$PROJECT_DIR$/app_icon.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/Analysis-00.toc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/EXE-00.toc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/PKG-00.toc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/PYZ-00.pyz" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/PYZ-00.toc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/base_library.zip" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/warn-ziona_app.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/xref-ziona_app.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ziona_app/ziona_app.pkg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dist/ziona_app.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ziona_analysis_results_20250610_215158.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/faiss_index/index.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/faiss_index/index.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ziona_gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona_app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ziona_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona_app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,6 +91,7 @@
     "Python.trial_doc_class.executor": "Debug",
     "Python.web_search.executor": "Run",
     "Python.ziona.executor": "Debug",
+    "Python.ziona_app (1).executor": "Run",
     "Python.ziona_gui.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
@@ -105,7 +117,7 @@
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\models" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ziona_app">
+  <component name="RunManager" selected="Python.ziona_app (1)">
     <configuration name="document_classifier" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ziona_bot" />
       <option name="ENV_FILES" value="" />
@@ -175,6 +187,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="ziona_app (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ziona_bot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ziona_app.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="ziona_app" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ziona_bot" />
       <option name="ENV_FILES" value="" />
@@ -198,36 +233,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="ziona_streamlit" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="ziona_bot" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="C:\Users\myor1\PycharmProjects\ziona_bot\ziona_streamlit.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.ziona_app (1)" />
         <item itemvalue="Python.ziona_app" />
         <item itemvalue="Python.document_classifier" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.trial_doc_class" />
-        <item itemvalue="Python.ziona_streamlit" />
       </list>
     </recent_temporary>
   </component>
@@ -278,6 +290,9 @@
       <workItem from="1749306423293" duration="3670000" />
       <workItem from="1749444899589" duration="4519000" />
       <workItem from="1749494412199" duration="4243000" />
+      <workItem from="1749709976250" duration="607000" />
+      <workItem from="1749836242216" duration="897000" />
+      <workItem from="1749837422944" duration="8317000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -607,7 +622,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749449445732</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL‎-00042" summary="create exe file">
+      <option name="closed" value="true" />
+      <created>1749584792233</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL‎-00042" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749584792233</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -679,6 +702,7 @@
     <SUITE FILE_PATH="coverage/ziona_bot$ziona_gui.coverage" NAME="ziona_gui Coverage Results" MODIFIED="1749579885337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$ziona.coverage" NAME="ziona Coverage Results" MODIFIED="1748720097275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$trial_doc_class.coverage" NAME="trial_doc_class Coverage Results" MODIFIED="1748835048568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
+    <SUITE FILE_PATH="coverage/ziona_bot$ziona_app__1_.coverage" NAME="ziona_app (1) Coverage Results" MODIFIED="1749844890365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ziona_bot$document_classifier.coverage" NAME="document_classifier Coverage Results" MODIFIED="1749311924309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/business_logic/chatbot" />
     <SUITE FILE_PATH="coverage/ziona_bot$.coverage" NAME=" Coverage Results" MODIFIED="1748833544126" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/ziona_bot$proj_w_llama.coverage" NAME="proj_w_llama Coverage Results" MODIFIED="1748111155642" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />

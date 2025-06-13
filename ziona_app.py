@@ -1,12 +1,10 @@
 import ast
 import os
 import threading
-import csv
 import time
 from datetime import datetime
 import flet as ft
 import pandas as pd
-from sqlalchemy.dialects.mssql.information_schema import columns
 
 from business_logic.chatbot.react_agent import ReActAgent
 # from business_logic.classification.classification_wrapper import LoadedClassificationModel
@@ -41,6 +39,60 @@ class ZionaApp:
         self.page = None
         self.resources_loaded = False
         self.current_mode = "single"  # "single" or "batch"
+
+        self.help_dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("How to Use Ziona's Consulting App", size=18, weight=ft.FontWeight.BOLD),
+            content=ft.Container(
+                content=ft.Column([
+                    ft.Text("Welcome to Ziona's Anti-Semitic Comment Analyzer!",
+                            size=16, weight=ft.FontWeight.W_500),
+                    ft.Container(height=10),
+
+                    ft.Text("Requirements for first use:", size=14, weight=ft.FontWeight.BOLD),
+                    ft.Text("• Follow the guid on 'https://www.youtube.com/watch?app=desktop&v=F5Erab2EMhU'",
+                            size=12),
+                    ft.Text("• from minute 0:52 to 2:30 to do the following actions:", size=12),
+                    ft.Text("• Download Ollama framework, ", size=12),
+                    ft.Text("• Open the terminal (write 'cmd' on the search bar)", size=12),
+                    ft.Text("• Activate Ollama", size=12),
+                    ft.Text("• Then follow the guide from minute 3:38 to 4:10 to download a specific LLM,",
+                            size=12),
+                    ft.Text("• you need to run the command 'ollama run llama3'.", size=12),
+                    ft.Container(height=10),
+
+                    ft.Text("Requirements for every use:", size=14, weight=ft.FontWeight.BOLD),
+                    ft.Text("• Activate Ollama by just clicking the Ollama App on your desktop.", size=12),
+                    ft.Container(height=10),
+
+                    ft.Text("Single Comment Mode:", size=14, weight=ft.FontWeight.BOLD),
+                    ft.Text("• Enter a potentially problematic comment in the text field", size=12),
+                    ft.Text("• Click 'Analyze & Generate Response' to get classification and educational response",
+                            size=12),
+                    ft.Text("• View results including category, sources, and suggested responses", size=12),
+                    ft.Text("• Copy responses to clipboard for use", size=12),
+                    ft.Container(height=10),
+
+                    ft.Text("Multiple Comments Mode:", size=14, weight=ft.FontWeight.BOLD),
+                    ft.Text("• Upload an Excel file (.xlsx or .xls) with comments", size=12),
+                    ft.Text("• File must have a 'comment' column (case insensitive)", size=12),
+                    ft.Text("• Maximum 100 comments per file", size=12),
+                    ft.Text("• Results are saved as CSV file with all analyses", size=12),
+                    ft.Container(height=10),
+
+                    ft.Text("Tips:", size=14, weight=ft.FontWeight.BOLD),
+                    ft.Text("• Comments should be between 3-5000 characters", size=12),
+                    ft.Text("• Processing may take a few moments depending on complexity", size=12),
+                    ft.Text("• All generated responses are educational and constructive", size=12),
+
+                ], tight=True, scroll=ft.ScrollMode.AUTO),
+                height=400,
+                width=500
+            ),
+            actions=[
+                ft.TextButton("Got it!", on_click=lambda e: self.page.close(self.help_dialog))
+            ]
+        )
 
     def load_resources(self):
         """Load knowledge base and classification model"""
@@ -491,17 +543,30 @@ class ZionaApp:
         self.page = page
         page.title = "Ziona - Anti-Semitic Comment Analyzer"
         page.theme_mode = ft.ThemeMode.LIGHT
-        page.window_width = 900
+        page.window_width = 800
         page.window_height = 1000
         page.window_resizable = True
         page.scroll = ft.ScrollMode.AUTO
+
+        # AppBar with help icon
+        page.appbar = ft.AppBar(
+            center_title=True,
+            actions=[
+                ft.IconButton(
+                    icon=ft.Icons.HELP_OUTLINE,
+                    icon_color=ft.Colors.BLUE_800,
+                    tooltip="Help & Instructions",
+                    on_click=lambda e: page.open(self.help_dialog)
+                )
+            ]
+        )
 
         # Header
         header = ft.Container(
             content=ft.Column([
                 ft.Text(
                     "Ziona's Consulting App",
-                    size=32,
+                    size=28,
                     weight=ft.FontWeight.BOLD,
                     color=ft.Colors.BLUE_800
                 ),
@@ -533,7 +598,7 @@ class ZionaApp:
 
         # === SINGLE MODE CONTENT ===
         comment_input = ft.TextField(
-            label="Enter a potentially anti-Semitic/anti-Israeli comment",
+            label="Enter a potentially anti-Semitic/ anti-Israeli comment",
             multiline=True,
             min_lines=3,
             max_lines=8,
@@ -756,7 +821,7 @@ class ZionaApp:
 
 def main():
     app = ZionaApp()
-    ft.app(target=app.main)
+    ft.app(target=ZionaApp().main)
 
 
 if __name__ == "__main__":
