@@ -1,9 +1,9 @@
 import numpy as np
 import re
+import requests
 from sentence_transformers import SentenceTransformer
 from transformers import pipeline
 from typing import Dict, List, Optional
-import requests
 from urllib.parse import urlparse
 
 

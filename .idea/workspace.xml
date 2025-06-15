@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="create exe file">
-      <change afterPath="$PROJECT_DIR$/app_icon.ico" afterDir="false" />
+    <list default="true" id="78c0857a-1820-4f89-a15d-2be4fe1518b9" name="Changes" comment="add help icon">
       <change afterPath="$PROJECT_DIR$/build/ziona_app/Analysis-00.toc" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/ziona_app/EXE-00.toc" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/ziona_app/PKG-00.toc" afterDir="false" />
@@ -15,13 +14,14 @@
       <change afterPath="$PROJECT_DIR$/build/ziona_app/warn-ziona_app.txt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/ziona_app/xref-ziona_app.html" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/build/ziona_app/ziona_app.pkg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/ziona_app.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ziona_analysis_results_20250610_215158.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_17_00__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12_[Changes]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_31_05_2025_18_12__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/document_classifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/documents_retriever.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/documents_retriever.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/business_logic/chatbot/react_evaluator.py" beforeDir="false" afterPath="$PROJECT_DIR$/business_logic/chatbot/react_evaluator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ziona_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/ziona_app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -78,33 +78,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.document_classifier.executor": "Run",
-    "Python.main (1).executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.main_claude_rag.executor": "Run",
-    "Python.proj_for_claude.executor": "Debug",
-    "Python.proj_for_gpt.executor": "Run",
-    "Python.proj_w_llama.executor": "Run",
-    "Python.react_agent.executor": "Run",
-    "Python.trial_doc_class.executor": "Debug",
-    "Python.web_search.executor": "Run",
-    "Python.ziona.executor": "Debug",
-    "Python.ziona_app (1).executor": "Run",
-    "Python.ziona_gui.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/myor1/PycharmProjects/ziona_bot/resources",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.document_classifier.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main_claude_rag.executor&quot;: &quot;Run&quot;,
+    &quot;Python.proj_for_claude.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.proj_for_gpt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.proj_w_llama.executor&quot;: &quot;Run&quot;,
+    &quot;Python.react_agent.executor&quot;: &quot;Run&quot;,
+    &quot;Python.trial_doc_class.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.web_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.ziona.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.ziona_app (1).executor&quot;: &quot;Run&quot;,
+    &quot;Python.ziona_gui.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/myor1/PycharmProjects/ziona_bot/resources&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\myor1\PycharmProjects\ziona_bot\resources" />
@@ -292,7 +292,9 @@
       <workItem from="1749494412199" duration="4243000" />
       <workItem from="1749709976250" duration="607000" />
       <workItem from="1749836242216" duration="897000" />
-      <workItem from="1749837422944" duration="8317000" />
+      <workItem from="1749837422944" duration="9123000" />
+      <workItem from="1749899044149" duration="5045000" />
+      <workItem from="1749912567665" duration="814000" />
     </task>
     <task id="LOCAL‎-00001" summary="NEED TO FIX BOT">
       <option name="closed" value="true" />
@@ -630,7 +632,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1749584792233</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL‎-00043" summary="add help icon">
+      <option name="closed" value="true" />
+      <created>1749846708507</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL‎-00043" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1749846708507</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -648,7 +658,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="updated binary_classifier.py + NEED TO UPDATE MULTICLASIFIER" />
     <MESSAGE value="tried to use llm for document classification, but it is bad + NEED TO UPDATE MULTICLASIFIER" />
     <MESSAGE value="rearanging" />
     <MESSAGE value="add final evaluation to react phase" />
@@ -673,19 +682,20 @@
     <MESSAGE value="minor fix in document_classifier.py" />
     <MESSAGE value="add excel for ziona bot" />
     <MESSAGE value="create exe file" />
-    <option name="LAST_COMMIT_MESSAGE" value="create exe file" />
+    <MESSAGE value="add help icon" />
+    <option name="LAST_COMMIT_MESSAGE" value="add help icon" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
-          <line>429</line>
+          <line>428</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/business_logic/chatbot/document_classifier.py</url>
-          <line>420</line>
+          <line>419</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>

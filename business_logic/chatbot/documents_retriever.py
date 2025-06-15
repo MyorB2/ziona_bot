@@ -3,7 +3,6 @@ import os
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional
-
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
