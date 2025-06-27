@@ -14,10 +14,10 @@ import torch.nn as nn
 from transformers.modeling_outputs import SequenceClassifierOutput
 
 from models.binary_dataset import BinaryClassificationDataset
-from src.global_parameters import ANTISEMITIC_PREFIXES
 
 ROOT_PATH = Path(__file__).parent.parent.parent
 RESOURCE_PATH = ROOT_PATH / "resources"
+ANTISEMITIC_PREFIXES = ["I", "H2", "OA", "L13b", "L13c", "L13d", "L13h", "L13i1", "LC1a", "PS", "D", "MMD", "Image", "Video/GIF", "SE", "S"]
 
 
 def extract_bin_categories(category_list, as_categories):
