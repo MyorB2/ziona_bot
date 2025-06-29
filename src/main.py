@@ -10,7 +10,7 @@ from collections import Counter
 
 from business_logic.chatbot.react_agent import ReActAgent
 from business_logic.chatbot.react_evaluator import ResponseEvaluator
-from business_logic.classification.classification_wrapper import LoadedClassificationModel
+from business_logic.classification.classification_wrapper import ClassificationModel
 from src.utils import normalize_categories
 
 # Setup logging
@@ -61,7 +61,7 @@ def main():
             "hatebert": "Hate-speech-CNERG/dehatebert-mono-english",
             "twitter": "cardiffnlp/twitter-roberta-base",
         }
-        classification_model = LoadedClassificationModel(model_paths)
+        classification_model = ClassificationModel(model_paths)
 
         test_comments = [
             "They always call you antisemitic just because you criticize Israel. It's just a way to silence people.",

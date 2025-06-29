@@ -6,8 +6,10 @@ import flet as ft
 import pandas as pd
 from datetime import datetime
 
+from sympy import vfield
+
 from business_logic.chatbot.react_agent import ReActAgent
-# from business_logic.classification.classification_wrapper import LoadedClassificationModel
+from business_logic.classification.classification_wrapper import ClassificationModel
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,11 +17,12 @@ KNOWLEDGE_BASE_PATH = os.path.join(BASE_DIR, 'resources', 'knowledge_base_catego
 
 # Categories explanation
 LABEL_MAP = {
-    1: "antisemitic ideology",
-    2: "stereotypes and dehumanisation",
-    3: "antisemitism against Israel or Zionism",
-    4: "Holocaust or Zionism denial",
-    5: "indirect antisemitism or secondary objective"
+    0: "Non Antisemitic",
+    1: "Antisemitic Ideology",
+    2: "Stereotypes and Dehumanization",
+    3: "Antisemitism Against Israel/Zionism",
+    4: "Holocaust Denial/Distortion",
+    5: "Indirect Antisemitism",
 }
 
 
@@ -107,7 +110,7 @@ class ZionaApp:
             self.knowledge_base = df
 
             # Load classification model
-            # self.classification_model = LoadedClassificationModel(r"./resources/meta_model_best.pkl")
+            self.classification_model = ClassificationModel()
             self.resources_loaded = True
             return True
         except Exception as e:
@@ -123,18 +126,24 @@ class ZionaApp:
                 lambda: self.update_progress(0.3, "Classifying comment..."))
 
             # Step 1: Classify the comment
-            # pred = self.classification_model.predict(comment_text)
-            # category_id = pred["predicted_labels"][0]
-            category_id = 3
+            pred = self.classification_model.predict(comment_text)
+            category_id = pred["predicted_labels"][0]
             category_name = LABEL_MAP[category_id]
-
             # Update UI - Response generation step
             self.page.run_thread(
                 lambda: self.update_progress(0.6, "Generating educational response..."))
 
             # Step 2: Generate the educational response
-            agent = ReActAgent(self.knowledge_base)
-            response = agent.generate_response(comment_text, category_id, category_name)
+            if category_id == 0:
+                response = {
+                    "final_response": "No response is needed",
+                    "paragraph": "N/A",
+                    "source": "N/A",
+                    "url": "N/A"
+                }
+            else:
+                agent = ReActAgent(self.knowledge_base)
+                response = agent.generate_response(comment_text, category_id, category_name)
 
             # Update UI - Complete
             self.page.run_thread(lambda: self.update_progress(1.0, "Analysis complete!"))
@@ -194,9 +203,9 @@ class ZionaApp:
                     ft.Text(f"Retrieval Score: {response.get('retrieval_score', 0):.2f}", size=14),
                     ft.TextButton(
                         text=f"View Source: {response.get('url', 'N/A')}",
-                        url=response.get('url', ''),
+                        url=response.get('url', 'N/A'),
                         tooltip="Click to open source URL"
-                    ) if response.get('url') else None,
+                    ) if response.get('url') else "N/A",
                 ], tight=True),
                 padding=20,
             ),
@@ -211,7 +220,7 @@ class ZionaApp:
                     ft.Text("Educational Response", size=20, weight=ft.FontWeight.BOLD),
                     ft.Container(
                         content=ft.Text(
-                            response.get('final_response', 'No response generated'),
+                            response.get('final_response', 'N/A'),
                             size=14,
                             selectable=True
                         ),
@@ -223,7 +232,7 @@ class ZionaApp:
                         ft.ElevatedButton(
                             text="Copy Response",
                             icon=ft.Icons.COPY,
-                            on_click=lambda _: self.copy_to_clipboard(response.get('final_response', ''))
+                            on_click=lambda _: self.copy_to_clipboard(response.get('final_response', 'N/A'))
                         ),
                     ], alignment=ft.MainAxisAlignment.END)
                 ], tight=True),
@@ -286,7 +295,6 @@ class ZionaApp:
             total_comments = len(self.comments_df)
 
             results = []
-            agent = ReActAgent(self.knowledge_base)
 
             i = 0
             for index, row in self.comments_df.iterrows():
@@ -304,13 +312,21 @@ class ZionaApp:
 
                 try:
                     # Classify comment
-                    # pred = self.classification_model.predict(comment_text)
-                    # category_id = pred["predicted_labels"][0]
-                    category_id = 3
+                    pred = self.classification_model.predict(comment_text)
+                    category_id = pred["predicted_labels"][0]
                     category_name = LABEL_MAP[category_id]
 
                     # Generate response
-                    response = agent.generate_response(comment_text, category_id, category_name)
+                    if category_id == 0:
+                        response = {
+                            "final_response": "No response is needed",
+                            "paragraph": "N/A",
+                            "source": "N/A",
+                            "url": "N/A"
+                        }
+                    else:
+                        agent = ReActAgent(self.knowledge_base)
+                        response = agent.generate_response(comment_text, category_id, category_name)
 
                     # Store result
                     result = {
@@ -318,9 +334,9 @@ class ZionaApp:
                         'comment': comment_text,
                         'category_id': category_id,
                         'category_name': category_name,
-                        'educational_response': response.get('final_response', ''),
-                        'source': response.get('source', ''),
-                        'source_url': response.get('url', ''),
+                        'educational_response': response.get('final_response', 'N/A'),
+                        'source': response.get('source', 'N/A'),
+                        'source_url': response.get('url', 'N/A'),
                         'retrieval_score': response.get('retrieval_score', 0)
                     }
                     results.append(result)
@@ -333,8 +349,8 @@ class ZionaApp:
                         'category_id': 'ERROR',
                         'category_name': 'Analysis Failed',
                         'educational_response': f'Error processing comment: {str(e)}',
-                        'source': '',
-                        'source_url': '',
+                        'source': 'N/A',
+                        'source_url': 'N/A',
                         'retrieval_score': 0
                     }
                     results.append(result)
