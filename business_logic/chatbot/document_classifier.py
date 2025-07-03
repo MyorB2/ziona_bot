@@ -61,8 +61,8 @@ class AntisemitismCategory(Enum):
     INDIRECT_ANTISEMITISM = (6, "Indirect Antisemitism",
                              "Educational content countering mentions of Jewish/Israeli public figures with antisemitic implications")
 
-    def __init__(self, id: int, name: str, description: str):
-        self.id = id
+    def __init__(self, id_doc: int, name: str, description: str):
+        self.id = id_doc
         self.category_name = name
         self.description = description
 

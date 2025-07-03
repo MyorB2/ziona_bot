@@ -114,12 +114,12 @@ class DatasetPreprocessor:
         mapped = [self.mapping_dict.get(sub.strip().upper(), None) for sub in subcategories]
         return sorted(set([m for m in mapped if m is not None]))
 
-    def replace_6_with_1(lst):
+    def replace_6_with_1(self, lst):
         if isinstance(lst, list) and lst == [6]:
             return [1]
         return lst
 
-    def string_to_list(x):
+    def string_to_list(self, x):
         if isinstance(x, str):
             try:
                 parsed = ast.literal_eval(x)

@@ -142,7 +142,7 @@ def crawl_isgap_articles(max_articles=5):
     return data
 
 
-# 6. PDF Extraction (כללי)
+# 6. PDF Extraction
 def extract_paragraphs_from_pdf(pdf_path, source_name, base_url=None):
     paragraphs = []
     try:
