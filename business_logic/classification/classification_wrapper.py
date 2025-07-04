@@ -1,6 +1,7 @@
 import os
+import pickle
 from pathlib import Path
-
+from safetensors.torch import load_file as load_safetensors
 import torch
 import numpy as np
 import joblib
@@ -106,7 +107,6 @@ def load_binary_model(device=torch.device('cpu')):
     if safetensors_files:
         weights_path = os.path.join(BIN_MODEL_PATH, safetensors_files[0])
         try:
-            from safetensors.torch import load_file as load_safetensors
             # Pass device as a torch.device object
             state_dict = load_safetensors(weights_path, device=str(device))
         except ImportError:
@@ -118,7 +118,7 @@ def load_binary_model(device=torch.device('cpu')):
             raise FileNotFoundError(
                 f"No weights file found in {BIN_MODEL_PATH}: looked for '*.safetensors' or pytorch_model.bin"
             )
-        state_dict = torch.load(bin_path, map_location=torch.device('cpu'))
+        state_dict = torch.load(bin_path, map_location=device)  # Fixed: use device parameter
 
     # Remove unexpected keys from the state dictionary
     unexpected_keys = ["loss_fn.pos_weight"]
@@ -138,10 +138,39 @@ def load_multilabel_model(device=torch.device('cpu')):
     """Load multi-label model entirely from local files."""
     # load config
     config = AutoConfig.from_pretrained(ML_MODEL_PATH, local_files_only=True)
-    # load extras & classes
-    extras = joblib.load(os.path.join(ML_MODEL_PATH, "extras.pkl"))
-    mlb = joblib.load(os.path.join(ML_MODEL_PATH, "updated_mlb.pkl"))
-    pos_w = torch.tensor(extras["pos_weight"], dtype=torch.float32)
+
+
+    # Temporarily set the default tensor type to CPU before loading pickle files
+    # This ensures any tensors in the pickle files are created on CPU
+    torch.set_default_tensor_type('torch.FloatTensor')  # CPU tensors
+
+    try:
+        # load extras & classes
+        extras = joblib.load(os.path.join(ML_MODEL_PATH, "extras.pkl"))
+
+        # Ensure pos_weight is moved to the correct device
+        if isinstance(extras["pos_weight"], torch.Tensor):
+            pos_w = extras["pos_weight"].to(device)
+        else:
+            pos_w = torch.tensor(extras["pos_weight"], dtype=torch.float32, device=device)
+
+    finally:
+        # Restore original tensor type
+        orig = torch.get_default_dtype()
+        torch.set_default_dtype(orig)
+
+    try:
+        mlb = joblib.load(os.path.join(ML_MODEL_PATH, "updated_mlb.pkl"))
+
+    except Exception as e:
+        raise Exception(e)
+
+    # with open(os.path.join(ML_MODEL_PATH, "extras.pkl"), "rb") as f:
+    #     extras = torch.load(f, map_location=torch.device("cpu"))
+    #     if isinstance(extras["pos_weight"], torch.Tensor):
+    #         extras["pos_weight"] = extras["pos_weight"].cpu()
+    # mlb = joblib.load(os.path.join(ML_MODEL_PATH, "updated_mlb.pkl"))
+
     # adjust config
     config.num_labels = len(mlb.classes_)
     config.problem_type = "multi_label_classification"
@@ -150,7 +179,8 @@ def load_multilabel_model(device=torch.device('cpu')):
     model = CustomLossModel(base_model, pos_w)
     # load weights
     weights_file = os.path.join(ML_MODEL_PATH, "custom_model_weights.pt")
-    state_dict = torch.load(weights_file, map_location=torch.device('cpu'))
+    state_dict = torch.load(weights_file, map_location=device,
+                            weights_only=False)  # Fixed: use device parameter and weights_only=False
     model.load_state_dict(state_dict)
     model.to(device).eval()
     # tokenizer & thresholds
@@ -164,8 +194,19 @@ class ClassificationModel:
     End-to-end predictor using fixed model paths.
     Returns 0 if binary prediction is False, otherwise returns the numerical code for the multi-label prediction.
     """
-    def __init__(self, device=torch.device("cpu")):
-        self.bin_model, self.bin_tokenizer, self.device = load_binary_model(device)
+
+    def __init__(self, device=None):
+        # Auto-detect device if not provided
+        if device is None:
+            if torch.cuda.is_available():
+                device = torch.device("cuda")
+            else:
+                device = torch.device("cpu")
+
+        self.device = device
+        print(f"Using device: {self.device}")
+
+        self.bin_model, self.bin_tokenizer, self.device = load_binary_model(self.device)
         (self.multi_model,
          self.multi_tokenizer,
          self.mlb,
@@ -177,6 +218,10 @@ class ClassificationModel:
         Predict on a list of texts.
         Returns 0 if binary prediction is False, otherwise returns the numerical code for the multi-label prediction.
         """
+        # Ensure texts is a list
+        if isinstance(texts, str):
+            texts = [texts]
+
         # binary stage
         enc = self.bin_tokenizer(texts, padding=True, truncation=True, return_tensors="pt")
         enc = {k: v.to(self.device) for k, v in enc.items()}
@@ -185,13 +230,14 @@ class ClassificationModel:
             bin_probs = torch.sigmoid(bin_logits).cpu().numpy()
             bin_preds = bin_probs >= bin_threshold
 
-        # Check binary prediction
-        if not bin_preds[0]:  # Assuming prediction is for a single text
+        # Check binary prediction for the first text
+        if not bin_preds[0]:
             return 0
         else:
             # multi-label stage
-            text = texts[0] # Assuming prediction is for a single text
-            enc2 = self.multi_tokenizer(text, padding=True, truncation=True, return_tensors="pt").to(self.device)
+            text = texts[0]  # Assuming prediction is for a single text
+            enc2 = self.multi_tokenizer(text, padding=True, truncation=True, return_tensors="pt")
+            enc2 = {k: v.to(self.device) for k, v in enc2.items()}  # Fixed: properly move to device
             with torch.no_grad():
                 multi_logits = self.multi_model(**enc2).logits.cpu().numpy()[0]
                 multi_probs = 1 / (1 + np.exp(-multi_logits))
