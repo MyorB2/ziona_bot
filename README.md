@@ -28,7 +28,7 @@ Bot's response:
 "Hey, I understand where you're coming from, but I want to clarify something. The statement 'They always call you antisemitic just because you criticize Israel' is misleading. According to the European Monitoring Centre on Racism and Xenophobia (EUMC), which is a well-established organization that tracks hate speech and antisemitism, criticism of Israel is not considered antisemitic. In fact, the EUMC defines antisemitism as 'a certain perception of Jews, which may be expressed as hatred toward Jews.' Criticism of Israel, like any other country, does not necessarily imply hatred towards its Jewish population. This is important because it means that criticism of Israel cannot be used as a way to silence people who have legitimate concerns or questions about the Israeli government's actions. Instead, we should focus on engaging in respectful and informed discussions about these issues.I'd love to hear more about what you're concerned about regarding Israel, and I'm happy to share my perspective if you're open to it."
 
 
-# System Architecture:
+## System Architecture:
 ![image](https://github.com/user-attachments/assets/9fe348c3-89c4-4e4c-ab9c-f3197fd32e53)
 
 A close-up for the retrieval model:
