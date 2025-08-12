@@ -1,22 +1,26 @@
+# Copyrights:
+This project is a final project of our bachelor's degree in Data Engineering at BGU, and the mentor of this project is Dr. Oren Tsur. 
+The training data for the classifiers is confidential.
+
 # Introduction: 
 Since the outbreak of the Israel-Gaza War, many civilians joined the Hasbara forces.
 Fighting against online antisemitism requires time and human resources.
-We developed an Advisory Bot to analyze and respond to antisemitic expressions on social media automatically, using NLP technologies.
+We developed an Advisory Bot to automatically analyze and respond to antisemitic expressions on social media, utilizing NLP technologies.
 Most data is from “Decoding Antisemitism” - an EU project studying antisemitism in Europe. The rest of the data was sourced from Twitter.
 
 # Solution:
-We have developed a system that classifies comments from across the web and returns a polite, educated, and well-founded response tailored to the type of antisemitism in the comment.
+We developed a system that classifies comments from across the web and returns a polite, educated, and well-founded response tailored to the type of antisemitism in the comment.
 
 ## Categories:
 0. Not Antisemitic
-1. Ideology - Calling for annihilation, conspiracy theories, identifying Jewish people as evil.
+1. Ideology - Calling for annihilation, conspiracy theories, and identifying Jewish people as evil.
 2. Stereotypes and Dehumanization - Economic stereotypes, biological racism, humiliating external imaging.
 3. Against Israel/ Zionism - Demonize Israel, compare Israel and Zionism to Nazis, anti-Zionism, denial of the right to exist.
 4. Holocaust Denial/ Distortion - Be cynical about the Holocaust, Holocaust denial.
 5. Indirect Antisemitic - Mention of Jewish or Israeli public figures along with antisemitic connotation, implying Jewish people.
 
 ## Example:
-comment = "they always call you antisemitic just because you criticize Israel. it’s just a way to silence people!"
+Comment = "they always call you antisemitic just because you criticize Israel. it’s just a way to silence people!"
 label = "Foreigner/Alien"
 
 Reasoning towards final response:
@@ -52,7 +56,7 @@ from minute 0:52 to 2:30 to do the following actions:
 3. Activate Ollama.
 4. Then follow the guide from minute 3:38 to 4:10 to download a specific LLM. You need to run the command 'ollama run llama3'.
 
-## Requirements for first use:
+## Requirements for every use:
 1. Activate Ollama by just clicking the Ollama App on your desktop.
 
 ## Instructions
